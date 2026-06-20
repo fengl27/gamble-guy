@@ -38,6 +38,9 @@ var assets = {
     small: "small.png",
     smallDashing: "small-dashing.png",
 
+    sword: "sword.png",
+    swordless: "swordless.png",
+    weapons: "weapons.png",
     
 
     plus: "plus.png"

@@ -345,6 +345,134 @@ class Enemy {
             this.dashTrail = [];
         }
     }
+    static sword = {
+        drawDanger: function() {
+        },
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+        
+            var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+            var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+            
+            //ctx.fillStyle = "red";
+            //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+            ctx.drawImage(
+                assets[this.swording? "swordless": this.asset],
+                tilesheetPos.x * Player.spriteSize,
+                tilesheetPos.y * Player.spriteSize,
+                Player.spriteSize,
+                Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8
+            );
+
+            if(this.swording) {
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(this.swordDir + Math.PI / 2);///it points up so im in pain
+
+                var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
+                ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+
+                ctx.drawImage(assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
+                     -this.swordSize / 2 * cam.scale, -cam.scale * 3 - this.swordSize * cam.scale,
+                    this.swordSize * cam.scale, this.swordSize * cam.scale
+                )
+
+                ctx.restore();
+                /*
+                ctx.fillStyle = "red";
+                if(this.swordTimer < 15) {
+                    ctx.beginPath();
+                    ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                */
+            }
+        },
+
+        update: function(toPlayer, dst) {
+            this.vel.mult(0.5);
+            let moveAmt = 0.15 * (this.swording? 0.1: 1);
+            this.vel.add(Vect.mult(toPlayer, moveAmt));
+            this.pos.add(this.vel);
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(!this.swording) {
+                this.walkAnim ++;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+
+            if(this.swordReload > 0) {
+                this.swordReload --;
+            }
+            else if(dst < 15 && !this.swording) {
+                this.swording = true;
+                this.swordTargetDir = Math.atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x);
+                this.swordDir = this.swordTargetDir - Math.PI / 4;
+                this.swordVel = -0.5;
+                this.swordWindup = 1;
+            }
+            else if(this.swordWindup) {
+                this.swordWindup ++;
+                this.swordVel += 0.05;
+                this.swordDir += this.swordVel;
+                if(this.swordWindup >= 20) {
+                    this.swordWindup = 0;
+                    this.swordTimer = 1;
+                    this.swordVel = 0.7;
+                }
+            }
+            else if(this.swordTimer) {
+                this.swordTimer ++;
+                this.swordDir += this.swordVel;
+                if(this.swordDir > this.swordTargetDir + Math.PI) {
+                    this.swordVel *= 0.8;
+                }
+                if(this.swordTimer > 40) {
+                    this.swording = false;
+                    this.swordTimer = 0;
+                    this.swordReload = 20;
+                }
+                else if(this.swordTimer < 15) {
+                    var p = new Vect(
+                        this.pos.x + Math.cos(this.swordDir) * this.swordSize,
+                        this.pos.y + Math.sin(this.swordDir) * this.swordSize
+                    );
+                    /*
+                    ctx.beginPath();
+                    ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    */
+                    if(sqrDist(p.x, p.y, player.pos.x, player.pos.y) < (player.size + 2) * (player.size + 2)) {
+                        //die
+                        player.damage();
+                    }
+                }
+            }
+        },
+        init: function() {
+            this.size = 2.25;
+            this.walkAnimSpeed = 10;
+            this.swording = false;
+            this.swordWindup = 0;
+            this.swordTimer = 0;
+            this.swordDir = 0;
+            this.swordTargetDir = 0;
+            this.swordVel = 0;
+            this.swordSize = 10;
+            this.swordReload = 0;
+        }
+    }
     constructor(x,y, type) {
         this.pos = new Vect(x||0,y||0);
         this.vel = new Vect(0, 0);

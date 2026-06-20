@@ -63,10 +63,15 @@ class Player {
             if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size) * (this.size + enemies[i].size)) {
                 //collision
                 //ya' die
-                soundEffects.finalKill.play();
-                screenshake.shake(15);
-                enemies = [];
+                this.damage();
             }
+        }
+    }
+    damage() {
+        soundEffects.finalKill.play();
+        screenshake.shake(15);
+        for(var i = 0; i < enemies.length; i ++) {
+            enemies[i].dead = true;
         }
     }
 };

@@ -12,7 +12,7 @@ person      art??       coded??
 
 rock        yes         yes
 bow         yes         yes
-sword       yes         
+sword       yes         yes
 mini        yes         yes
 roller      yes         
 deflector   yee         
