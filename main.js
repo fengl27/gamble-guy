@@ -1,0 +1,225 @@
+var stateSwitchTimer = 0;
+var setupLevel = function() {
+    //nothing
+    player = new Player();
+    enemies = [];
+    cam.scale = h100 / 3;
+};
+var setupUpgrade = function() {
+    upgradeChoices = [];
+    //Choose three different upgrades from currPossibleUpgrades as the upgrades.
+    var tempThing = currPossibleUpgrades.slice();//make tempThing so that we don't actually delete stuff fromcurrpossibleupgrades because you only do that hwen they actually buy it
+    for(var i = 0; i < 3; i ++) {
+        while(true) {
+            if(tempThing.length <= 0) {
+                break;
+            }
+            var id = Math.floor(getRand() * tempThing.length);
+            if(!tempThing[i].criteria || tempThing[i].criteria()) {
+                upgradeChoices.push(tempThing[id]);
+                tempThing.splice(id, 1);
+                break;
+            }
+        }
+    }
+};
+var switchState = function(target) {
+    gameState = target;
+    stateSwitchTimer = 0;
+    switch(target) {
+        case "playing":
+            setupLevel();
+            break;
+        case "win":
+            currLevel ++;
+            winUpgrades = 3;
+            setupUpgrade();
+            break;
+        case "lose":
+            console.log("AHA YIOU GOT TO level " + (currLevel+1));
+            break;
+        case "equip":
+            equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
+            break;
+    }
+};
+var mainMenu = {
+    buttons: [//button constructor (x,y,w,h,txt)
+        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState("gamble")}
+    ],
+    go: function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for(var i = 0; i < this.buttons.length; i ++) {
+            this.buttons[i].b.go();
+            if(this.buttons[i].b.pressed) {
+                this.buttons[i].thing();
+            }
+        }
+    }
+};
+var loseButtons = {
+    equipButton: new Button(h100*25, h100 * 80, h100 * 50, h100 * 10, "try again!"),
+    menuButton: new Button(h100 *25, h100 * 80, h100 * 50, h100 * 10, "main menu")
+};
+var lives = 3;
+//switchState("playing");
+var performanceTracker = {
+    lastMillis: Date.now(),
+    fps: 0,
+    dt: 0,
+    timer: 250,
+    update: function() {
+        var currMillis = Date.now();
+        this.timer -= currMillis - this.lastMillis;
+        if(this.timer <= 0) {
+            this.fps = 1000 / (currMillis - this.lastMillis);
+            this.dt = 60 / this.fps;
+            //this.timer += 250;
+        }
+        this.lastMillis = currMillis;
+    }
+};
+var frame = function() {
+    performanceTracker.update();
+    //fixes wierd canvas bug with uhhhhhhhhh wierd rectangles lingering
+    ctx.fillStyle = "rgba(255,0,0,0.01)";
+    ctx.beginPath();
+    ctx.rect(0,0,1,1);
+    ctx.fill();
+    ctx.closePath();
+
+    //screenshake stuff
+    screenshake.update();
+    canvas.style.transform = `translate(${screenshake.x}px, ${screenshake.y}px)`;
+    
+    //pause screen stuff
+    if(justPressed["p"]) {
+        paused = !paused;
+    }
+    if(paused) {
+        pauseScreen();
+    }
+    else {
+        switch(gameState) {
+            case "mainMenu":
+                mainMenu.go();
+                break;
+            case "playing":
+                game();
+                break;
+            case "gamble":
+                gamble();
+                break;
+            case "win":
+                //offset of doom
+                var t = limit(stateSwitchTimer / 45 - 1, 0, 1);
+                if(t < 1) {
+                    updateGame(false, 0.5);
+                }
+                var offsetY = -easings.easeInOutQuad(t) * canvas.height;
+                ctx.save();
+                ctx.translate(0, offsetY);
+                displayGame();
+                ctx.translate(0, canvas.height);
+                upgradeScreen();
+                ctx.restore();
+                break;
+            case "lose":
+                displayGame();
+                //darkness of doom
+                var t = limit(stateSwitchTimer / 45, 0, 1);
+                var opacity = easings.easeInOutQuad(t) / 2;
+                ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                //variable shenanigans
+                ctx.fillStyle = "rgb(206, 58, 36)";
+                ctx.strokeStyle = "rgb(141, 34, 17)";
+                ctx.lineWidth = h100;
+
+                ctx.font = "5em cursive";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                //text falls out of sky
+                var t = Math.min(stateSwitchTimer / 120, 1);
+                var r = 0.2 * Math.sin(stateSwitchTimer/20);
+                var y = canvas.height / 3 + canvas.height * (easings.easeOutQuad(t)-1);
+                ctx.save();
+                ctx.translate(canvas.width / 2, y);
+                ctx.rotate(r);
+                ctx.strokeText("Haha you lose", 0,0);
+                ctx.fillText(  "Haha you lose", 0,0);
+                ctx.restore();
+
+                //other text just like appears idk
+                var t2 = limit(stateSwitchTimer / 60 - 4, 0, 1);//just realized it's supposed to be called clamp
+                var opacity = easings.easeInOutQuad(t2);
+                ctx.globalAlpha = opacity;
+                /*
+                ctx.fillStyle = `rgba(150, 150, 150, ${opacity})`;
+                ctx.strokeStyle = `rgba(100, 100, 100, ${opacity})`;
+                ctx.strokeText("press space to yee", canvas.width / 2, canvas.height * 7/8);
+                ctx.fillText(  "press space to yes", canvas.width / 2, canvas.height * 7/8);
+                */
+                if(true) {
+                    loseButtons.gambleButton.go();
+                }
+                else {
+                    loseButtons.menuButton.go();
+                }
+                ctx.globalAlpha = 1;
+                
+                Particle.runParticles();//do the particling
+
+                if(/*justPressed[" "]*/loseButtons.equipButton.pressed) {//press button
+                    if(true) {
+                        switchState("gamble");
+                    }
+                    else {
+                        switchState("mainMenu");
+                    }
+                }
+                break;
+        }
+    }
+
+    justPressed = [];
+    mouse.justPressed = false;
+    mouse.justReleased = false;
+    stateSwitchTimer ++;
+    
+    ctx.fillStyle = "red";
+    ctx.fillRect(0, 0, 100, 40);
+    
+    ctx.fillStyle = "green"
+    ctx.fillRect(0, 0, performanceTracker.fps/60 * 100, 40);
+
+
+    ctx.font = "30px pixelFontSmall";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "hanging";
+    ctx.fillText(performanceTracker.fps.toFixed(2), 10, 10);
+    
+
+    if(!keys.x) {
+        window.requestAnimationFrame(frame);
+    }
+};
+
+function startGame() {
+    canvas.style.visibility = "visible";
+    frame();
+}
+/*
+ctx.textAlign = "center";
+ctx.textBaseline = "middle";
+ctx.fillStyle = "white";
+ctx.strokeStyle = "black";
+ctx.font = "6em cursive";
+ctx.lineWidth = h100;
+ctx.strokeText("click to start :)", canvas.width / 2, canvas.height / 2);
+ctx.fillText(  "click to start :)", canvas.width / 2, canvas.height / 2);
+//window.requestAnimationFrame(frame);
+*/

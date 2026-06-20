@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" type="image/png" href="assets/icon.jpeg">
+        <title>jame gam</title>
+        <style>
+            body {
+                overflow: hidden;
+                position: relative;
+                margin: 0px;
+                padding: 0px;
+                height: 100vh;
+                
+                background-image: linear-gradient(
+                    45deg,
+                    rgb(31, 31, 61),
+                    rgb(74, 74, 119),
+                    rgb(31, 31, 61)
+                );
+                
+                /*background-color: black;*/
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                gap: 1em;
+            }
+
+            #canvas {
+                visibility: hidden;
+                background-color: rgb(48, 48, 48);
+                aspect-ratio: 16/9;
+                transition: all cubic-bezier(0.34, 1.56, 0.64, 1);
+                transition-duration: 0.5s;
+
+                height: calc(min(100vh - 20px, 56.25vw - 20px));
+                border: 1px solid black;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body onload = "startGame()">
+        <canvas id = "canvas"></canvas>
+    </body>
+    <!--sound effect lib-->
+    <script src = "sfxr.js"></script>
+    
+
+    <script src = "vect.js"></script>
+    <script src = "init.js"></script>
+
+    <script src = "utils.js"></script>
+    <script src = "button.js"></script>
+    
+    <!--stores all sound effect data-->
+    <script src = "soundeffects.js"></script>
+
+    <script src = "particle.js"></script>
+    <script src = "screenshake.js"></script>
+    <script src = "upgrade.js"></script>
+
+    <script src = "player.js"></script>
+    <script src = "enemy.js"></script>
+
+    <script src = "game.js"></script>
+
+    <script src = "main.js"></script>
+</html>
