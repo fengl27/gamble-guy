@@ -89,10 +89,11 @@ class Enemy {
         },
         update: function(toPlayer, dst) {
             this.vel.mult(0.5);
-            let moveAmt = dst > 35? 0.1: dst > 30? 0: -0.1;
+            let moveAmt = dst > 50? 0.1: dst > 35? 0: -0.15;
             if(moveAmt === 0 && this.shootReload <= 0 && !this.shooting) {
                 this.shooting = true;
-                this.aimDir.set(this.toPlayer);
+                var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, settings.archerWindupTime + dst / 3 - Math.random() * 20));
+                this.aimDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
                 soundEffects.arrowLoad.play();
             }
             if(this.shooting) moveAmt *= 0.1;
@@ -122,7 +123,7 @@ class Enemy {
                     soundEffects.arrowLaunch.play();
 
                     let bob = new Enemy(this.pos.x, this.pos.y, "arrow");
-                    bob.vel.set(Vect.mult(this.aimDir, 2.5));
+                    bob.vel.set(Vect.mult(this.aimDir, 2));
                     enemies.push(bob);
                 }
             }
@@ -142,15 +143,29 @@ class Enemy {
         display: function() {
             var pos = cam.toScreen(this.pos);
 
-            //no tilesheets for rocks :)
+            
+            //yes tilesheets for rocks :)
+            var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
             ctx.drawImage(
                 assets[this.asset],
+                tilesheetPos * Player.spriteSize, 0,
+                Player.spriteSize, Player.spriteSize,
                 pos.x - cam.scale * 4,
                 pos.y - cam.scale * 4,
                 cam.scale * 8,
                 cam.scale * 8
             );
+            /*
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, cam.scale * this.size, 0, Math.PI * 2);
+            ctx.fill();
+            */
 
+            var particle = function(x, y, o) {
+                Particle.squareParticle(x, y, o, "99, 46, 8");
+            }
+            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
         },
         update: function() {
             this.vel.mult(0.9 / this.vel.mag())
@@ -159,12 +174,12 @@ class Enemy {
                 //horizontal collision
                 this.vel.x *= -1;
                 this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
-                soundEffects.bounce.play();
+                soundEffects.rockRoll.play();
             }
             if(Math.abs(this.pos.y) > l2.y - this.size) {
                 this.vel.y *= -1;
                 this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
-                soundEffects.bounce.play();
+                soundEffects.rockRoll.play();
             }
             this.walkAnim ++;
         },
@@ -172,6 +187,7 @@ class Enemy {
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
+            this.walkAnimSpeed = 10;
         }
     }
     static small = {
@@ -270,7 +286,7 @@ class Enemy {
                     this.dashCharge ++;
 
                     //cool maths
-                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 23));
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
                     this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
 
                     this.vel.set(Vect.mult(this.dashDir, -1.5));

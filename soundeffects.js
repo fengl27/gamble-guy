@@ -614,7 +614,12 @@ var otherSounds = {
     arrowLaunch: "arrow-launch.mp3",
     smallDash: "small-dash.mp3",
     gambleSpin: "gamble-spin.mp3",
-    gamble: "gamble.mp3"
+    gamble: "gamble.mp3",
+    gambleFinish: "gamble-finish.mp3",
+    rockRoll: "rock-roll.mp3"
+};
+var music = {
+    playing: "song.mp3"
 };
 
 var toCringeAudio = function(sfx) {
@@ -654,7 +659,19 @@ for(let i in otherSounds) {
     };
     soundEffects[i] = bob;
 }
-
+for(let i in music) {
+    music[i] = {
+        audio: new Audio("assets/sounds/" + music[i]),
+        play: function() {
+            this.audio.currentTime = 0;
+            this.audio.play();
+        },
+        pause: function() {
+            this.audio.pause();
+        }
+    };
+    music[i].audio.loop = true;
+}
 
 //hi i made this weird aah sound
 /*{

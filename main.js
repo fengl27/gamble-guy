@@ -4,6 +4,12 @@ var setupLevel = function() {
     player = new Player();
     enemies = [];
     cam.scale = h100 / 3;
+
+    for(var i = 0; i < roundEnemies.length; i ++) {
+        //actual spaghetti
+        var p = Math.random() < 0.5? new Vect(Math.sign(Math.random()-0.5) * l2.x, Math.random() * l2.y): new Vect(Math.random() * l2.x, Math.sign(Math.random()-0.5) * l2.y);
+        enemies.push(new Enemy(p.x, p.y, roundEnemies[i]));
+    }
 };
 var setupUpgrade = function() {
     upgradeChoices = [];
@@ -29,6 +35,7 @@ var switchState = function(target) {
     switch(target) {
         case "playing":
             setupLevel();
+            music.playing.play();
             break;
         case "win":
             currLevel ++;
@@ -41,6 +48,9 @@ var switchState = function(target) {
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
             break;
+    }
+    if(target !== "playing") {
+        music.playing.pause();
     }
 };
 var mainMenu = {

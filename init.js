@@ -11,8 +11,8 @@ const w100 = canvas.width / 100;
 const ar = canvas.width / canvas.height;//16/9
 const settings = {
     //archer
-    archerWindupTime: 60,
-    archerReloadTime: 150,
+    archerWindupTime: 40,
+    archerReloadTime: 100,
 
     levelSize: new Vect(100*ar, 100),
     //misc
@@ -31,11 +31,14 @@ var assets = {
     player: "player.png",
     archer: "archer.png",
     archerShoot: "archer-shoot.png",
-    grass: "grass.png",
+    //grass: "grass.png",
+    bricks: "bricks.png",
     arrow: "arrow.png",
     rock: "rock.png",
     small: "small.png",
     smallDashing: "small-dashing.png",
+
+    
 
     plus: "plus.png"
 };

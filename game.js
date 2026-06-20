@@ -4,10 +4,10 @@ var displayGame = function() {
     var tl = cam.toScreen(Vect.mult(l2, -1));
     var br = cam.toScreen(l2);
 
-    let grassSize = cam.scale * 70;
+    let grassSize = cam.scale * 20;
     for(var x = tl.x; x < canvas.width; x += grassSize) {
         for(var y = tl.y; y < canvas.height; y += grassSize) {
-            ctx.drawImage(assets.grass, x, y, grassSize, grassSize);
+            ctx.drawImage(assets.bricks, x, y, grassSize, grassSize);
         }
     }
     //red danger stuff
@@ -19,20 +19,21 @@ var displayGame = function() {
 
     //walls
 
-    ctx.fillStyle = "rgb(22, 78, 22)";
 
 
-    ctx.fillStyle = "rgb(45, 60, 40)";
+    ctx.fillStyle = "rgb(66, 66, 66)";
     ctx.fillRect(0, 0, tl.x, canvas.height);
     ctx.fillRect(0, 0, canvas.width, tl.y);
     ctx.fillRect(br.x, 0, canvas.width, canvas.height);
 
     let margin = 4 * cam.scale;
-    ctx.fillStyle = "rgb(20, 27, 21)";
+    ctx.fillStyle = "rgb(20, 20, 20)";
     ctx.fillRect(0, 0, tl.x - margin, canvas.height);
     ctx.fillRect(0, 0, canvas.width, tl.y - margin);
     ctx.fillRect(br.x + margin, 0, canvas.width, canvas.height);
 
+    Particle.runParticles();
+    
     //actual stuff
     player.display();
     enemies.sort((a, b) => a.pos.y-b.pos.y);
@@ -41,12 +42,11 @@ var displayGame = function() {
     }
 
     //more walls (bottom wall)
-    ctx.fillStyle = "rgb(45, 60, 40)";
+    ctx.fillStyle = "rgb(66, 66, 66)";
     ctx.fillRect(tl.x, br.y, settings.levelSize.x * cam.scale, canvas.height);
-    ctx.fillStyle = "rgb(20, 27, 21)";
+    ctx.fillStyle = "rgb(20, 20, 20)";
     ctx.fillRect(0, br.y + margin, canvas.width, canvas.height);
 };
-const enemyTypes = ['archer', 'rock', 'small']
 var updateGame = function() {
     /*
     if(stateSwitchTimer % 120 === 0) {
@@ -79,6 +79,8 @@ var pauseScreen = function() {
 };
 
 var drawGamble = function(things, offset, thingSpacing, pos, size) {
+    ctx.fillStyle = "white";
+    ctx.fillRect(...pos, ...size);
     ctx.save();
     ctx.beginPath();
     ctx.rect(...pos, ...size);
@@ -94,7 +96,7 @@ var drawGamble = function(things, offset, thingSpacing, pos, size) {
         ctx.drawImage( //draw the first image in each tileset
             assets[things[i]],
             0, 0,
-            Player.spriteSize, Player.spriteSize,
+            Player.spriteSize - 0.04, Player.spriteSize,
             pos[0] + h100 * 4, pos[1] + yPos,
             size[0] - h100 * 8,
             size[0] - h100 * 8
@@ -112,6 +114,7 @@ var drawGamble = function(things, offset, thingSpacing, pos, size) {
     }
     ctx.closePath();
     ctx.restore();
+    ctx.lineWidth = h100;
     ctx.strokeRect(...pos, ...size);
 
     ctx.fillStyle = "rgba(24, 24, 24, 0.1)  ";
@@ -121,8 +124,24 @@ var drawGamble = function(things, offset, thingSpacing, pos, size) {
     return closest;
 };
 
+const enemyTypes = ['rock', 'archer', 'sword', 'small']
+/*
+var enemyMerges = [
+    ["boulder", "roller",     "deflector", "controller"],
+    [false,     "crossbow", "spear",     "rogue"     ],
+    [false,     false,      "fencer",    "barbarian" ]
+];
+*/
+var enemyMerges = [
+    ["boulder", "roller",   "deflector", "controller"],
+    [false,     "crossbow", "spear",     "rogue"     ],
+    [false,     false,      "fencer",    "barbarian" ]
+];
 var gamble = function() {
-    ctx.fillStyle = "white";
+    const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 30*h100, canvas.width/2, canvas.height/2, canvas.width / 2);
+    gradient.addColorStop(0, "rgb(0, 0, 0)");
+    gradient.addColorStop(1, "rgb(34, 34, 34)");
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let results = [];
     let gambling = [
@@ -130,6 +149,13 @@ var gamble = function() {
         ["small", "plus", "archer", "plus", "rock", "plus"],
         ["small", "archer", "rock"],
     ];
+    ctx.fillStyle = "rgb(105, 11, 11)";
+    ctx.fillRect(w100 * 25, 0, w100 * 70 - h100 * 3, h100 * 100);
+    ctx.fillStyle = "rgb(255, 255, 255)";
+    ctx.font = 15 * h100 + "px pixelFont";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("SPIN TO WIN!", w100 * 60 - h100 * 1.5, h100 * 70);
     for(var x = 0; x < 3; x ++) {
         gamble.offsets[x] += gamble.offsetVels[x];
         var threshold = (x + 1) * 60;
@@ -138,6 +164,9 @@ var gamble = function() {
         }
         else if(gamble.gambleTimer > threshold) {
             gamble.offsetVels[x] *= 0.85;
+            if(gamble.gambleTimer === threshold + 20) {
+                soundEffects.gambleFinish.play();
+            }
         }
         results.push(drawGamble(
             gambling[x],
@@ -147,12 +176,19 @@ var gamble = function() {
             [w100 * 20 - h100 * 3, h100 * 60]
         ));
     }
+
     if(gamble.gambleTimer === 250) {
         console.log("letS go GAMbliNG")
         for(var i = 0; i < results.length; i ++) {
             if(gambling[i][results[i]] !== "plus") {//add plussing later
                 roundEnemies.push(...Array(2).fill(gambling[i][results[i]]));
             }
+        }
+    }
+    else if(gamble.gambleTimer > 250) {
+        gamble.button.go();
+        if(gamble.button.pressed) {
+            switchState("playing");
         }
     }
 
@@ -175,6 +211,7 @@ var gamble = function() {
 };
 gamble.gambleTimer = 0;
 gamble.spacing = h100 * 70;
-gamble.offsets = [0, 0, 0];
+gamble.offsets = [h100 * 20, h100 * 20, h100 * 20];
 gamble.offsetVels = [0, 0, 0];
+gamble.button = new Button(40 * w100 - 1.5 * h100, 80 * h100, 40 * w100, 10 * h100, "Next level!", "rgb(218, 193, 7)");
 //gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];

@@ -3,3 +3,26 @@ game
 credits list
 
 sfxr for sfxr
+beepbox for moosik
+
+
+checklist
+
+person      art??       coded??
+
+rock        yes         yes
+bow         yes         yes
+sword       yes         
+mini        yes         yes
+roller      yes         
+deflector   yee         
+controller  yes         
+crossbow    yee         
+spear       yes         
+rogue       yee         
+fencer      omg         
+barbarian   yes         
+boulder     no          
+trenchcoat  no          
+
+music       no          no

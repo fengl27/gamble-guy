@@ -10,15 +10,15 @@ class Particle {
         ctx.stroke();
     }
 
-    static spawnParticles = function(num, disp, x, y) {
+    static spawnParticles = function(num, disp, x, y, v) {
         for(var i = 0; i < num; i ++) {
-            particles.push(new Particle(disp, x, y));
+            particles.push(new Particle(disp, x, y, v));
         }
     }
 
-    static AABBParticles = function(num, disp, pos, size) {
+    static AABBParticles = function(num, disp, pos, size, v) {
         for(var i = 0; i < num; i ++) {
-            particles.push(new Particle(disp, pos.x + Math.random() * size.x, pos.y + Math.random() * size.y));
+            particles.push(new Particle(disp, pos.x + Math.random() * size.x, pos.y + Math.random() * size.y, v));
         }
     }
 
@@ -30,8 +30,8 @@ class Particle {
         }
     }
 
-    constructor(disp, x, y) {
-        this.vel = new Vect(Math.random() * h100 * 2 - h100, -h100 - h100 * Math.random());
+    constructor(disp, x, y, v) {
+        this.vel = new Vect(Math.random() * v - v/2, Math.random() * v - v/2);
         this.pos = new Vect(x, y);
         this.disp = disp;
         this.timeToLive = 20 + Math.random() * 20;
@@ -42,11 +42,11 @@ class Particle {
         this.pos.add(this.vel);
         this.vel.y *= 0.95;
         this.vel.x *= 0.95;
-        this.vel.y += h100 / 8;
 
         this.timeToLive --;
         var opacity = Math.min(1, this.timeToLive / this.fadeTime);
-        this.disp(this.pos.x, this.pos.y, opacity);
+        let p = cam.toScreen(this.pos);
+        this.disp(p.x, p.y, opacity);
 
         if(this.pos.y > canvas.height * 1.2) {
             return true;
