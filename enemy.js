@@ -174,12 +174,12 @@ class Enemy {
                 //horizontal collision
                 this.vel.x *= -1;
                 this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
-                soundEffects.rockRoll.play();
+                soundEffects.bounce.play();
             }
             if(Math.abs(this.pos.y) > l2.y - this.size) {
                 this.vel.y *= -1;
                 this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
-                soundEffects.rockRoll.play();
+                soundEffects.bounce.play();
             }
             this.walkAnim ++;
         },
@@ -396,7 +396,7 @@ class Enemy {
 
         update: function(toPlayer, dst) {
             this.vel.mult(0.5);
-            let moveAmt = 0.15 * (this.swording? 0.1: 1);
+            let moveAmt = 0.2 * (this.swording? 0.1: 1);
             this.vel.add(Vect.mult(toPlayer, moveAmt));
             this.pos.add(this.vel);
 

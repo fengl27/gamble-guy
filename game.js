@@ -146,9 +146,9 @@ var gamble = function() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let results = [];
     let gambling = [
-        ["small", "archer", "rock"],
-        ["small", "plus", "archer", "plus", "rock", "plus"],
-        ["small", "archer", "rock"],
+        enemyTypes,
+        ["small", "plus", "archer", "plus", "rock", "plus", "sword", "plus"],
+        enemyTypes,
     ];
     ctx.fillStyle = "rgb(105, 11, 11)";
     ctx.fillRect(w100 * 25, 0, w100 * 70 - h100 * 3, h100 * 100);
