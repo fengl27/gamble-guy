@@ -244,6 +244,169 @@ class Enemy {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
         }
     }
+    static crossbow = {
+        drawDanger: function() {
+            if(this.shooting && Math.sin(this.shootTimer*this.shootTimer/144) > 0) {
+                var pos = cam.toScreen(this.pos);
+                //red rectangle (THE BATTLE CATS!!!)
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(Math.atan2(this.aimDirs[0].y, this.aimDirs[0].x));
+                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
+                ctx.restore();
+                
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(Math.atan2(this.aimDirs[1].y, this.aimDirs[1].x));
+                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
+                ctx.restore();
+                
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(Math.atan2(this.aimDirs[2].y, this.aimDirs[2].x));
+                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
+                ctx.restore();
+            
+            }
+        },
+        display: function() {
+            var pos = cam.toScreen(this.pos);
+
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            if(this.shooting) {
+                var roundedDir = new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y));
+                var tilesheetPos = roundedDir.x === 1? 3: roundedDir.x === -1? 1: roundedDir.y === 1? 0: 2;
+                Enemy.drawImage(
+                    assets.crossbowShoot,
+                    tilesheetPos * Player.spriteSize, 0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8, this.iframes
+                );
+            }
+            else {
+                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+                
+                Enemy.drawImage(
+                    assets.crossbow,
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8, this.iframes
+                );
+            }
+        },
+        update: function(toPlayer, dst) {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
+            this.vel.mult(0.5);
+            let moveAmt = dst > 50? 0.1: dst > 35? 0: -0.15;
+            if(moveAmt !== 0.1 && this.shootReload <= 0 && !this.shooting) {
+                this.shooting = true;
+                var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, settings.crossbowWindupTime + dst / 3 - Math.random() * 20));
+                this.aimDirs[0].set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+                predictedPos = player.pos;
+                this.aimDirs[1].set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+                predictedPos = Vect.add(player.pos, Vect.mult(player.vel, -settings.crossbowWindupTime - dst / 3 + Math.random() * 20));
+                this.aimDirs[2].set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+                soundEffects.arrowLoad.play();
+            }
+            if(this.shooting) moveAmt *= 0.1;
+            this.vel.add(Vect.mult(toPlayer, moveAmt));
+            this.pos.add(this.vel);
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(moveAmt) {
+                this.walkAnim ++;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+
+            //cooldowns
+            if(this.shooting) {
+                this.shootTimer ++;
+                if(this.shootTimer > settings.crossbowWindupTime) {
+                    //school shooting
+                    this.shooting = false;
+                    this.shootTimer = 0;
+                    this.shootReload = settings.crossbowReloadTime;
+                    soundEffects.arrowLaunch.play();
+
+                    let arrows = Array(3).fill(0).map((n,   idx) => {
+                        let arrow = new Enemy(this.pos.x, this.pos.y, "arrow");
+                        arrow.vel.set(Vect.mult(this.aimDirs[idx], 2));
+                        arrow.pos.add(Vect.mult(arrow.vel, 2));//don't let the arrow die immediately please
+                        return arrow;
+                    });
+                    enemies.push(...arrows);
+                }
+            }
+            else {
+                this.shootReload --;
+            }
+        },
+        init: function() {
+            this.shooting = false;
+            this.shootReload = 0;
+            this.shootTimer = 0;
+            this.size = 2.25;
+            this.health = 2;
+            this.aimDirs = [new Vect(),new Vect(),new Vect()];
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 10));
+        }
+    }
     static rock = {
         display: function() {
             var pos = cam.toScreen(this.pos);
@@ -1515,7 +1678,7 @@ class Enemy {
             }
         },
         init: function() {
-            this.health = 3;
+            this.health = 3 ;
             this.size = 1.5;
             this.walkAnimSpeed = 7;
 

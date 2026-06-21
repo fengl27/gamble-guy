@@ -15,6 +15,9 @@ const settings = {
     //archer
     archerWindupTime: 40,
     archerReloadTime: 100,
+    //crossbow
+    crossbowWindupTime: 60,
+    crossbowReloadTime: 100,
 
     levelSize: new Vect(100*ar, 100),
     //misc
