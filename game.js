@@ -136,7 +136,7 @@ var enemyMerges = [
     ["boulder",    "roller",   "deflector", "controller"],
     ["roller",     "crossbow", "spear",     "rogue"     ],
     ["deflector",  "spear",    "fencer",    "barbarian" ],
-    ["controller", "rogue",    "barbarian", "trenchcoat"],
+    ["controller", "rogue",    "barbarian", "stack"     ],
 ];
 var gamble = function() {
     const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 30*h100, canvas.width/2, canvas.height/2, canvas.width / 2);

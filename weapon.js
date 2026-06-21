@@ -21,10 +21,9 @@ const weapons = {
                         if(enemies[i].type === Enemy.arrow && !selected) {
                             continue;//don't or else it would be kinda op
                         }
-                        if(enemies[i].damage(1)) {
-                            console.log("damaged " + enemies[i].asset);
-                            soundEffects.sword.play();
-                        }
+                        enemies[i].damage(1);
+                        console.log("damaged " + enemies[i].asset);
+                        soundEffects.sword.play();
                     }
                 }
             }

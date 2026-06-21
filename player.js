@@ -16,6 +16,7 @@ class Player {
         this.walkAnim = 0;
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
+        this.stun = 0;
     }
 
     display() {
@@ -58,8 +59,14 @@ class Player {
         else {
             this.walkAnim = 0;
         }
-        this.vel.mult(0.5);
-        this.vel.add(Vect.mult(input, 0.3));
+        if(this.stun > 0) {
+            this.stun --;
+            this.vel.mult(0.9);
+        }
+        else {
+            this.vel.mult(0.5);
+            this.vel.add(Vect.mult(input, 0.3));
+        }
         this.pos.add(this.vel);
 
         this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
