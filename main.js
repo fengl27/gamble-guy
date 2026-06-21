@@ -49,6 +49,9 @@ var switchState = function(target) {
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
             break;
+        case "gamble":
+            gamble.gambleTimer = 0;
+            gamble.offsetVels = [h100, -h100, h100];
     }
     if(target !== "playing") {
         music.playing.pause();
@@ -56,7 +59,7 @@ var switchState = function(target) {
 };
 var mainMenu = {
     buttons: [//button constructor (x,y,w,h,txt)
-        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState("gamble")}
+        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState("playing")}
     ],
     go: function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);

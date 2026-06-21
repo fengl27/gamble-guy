@@ -2672,10 +2672,10 @@ class Enemy {
 
             if(this.spearing && !this.deathTimer) {
                 ctx.save();
-                ctx.translate(pos.x, pos.y);
+                ctx.translate(pos.x, pos.y + cam.scale);
                 ctx.rotate(this.spearDir + Math.PI / 2);///it points up so im in pain
 
-                var opacity = limit(this.spearTimer - 20, 0, 20) / 20;
+                var opacity = limit(this.spearTimer-10, 0, 5) / 5;
                 ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
                 ctx.drawImage(assets.weapons, Player.spriteSize * 3, 0, Player.spriteSize, Player.spriteSize,
@@ -2684,14 +2684,6 @@ class Enemy {
                 )
 
                 ctx.restore();
-                /*
-                ctx.fillStyle = "red";
-                if(this.swordTimer < 15) {
-                    ctx.beginPath();
-                    ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                */
             }
         },
 
@@ -2734,6 +2726,8 @@ class Enemy {
             else {
                 this.walkAnim = 0;
             }
+
+            this.invincible = !this.spearing;
             
             if(this.spearReload > 0) {
                 this.spearReload --;
@@ -2741,15 +2735,18 @@ class Enemy {
             else if(dst < 15 && !this.spearing) {
                 this.spearing = true;
                 this.spearTargetDir = Math.atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x);
-                this.spearDir = this.spearTargetDir;
+                if(this.spearTargetDir > Math.PI / 2) {
+                    this.spearTargetDir -= 2 * Math.PI;
+                }
+                this.spearDir = -Math.PI / 2;
                 this.spearDisplace = 5;
-                this.spearVel = -0;
+                this.spearVel = 1.5;
                 this.spearWindup = 1;
             }
             else if(this.spearWindup) {
                 this.spearWindup ++;
-                this.spearVel += 0.04;
-                this.spearVel*=0.8;
+                this.spearVel -= 0.1;
+                this.spearDir += (this.spearTargetDir - this.spearDir) / 10;
                 this.spearDisplace += this.spearVel;
                 if(this.spearWindup >= 30) {
                     this.spearWindup = 0;
@@ -2764,25 +2761,19 @@ class Enemy {
                 if(this.spearDir > this.spearTargetDir + Math.PI) {
                     this.spearVel *= 0.8;
                 }
-                if(this.spearTimer > 10) {
+                if(this.spearTimer > 15) {
                     this.spearing = false;
                     this.spearTimer = 0;
                     this.spearReload = 40;
                 }
-                else if(this.spearTimer < 15) {
-                    var p = new Vect(
-                        this.pos.x + Math.cos(this.spearDir) * (this.spearSize+this.spearDisplace),
-                        this.pos.y + Math.sin(this.spearDir) * (this.spearSize+this.spearDisplace)
-                    );
-                    
-                    ctx.beginPath();
-                    ctx.arc(p.x,p.y, cam.scale * 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    if(sqrDist(p.x, p.y, player.pos.x, player.pos.y) < (player.size + 2) * (player.size + 2)) {
-                        //die
-                        player.damage();
-                    }
+                var p = new Vect(
+                    this.pos.x + Math.cos(this.spearDir) * (this.spearSize-this.spearDisplace),
+                    this.pos.y + Math.sin(this.spearDir) * (this.spearSize-this.spearDisplace)
+                );
+                
+                if(sqrDist(p.x, p.y, player.pos.x, player.pos.y) < (player.size + 2) * (player.size + 2)) {
+                    //die
+                    player.damage();
                 }
             }
         },
@@ -2834,6 +2825,7 @@ class Enemy {
         this.asset = type || "archer";
         this.type = Enemy[type || "archer"];
 
+        this.invincible = false;
         this.size = 0;
         this.health = 1;
         this.collisions = true;

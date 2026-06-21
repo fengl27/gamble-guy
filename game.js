@@ -173,6 +173,9 @@ var gamble = function() {
                 soundEffects.gambleFinish.play();
             }
         }
+        if(gamble.offsets[x] < 0) {
+            gamble.offsets[x] += gamble.spacing * gambling[x].length;//loop back around so ya don't run out of stuff
+        }
         results.push(drawGamble(
             gambling[x],
             gamble.offsets[x],
@@ -217,6 +220,7 @@ var gamble = function() {
         gamble.gambleTimer ++;
         if(gamble.gambleTimer === 10) {
             screenshake.shake(20, Math.random() - 1/2, 1);
+            gamble.offsets = [h100 * 20, h100 * 20, h100 * 20];//teehee
             gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];
             soundEffects.gambleSpin.play();
             soundEffects.gambleSpin.play(1);
