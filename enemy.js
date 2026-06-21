@@ -372,21 +372,21 @@ class Enemy {
                 }
             }
 
-            if(this.vel.mag() > 0.5) {
+            if(this.dashTimer) {
                 var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
                 var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
                 
                 //ctx.fillStyle = "red";
                 //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
-                ctx.drawImage(
-                    assets.golumite,
-                    tilesheetPos * Player.spriteSize, 0,
+                Enemy.drawImage(
+                    assets.golemite,
+                    tilesheetPos.x * Player.spriteSize, tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
                     Player.spriteSize,
                     pos.x - cam.scale * 4,
                     pos.y - cam.scale * 4,
                     cam.scale * 8,
-                    cam.scale * 8
+                    cam.scale * 8, this.iframes
                 );
             }
             else {
@@ -436,6 +436,27 @@ class Enemy {
             }
         },
         update: function(toPlayer, dst) {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
             if(this.dashTimer) {
                 this.pos.add(this.vel);
                 this.vel.mult(0.95);
@@ -446,20 +467,13 @@ class Enemy {
             }
             else {
                 this.vel.mult(0.8);
-                let moveAmt = 0.15;
-                if(this.driftTimer > 0) {
-                    moveAmt *= 0.1;
-                    this.vel.mult(0.95 / 0.85);
-                }
-                else if(dst < 10) {
+                if(dst < 40 && this.driftTimer <= 0) {
                     this.dashTrail = [];
                     this.dashCharge ++;
 
                     //cool maths
                     var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
                     this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
-
-                    this.vel.set(Vect.mult(this.dashDir, -0.1));
                 }
                 this.pos.add(this.vel);
             }
@@ -479,17 +493,18 @@ class Enemy {
             //timers
             if(this.dashCharge) {
                 this.dashCharge ++;
-                if(this.dashCharge > 30) {
+                if(this.dashCharge > 25) {
                     this.dashCharge = 0;
                     this.dashTimer ++;
-                    this.vel.set(Vect.mult(this.dashDir, 3));
+
+                    this.vel.set(Vect.mult(this.dashDir, 4));
 
                     soundEffects.smallDash.play();
                 }
             }
             else if(this.dashTimer) {
                 this.dashTimer ++;
-                if(this.dashTimer > 2) {
+                if(this.dashTimer > 25) {
                     this.dashTimer = 0;
                     this.driftTimer = 120;
                     this.vel.mult(0.6);
@@ -506,7 +521,7 @@ class Enemy {
             
             this.health = 1;
             this.size = 1.5;
-            this.walkAnimSpeed = 3;
+            this.walkAnimSpeed = 15;
 
             this.dashCharge = 0;
             this.dashTimer = 0;//when you actually dash;
@@ -565,7 +580,27 @@ class Enemy {
         },
         
         update: function() {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
                 
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
             
             this.vel.mult(0.9 / this.vel.mag())
             this.pos.add(this.vel);
@@ -599,6 +634,7 @@ class Enemy {
             this.spawnDelay = Math.max(0, this.spawnDelay-1);
         },
         init: function() {
+            this.health = 5;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
@@ -1913,7 +1949,9 @@ class Enemy {
     damage(amt) {
         this.health -= amt;
         this.iframes = 40;
-        this.type.damage.call(this);
+        if(this.type.damage) {
+            this.type.damage.call(this);
+        }
         if(this.health <= 0) {
             this.deathAnim = 1;
             console.log("i dead");
