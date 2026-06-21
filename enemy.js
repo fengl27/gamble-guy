@@ -246,28 +246,20 @@ class Enemy {
     }
     static crossbow = {
         drawDanger: function() {
-            if(this.shooting && Math.sin(this.shootTimer*this.shootTimer/144) > 0) {
+            if(this.shooting) {
                 var pos = cam.toScreen(this.pos);
                 //red rectangle (THE BATTLE CATS!!!)
                 ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red
-                ctx.save();
-                ctx.translate(pos.x, pos.y);
-                ctx.rotate(Math.atan2(this.aimDirs[0].y, this.aimDirs[0].x));
-                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
-                ctx.restore();
-                
-                ctx.save();
-                ctx.translate(pos.x, pos.y);
-                ctx.rotate(Math.atan2(this.aimDirs[1].y, this.aimDirs[1].x));
-                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
-                ctx.restore();
-                
-                ctx.save();
-                ctx.translate(pos.x, pos.y);
-                ctx.rotate(Math.atan2(this.aimDirs[2].y, this.aimDirs[2].x));
-                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
-                ctx.restore();
-            
+                for(var i = 0; i < 3; i ++) {
+                    var thing = this.shootTimer - i * 5;
+                    if(thing > 0 && Math.sin(thing*thing/144) > 0) {
+                        ctx.save();
+                        ctx.translate(pos.x, pos.y);
+                        ctx.rotate(Math.atan2(this.aimDirs[i].y, this.aimDirs[i].x));
+                        ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
+                        ctx.restore();
+                    }
+                }
             }
         },
         display: function() {
@@ -348,12 +340,14 @@ class Enemy {
             let moveAmt = dst > 50? 0.1: dst > 35? 0: -0.15;
             if(moveAmt !== 0.1 && this.shootReload <= 0 && !this.shooting) {
                 this.shooting = true;
-                var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, settings.crossbowWindupTime + dst / 3 - Math.random() * 20));
-                this.aimDirs[0].set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
-                predictedPos = player.pos;
-                this.aimDirs[1].set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
-                predictedPos = Vect.add(player.pos, Vect.mult(player.vel, -settings.crossbowWindupTime - dst / 3 + Math.random() * 20));
-                this.aimDirs[2].set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+                var predictedPositions = [
+                    Vect.add(player.pos, Vect.mult(player.vel, settings.crossbowWindupTime + dst / 3 - Math.random() * 20)),
+                    player.pos,
+                    Vect.add(player.pos, Vect.mult(player.vel, -settings.crossbowWindupTime - dst / 3 + Math.random() * 20))
+                ];
+                this.aimDirs.forEach((val, idx) => {
+                    val.set(Vect.normalize(Vect.sub(predictedPositions[idx], this.pos)));
+                });
                 soundEffects.arrowLoad.play();
             }
             if(this.shooting) moveAmt *= 0.1;
@@ -375,20 +369,20 @@ class Enemy {
             //cooldowns
             if(this.shooting) {
                 this.shootTimer ++;
-                if(this.shootTimer > settings.crossbowWindupTime) {
+                if(this.shootTimer >= settings.crossbowWindupTime && (this.shootTimer - settings.crossbowWindupTime) % 5 === 0) {
                     //school shooting
-                    this.shooting = false;
-                    this.shootTimer = 0;
-                    this.shootReload = settings.crossbowReloadTime;
+                    var arrowIdx = (this.shootTimer - settings.crossbowWindupTime) / 5;
                     soundEffects.arrowLaunch.play();
 
-                    let arrows = Array(3).fill(0).map((n,   idx) => {
-                        let arrow = new Enemy(this.pos.x, this.pos.y, "arrow");
-                        arrow.vel.set(Vect.mult(this.aimDirs[idx], 2));
-                        arrow.pos.add(Vect.mult(arrow.vel, 2));//don't let the arrow die immediately please
-                        return arrow;
-                    });
-                    enemies.push(...arrows);
+                    let arrow = new Enemy(this.pos.x, this.pos.y, "arrow");
+                    arrow.vel.set(Vect.mult(this.aimDirs[arrowIdx], 2));
+                    arrow.pos.add(Vect.mult(arrow.vel, 2));//don't let the arrow die immediately please
+                    enemies.push(arrow);
+                    if(arrowIdx === 2) {
+                        this.shooting = false;
+                        this.shootTimer = 0;
+                        this.shootReload = settings.crossbowReloadTime;
+                    }
                 }
             }
             else {
@@ -400,7 +394,7 @@ class Enemy {
             this.shootReload = 0;
             this.shootTimer = 0;
             this.size = 2.25;
-            this.health = 2;
+            this.health = 3;
             this.aimDirs = [new Vect(),new Vect(),new Vect()];
         },
         damage: function() {
