@@ -191,7 +191,7 @@ var gamble = function() {
         if(!cool) {
             for(var i = 0; i < results.length; i ++) {
                 if(gambling[i][results[i]] !== "plus") {//don't spawn plusses ya dingus
-                    roundEnemies.push(...Array(2).fill(gambling[i][results[i]]));
+                    roundEnemies.push(gambling[i][results[i]]);
                 }
             }
         }

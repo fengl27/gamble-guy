@@ -490,6 +490,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
+            this.mass = 2;
             this.health = 3;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
@@ -501,7 +502,7 @@ class Enemy {
         }
     }
     
-    static golumite = {
+    static golemite = {  
         drawDanger: function() {
             if(this.dashCharge && this.dashCharge % 10 < 8) {
                 var pos = cam.toScreen(this.pos);
@@ -517,22 +518,38 @@ class Enemy {
         display: function() {
             let pos = cam.toScreen(this.pos);
 
-            if(this.vel.mag() > 0.5) {
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    Enemy.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8, this.iframes
+                    );
+                    return;
+                }
+            }
+
+            if(this.dashTimer) {
                 var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
                 var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
                 
                 //ctx.fillStyle = "red";
                 //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
-                ctx.drawImage(
-                    assets.golumite,
-                    tilesheetPos.x * Player.spriteSize,
-                    tilesheetPos.y * Player.spriteSize,
+                Enemy.drawImage(
+                    assets.golemite,
+                    tilesheetPos.x * Player.spriteSize, tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
                     Player.spriteSize,
                     pos.x - cam.scale * 4,
                     pos.y - cam.scale * 4,
                     cam.scale * 8,
-                    cam.scale * 8
+                    cam.scale * 8, this.iframes
                 );
             }
             else {
@@ -545,8 +562,8 @@ class Enemy {
                 
                 //ctx.fillStyle = "red";
                 //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
-                ctx.drawImage(
-                    assets.golumite,
+                Enemy.drawImage(
+                    assets.golemite,
                     tilesheetPos.x * Player.spriteSize,
                     tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
@@ -554,7 +571,7 @@ class Enemy {
                     pos.x - cam.scale * 4,
                     pos.y - cam.scale * 4,
                     cam.scale * 8,
-                    cam.scale * 8
+                    cam.scale * 8, this.iframes
                 );
                 /*
                 if(this.dashTimer || this.driftTimer) {
@@ -566,7 +583,7 @@ class Enemy {
                         let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
                         ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
                         ctx.drawImage(
-                            assets.golumite,
+                            assets.golemite,
                             tilesheetPos * Player.spriteSize, 0,
                             Player.spriteSize,
                             Player.spriteSize,
@@ -582,24 +599,6 @@ class Enemy {
             }
         },
         update: function(toPlayer, dst) {
-            
-            if(this.deathAnim) {
-                this.iframes = NaN;//white
-                if(this.deathAnim >= settings.deathDelay - 9) {
-                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
-                    ctx.drawImage(
-                        assets.death,
-                        frame * Player.spriteSize, 0,
-                        Player.spriteSize, Player.spriteSize,
-                        pos.x - cam.scale * 4,
-                        pos.y - cam.scale * 4,
-                        cam.scale * 8,
-                        cam.scale * 8
-                    );
-                    return;
-                }
-            }
-
             if(this.deathAnim) {
                 if(this.deathAnim === 1) {
                     this.vel.mult(0.5);
@@ -627,27 +626,18 @@ class Enemy {
             }
             else if(this.dashCharge) {
                 //do funny
-                this.vel.add(Vect.mult(this.dashDir, -0));
                 this.pos.add(this.vel);
             }
             else {
                 this.vel.mult(0.8);
-                let moveAmt = 0;
-                if(this.driftTimer > 0) {
-                    moveAmt *= 0.1;
-                    this.vel.mult(0.95 / 0.85);
-                }
-                else if(dst < 50) {
+                if(dst < 40 && this.driftTimer <= 0) {
                     this.dashTrail = [];
                     this.dashCharge ++;
 
                     //cool maths
                     var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
                     this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
-
-                    this.vel.set(Vect.mult(this.dashDir, -0.1));
                 }
-                this.vel.add(Vect.mult(toPlayer, moveAmt));
                 this.pos.add(this.vel);
             }
 
@@ -656,8 +646,8 @@ class Enemy {
             this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
 
             ///anim
-            if(!this.dashCharge) {
-                this.walkAnim += this.driftTimer > 0? 0.5: 1;
+            if(this.dashTimer) {
+                this.walkAnim ++;
             }
             else {
                 this.walkAnim = 0;
@@ -666,10 +656,11 @@ class Enemy {
             //timers
             if(this.dashCharge) {
                 this.dashCharge ++;
-                if(this.dashCharge > 30) {
+                if(this.dashCharge > 25) {
                     this.dashCharge = 0;
                     this.dashTimer ++;
-                    this.vel.set(Vect.mult(this.dashDir, 3.5));
+
+                    this.vel.set(Vect.mult(this.dashDir, 4));
 
                     soundEffects.smallDash.play();
                 }
@@ -678,7 +669,7 @@ class Enemy {
                 this.dashTimer ++;
                 if(this.dashTimer > 25) {
                     this.dashTimer = 0;
-                    this.driftTimer = 60;
+                    this.driftTimer = 120;
                     this.vel.mult(0.6);
                 }
                 else if(!this.dashTrail.length || sqrDist(this.pos.x, this.pos.y, this.dashTrail.at(-1)[0].x, this.dashTrail.at(-1)[0].y) > 16) {
@@ -693,7 +684,7 @@ class Enemy {
             
             this.health = 1;
             this.size = 1.5;
-            this.walkAnimSpeed = 3;
+            this.walkAnimSpeed = 15;
 
             this.dashCharge = 0;
             this.dashTimer = 0;//when you actually dash;
@@ -701,39 +692,15 @@ class Enemy {
             this.dashDir = new Vect();
 
             this.dashTrail = [];
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 2));
         }
     }
     static boulder = {
         display: function() {
             var pos = cam.toScreen(this.pos);
 
-            
-            //yes tilesheets for rocks :)
-            var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
-            ctx.drawImage(
-                assets.rockDamaged,
-                tilesheetPos * Player.spriteSize, 0,
-                Player.spriteSize, Player.spriteSize,
-                pos.x - cam.scale * 4,
-                pos.y - cam.scale * 4,
-                cam.scale * 8,
-                cam.scale * 8
-            );
-            /*
-            ctx.fillStyle = "red";
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, cam.scale * this.size, 0, Math.PI * 2);
-            ctx.fill();
-            */
-
-            var particle = function(x, y, o) {
-                Particle.squareParticle(x, y, o, "46, 46, 46");
-            }
-            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
-        },
-        
-        update: function() {
-            
             if(this.deathAnim) {
                 this.iframes = NaN;//white
                 if(this.deathAnim >= settings.deathDelay - 9) {
@@ -750,7 +717,32 @@ class Enemy {
                     return;
                 }
             }
+            
+            //yes tilesheets for rocks :)
+            var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+            Enemy.drawImage(
+                assets.rockDamaged,
+                tilesheetPos * Player.spriteSize, 0,
+                Player.spriteSize, Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8, this.iframes
+            );
+            /*
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, cam.scale * this.size, 0, Math.PI * 2);
+            ctx.fill();
+            */
 
+            var particle = function(x, y, o) {
+                Particle.squareParticle(x, y, o, "46, 46, 46");
+            }
+            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
+        },
+        
+        update: function() {
             if(this.deathAnim) {
                 if(this.deathAnim === 1) {
                     this.vel.mult(0.5);
@@ -797,7 +789,7 @@ class Enemy {
                 }
             }
             if(this.spawnDelay===0&&this.spawning === true){
-                let bob = new Enemy(this.spawnPos.x, this.spawnPos.y, "golumite");
+                let bob = new Enemy(this.spawnPos.x, this.spawnPos.y, "golemite");
                 enemies.push(bob);
                 this.spawning = false;
             }
@@ -805,7 +797,6 @@ class Enemy {
             this.spawnDelay = Math.max(0, this.spawnDelay-1);
         },
         init: function() {
-            
             this.health = 5;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
@@ -814,6 +805,9 @@ class Enemy {
             this.spawnDelay = 10;
             this.spawning = false;
             this.spawnPos = new Vect();
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 10));
         }
     }
     
@@ -1206,19 +1200,35 @@ class Enemy {
         display: function() {
             var pos = cam.toScreen(this.pos);
 
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
             
             //yes tilesheets for rocks :)
             var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
 
             var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
-            ctx.drawImage(
+            Enemy.drawImage(
                 assets[this.asset],
                 tilesheetPos.x * Player.spriteSize, tilesheetPos.y * Player.spriteSize,
                 Player.spriteSize, Player.spriteSize,
                 pos.x - cam.scale * 4,
                 pos.y - cam.scale * 6,
                 cam.scale * 8,
-                cam.scale * 8
+                cam.scale * 8, this.iframes
             );
             /*
             ctx.fillStyle = "red";
@@ -1233,6 +1243,27 @@ class Enemy {
             Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
         },
         update: function() {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
             
             var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
             this.vel.add(Vect.mult(Vect.normalize(Vect.sub(predictedPos, this.pos)), 0.05));
@@ -1257,6 +1288,10 @@ class Enemy {
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
             this.walkAnimSpeed = 5;
+            this.health = 3;
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 3));
         }
     }
     static small = {
@@ -2077,7 +2112,9 @@ class Enemy {
     damage(amt) {
         this.health -= amt;
         this.iframes = 40;
-        this.type.damage.call(this);
+        if(this.type.damage) {
+            this.type.damage.call(this);
+        }
         if(this.health <= 0) {
             this.deathAnim = 1;
             console.log("i dead");
