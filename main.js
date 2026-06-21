@@ -34,7 +34,7 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "playing":
-            roundEnemies.push("rogue");
+            roundEnemies.push("spear");
             setupLevel();
             music.playing.play();
             break;
