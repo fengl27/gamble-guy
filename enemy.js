@@ -190,6 +190,286 @@ class Enemy {
             this.walkAnimSpeed = 10;
         }
     }
+    
+    static roller = {
+        display: function() {
+            var pos = cam.toScreen(this.pos);
+
+            
+            //yes tilesheets for rocks :)
+            var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+            ctx.drawImage(
+                assets.rock,
+                tilesheetPos * Player.spriteSize, 0,
+                Player.spriteSize, Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8
+            );
+            var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+            var roundedDir = new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y));
+            tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(roundedDir.x), Math.round(roundedDir.y)));
+            ctx.drawImage(
+                assets.archerShootMoving,
+                tilesheetPos * Player.spriteSize, 0,
+                Player.spriteSize,
+                Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 8,
+                cam.scale * 8,
+                cam.scale * 8
+            );
+            /*
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, cam.scale * this.size, 0, Math.PI * 2);
+            ctx.fill();
+            */
+
+            var particle = function(x, y, o) {
+                Particle.squareParticle(x, y, o, "46, 46, 46");
+            }
+            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
+        },
+        update: function() {
+            this.vel.mult(0.9 / this.vel.mag())
+            this.pos.add(this.vel);
+            if(Math.abs(this.pos.x) > l2.x - this.size) {
+                //horizontal collision
+                this.vel.x *= -1;
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
+                soundEffects.bounce.play();
+            }
+            if(Math.abs(this.pos.y) > l2.y - this.size) {
+                this.vel.y *= -1;
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
+                soundEffects.bounce.play();
+            }
+            this.walkAnim ++;
+        },
+        init: function() {
+            this.size = 2;
+            let theta = Math.random() * Math.PI * 2;
+            this.vel.set(Math.cos(theta), Math.sin(theta));
+            this.walkAnimSpeed = 10;
+        }
+    }
+    
+    
+    static deflector = {
+        display: function() {
+            var pos = cam.toScreen(this.pos);
+
+            
+            //yes tilesheets for rocks :)
+            var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+            ctx.drawImage(
+                assets.rock,
+                tilesheetPos * Player.spriteSize, 0,
+                Player.spriteSize, Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8
+            );
+            if(this.deflectingTimer>60) {
+                var walkCycle = 0;
+                pos = cam.toScreen(this.deflectorPos);
+
+                tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.deflectorDisplayDir.x),Math.round(this.deflectorDisplayDir.y)));
+                
+                //ctx.fillStyle = "red";
+                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+                ctx.drawImage(
+                    assets.sword,
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+                if(this.deflectingTimer > 150&& this.deflectingTimer<160) {
+                    ctx.save();
+                    ctx.translate(pos.x, pos.y);
+                    ctx.rotate((this.deflectingTimer-150)*Math.PI/10 + Math.atan2(this.deflectorPos.y - this.pos.y, this.deflectorPos.x - this.pos.x)+Math.PI);///it points up so im in pain
+
+                    var opacity = 0;
+                    ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+
+                    ctx.drawImage(assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
+                        -this.swordSize / 2 * cam.scale, -cam.scale * 3 - this.swordSize * cam.scale,
+                        this.swordSize * cam.scale, this.swordSize * cam.scale
+                    )
+
+                    ctx.restore();
+                }
+            }
+
+
+            var particle = function(x, y, o) {
+                Particle.squareParticle(x, y, o, "46, 46, 46");
+            }
+            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
+        },
+        update: function() {
+            if(Vect.dot(this.toPlayer,Vect.normalize(this.vel))<0&&this.deflectingTimer===0){
+                this.deflectingTimer=180;
+                this.deflectorPos=Vect.get(this.pos);
+                var framesTraveled = 0;
+                var simVel = Vect.get(this.vel);
+                /*
+                let limit = 50;
+                
+                while(--limit > 0 && framesTraveled<60){
+                    var limitors = [//walls
+                        [(Math.sign(simVel.x) * (l2.x-this.size)-this.deflectorPos.x)/simVel.x,0],
+                        [(Math.sign(simVel.y) * (l2.y-this.size)-this.deflectorPos.y)/simVel.y,1],
+                    ]
+                    limitors.sort((a,b)=>a[0]-b[0]);
+                    
+                    var mag = Math.min(Math.ceil(Math.abs(limitors[0][0])),60)
+                    this.deflectorPos.add(Vect.mult(simVel,mag));
+                    framesTraveled+=mag;
+                    //console.log(this.deflectorPos);
+                    if(limitors[0][1]===0){
+                        simVel.x*=-1;
+                        this.deflectorPos.x = Math.sign(this.deflectorPos.x) * (l2.x - this.size);
+                    }else{
+                        simVel.y*=-1;
+                        this.deflectorPos.y = Math.sign(this.deflectorPos.y) * (l2.y - this.size);
+                    }
+                }
+                */
+                for(var i = 0; i < 30; i ++) {
+                    this.deflectorPos.add(simVel);
+                    if(Math.abs(this.deflectorPos.x) > l2.x - this.size) {
+                        simVel.x*=-1;
+                        this.deflectorPos.x = Math.sign(this.deflectorPos.x) * (l2.x - this.size);
+                    }
+                    if(Math.abs(this.deflectorPos.y) > l2.y - this.size) {
+                        simVel.y*=-1;
+                        this.deflectorPos.y = Math.sign(this.deflectorPos.y) * (l2.y - this.size);
+                    }
+                }
+
+                if(limit <= 0) {
+                    //console.log("it bronk");
+                }
+                this.deflectorDir=Vect.normalize(Vect.sub(player.pos, this.deflectorPos));
+                this.deflectorDisplayDir = Vect.normalize(
+                            Vect.lerp(
+                                this.deflectorDir,
+                                Vect.mult(
+                                    Vect.normalize(simVel),-1
+                                ),
+                                0.5
+                            )
+                        );
+                this.deflectorPos.sub(
+                    Vect.mult(
+                        this.deflectorDisplayDir,
+                        10
+                    )
+                );
+                
+            }else if(this.deflectingTimer>0){
+                this.deflectingTimer--;
+                //console.log(this.deflectorPos);
+                ctx.fillRect(cam.toScreen(this.deflectorPos).x-5,cam.toScreen(this.deflectorPos).y-5,10,10);
+                if(this.deflectingTimer===150){
+                    this.vel=Vect.mult(this.deflectorDir,this.vel.mag());
+                }
+            }
+            this.vel.mult(1.8 / this.vel.mag())
+            this.pos.add(this.vel);
+            if(Math.abs(this.pos.x) > l2.x - this.size) {
+                //horizontal collision
+                this.vel.x *= -1;
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
+                soundEffects.bounce.play();
+            }
+            if(Math.abs(this.pos.y) > l2.y - this.size) {
+                this.vel.y *= -1;
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
+                soundEffects.bounce.play();
+            }
+            this.walkAnim ++;
+        },
+        init: function() {
+            this.size = 2;
+            this.swordSize = 10;
+
+            this.deflectingTimer = 0;
+            this.defectorPos = new Vect();
+            this.deflectorDir = new Vect();
+            this.deflectorDisplayDir = new Vect();
+            let theta = Math.random() * Math.PI * 2;
+            this.vel.set(Math.cos(theta), Math.sin(theta));
+            this.walkAnimSpeed = 10;
+        }
+    }
+    
+    static controller = {
+        display: function() {
+            var pos = cam.toScreen(this.pos);
+
+            
+            //yes tilesheets for rocks :)
+            var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+            var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+            ctx.drawImage(
+                assets[this.asset],
+                tilesheetPos.x * Player.spriteSize, tilesheetPos.y * Player.spriteSize,
+                Player.spriteSize, Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 6,
+                cam.scale * 8,
+                cam.scale * 8
+            );
+            /*
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, cam.scale * this.size, 0, Math.PI * 2);
+            ctx.fill();
+            */
+
+            var particle = function(x, y, o) {
+                Particle.squareParticle(x, y, o, "46, 46, 46");
+            }
+            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
+        },
+        update: function() {
+            
+            var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+            this.vel.add(Vect.mult(Vect.normalize(Vect.sub(predictedPos, this.pos)), 0.05));
+
+            this.vel.mult(0.98)
+            this.pos.add(this.vel);
+            if(Math.abs(this.pos.x) > l2.x - this.size) {
+                //horizontal collision
+                this.vel.x *= -1;
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
+                soundEffects.bounce.play();
+            }
+            if(Math.abs(this.pos.y) > l2.y - this.size) {
+                this.vel.y *= -1;
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
+                soundEffects.bounce.play();
+            }
+            this.walkAnim ++;
+        },
+        init: function() {
+            this.size = 2;
+            let theta = Math.random() * Math.PI * 2;
+            this.vel.set(Math.cos(theta), Math.sin(theta));
+            this.walkAnimSpeed = 5;
+        }
+    }
     static small = {
         drawDanger: function() {
             if(this.dashCharge && this.dashCharge % 10 < 8) {
