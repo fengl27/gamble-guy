@@ -34,7 +34,7 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "playing":
-            roundEnemies = ['deflector'];
+            roundEnemies.push("boulder");
             setupLevel();
             music.playing.play();
             break;
@@ -56,7 +56,7 @@ var switchState = function(target) {
 };
 var mainMenu = {
     buttons: [//button constructor (x,y,w,h,txt)
-        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState("playing")}
+        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState("gamble")}
     ],
     go: function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
