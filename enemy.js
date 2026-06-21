@@ -1542,6 +1542,275 @@ class Enemy {
         }
     }
     
+    static fencer = {
+        drawDanger: function() {
+            if(this.dashCharge && this.dashCharge % 10 < 8) {
+                var pos = cam.toScreen(this.pos);
+                //red rectangle (THE BATTLE CATS!!!)
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
+                ctx.save();
+                ctx.translate(pos.x, pos.y + cam.scale * 2);
+                ctx.rotate(Math.atan2(this.dashDir.y, this.dashDir.x));
+                ctx.fillRect(-cam.scale * 2.5, -cam.scale * 2.5, cam.scale * 30, 5 * cam.scale);
+                ctx.restore();
+            }
+        },
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            if(this.dashCharge) {
+                let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+
+                ctx.drawImage(
+                    assets.smallDashing,
+                    tilesheetPos * Player.spriteSize, 0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+            }
+            else {
+
+                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+                
+                //ctx.fillStyle = "red";
+                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+                Enemy.drawImage(
+                    assets.fencer,
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8, this.iframes
+                );
+
+                if(this.dashTimer || this.driftTimer) {
+                    let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                    let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+                    for(var i = 0; i < this.dashTrail.length; i ++) {
+                        let pos = cam.toScreen(this.dashTrail[i][0]);
+
+                        let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
+                        ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
+                        ctx.drawImage(
+                            assets.smallDashing,
+                            tilesheetPos * Player.spriteSize, 0,
+                            Player.spriteSize,
+                            Player.spriteSize,
+                            pos.x - cam.scale * 4,
+                            pos.y - cam.scale * 4,
+                            cam.scale * 8,
+                            cam.scale * 8
+                        );
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            }
+            
+            if(this.swording && !this.deathTimer) {
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(this.swordDir + Math.PI / 2);///it points up so im in pain
+
+                var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
+                ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+
+                ctx.drawImage(assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
+                     -this.swordSize / 2 * cam.scale, -cam.scale * 3 - this.swordSize * cam.scale,
+                    this.swordSize * cam.scale, this.swordSize * cam.scale
+                )
+
+                ctx.restore();
+                /*
+                ctx.fillStyle = "red";
+                if(this.swordTimer < 15) {
+                    ctx.beginPath();
+                    ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                */
+            }
+        },
+        update: function(toPlayer, dst) {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
+            if(this.dashTimer) {
+                this.pos.add(this.vel);
+                this.vel.mult(0.95);
+            }
+            else if(this.dashCharge) {
+                //do funny
+                this.vel.add(Vect.mult(this.dashDir, 0.1));
+                this.pos.add(this.vel);
+            }
+            else {
+                this.vel.mult(0.8);
+                let moveAmt = 0.15;
+                if(this.swordWindup) { 
+                    moveAmt*=0.5;
+                    this.swordWindup ++;
+                    this.swordVel += 0.05;
+                    this.swordDir += this.swordVel;
+                    if(this.swordWindup >= 5) {
+                        this.swordWindup = 0;
+                        this.swordTimer = 1;
+                        this.swordVel = 0.7;
+                    }
+                }
+                else if(this.swordTimer) {
+                    this.swordTimer ++;
+                    this.swordDir += this.swordVel;
+                    if(this.swordDir > this.swordTargetDir + Math.PI) {
+                        this.swordVel *= 0.8;
+                    }
+                    if(this.swordTimer > 40) {
+                        this.swording = false;
+                        this.swordTimer = 0;
+                    }
+                    else if(this.swordTimer < 15) {
+                        var p = new Vect(
+                            this.pos.x + Math.cos(this.swordDir) * this.swordSize,
+                            this.pos.y + Math.sin(this.swordDir) * this.swordSize
+                        );
+                        /*
+                        ctx.beginPath();
+                        ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                        ctx.fill();
+                        */
+                        if(sqrDist(p.x, p.y, player.pos.x, player.pos.y) < (player.size + 2) * (player.size + 2)) {
+                            //die
+                            player.damage();
+                        }
+                        if(this.swordTimer>13){
+                            this.vel.add(Vect.mult(toPlayer,-4));
+                        }
+                    }
+                }
+                
+                else if(dst < 30) {
+                    this.dashTrail = [];
+                    this.dashCharge ++;
+
+                    //cool maths
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+                    this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+
+                    this.vel.set(Vect.mult(this.dashDir, -1.5));
+                }
+                this.vel.add(Vect.mult(toPlayer, moveAmt));
+                this.pos.add(this.vel);
+            }
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(!this.dashCharge) {
+                this.walkAnim += this.driftTimer > 0? 0.5: 1;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+
+            //timers
+            if(this.dashCharge) {
+                this.dashCharge ++;
+                if(this.dashCharge > 20) {
+                    this.dashCharge = 0;
+                    this.dashTimer ++;
+                    this.vel.set(Vect.mult(this.dashDir, 3));
+
+                    soundEffects.smallDash.play();
+                }
+            }
+            else if(this.dashTimer) {
+                this.dashTimer ++;
+                if(this.dashTimer > 10) {
+                    this.dashTimer = 0;
+                    this.swording = true;
+                    this.swordTargetDir = Math.atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x);
+                    this.swordDir = this.swordTargetDir - Math.PI / 4;
+                    this.swordVel = -0.5;
+                    this.swordWindup = 1;
+                    this.vel.mult(0.7);
+                }
+                else if(!this.dashTrail.length || sqrDist(this.pos.x, this.pos.y, this.dashTrail.at(-1)[0].x, this.dashTrail.at(-1)[0].y) > 16) {
+                    this.dashTrail.push([new Vect(this.pos.x, this.pos.y), stateSwitchTimer]);
+                }
+            }
+            else {
+                this.driftTimer --;
+            }
+        },
+        init: function() {
+            this.size = 1.5;
+            this.walkAnimSpeed = 7;
+            this.health = 5;
+
+            this.dashCharge = 0;
+            this.dashTimer = 0;//when you actually dash;
+            this.driftTimer = 0;
+            this.swording = false;
+            this.swordWindup = 0;
+            this.swordTimer = 0;
+            this.swordDir = 0;
+            this.swordTargetDir = 0;
+            this.swordVel = 0;
+            this.swordSize = 10;
+            this.dashDir = new Vect();
+
+            this.dashTrail = [];
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 10));
+        }
+    }
     static stack = {
         drawDanger: function() {
             if(this.dashCharge && this.dashCharge % 10 < 8) {
@@ -1557,7 +1826,6 @@ class Enemy {
         },
         display: function() {
             let pos = cam.toScreen(this.pos);
-
             if(this.deathAnim) {
                 this.iframes = NaN;//white
                 if(this.deathAnim >= settings.deathDelay - 9) {
@@ -2284,7 +2552,7 @@ class Enemy {
             else {
                 this.walkAnim = 0;
             }
-
+            
             if(this.swordReload > 0) {
                 this.swordReload --;
             }

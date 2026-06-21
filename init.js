@@ -55,6 +55,7 @@ var assets = {
 
     sword: "sword.png",
     spear: "spear.png",
+    fencer: "fencer.png",
     swordless: "swordless.png",
     weapons: "weapons.png",
     
