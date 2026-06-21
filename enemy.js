@@ -1528,7 +1528,7 @@ class Enemy {
                 let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
 
                 ctx.drawImage(
-                    assets.smallDashing,
+                    assets.fencer,
                     tilesheetPos * Player.spriteSize, 0,
                     Player.spriteSize,
                     Player.spriteSize,
@@ -1567,7 +1567,7 @@ class Enemy {
                         let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
                         ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
                         ctx.drawImage(
-                            assets.smallDashing,
+                            assets.fencer,
                             tilesheetPos * Player.spriteSize, 0,
                             Player.spriteSize,
                             Player.spriteSize,
@@ -1757,6 +1757,12 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
+            this.swording = false;
+            this.swordWindup = 0;
+            this.swordTimer = 0;
+            this.swordDir = 0;
+            this.swordTargetDir = 0;
+            this.swordVel = 0;
         }
     }
     static stack = {
