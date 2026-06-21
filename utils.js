@@ -8,6 +8,12 @@ var cam = {
             canvas.width / 2 + (global.x - this.pos.x) * this.scale,
             canvas.height/ 2 + (global.y - this.pos.y) * this.scale,
         );
+    },
+    toGlobal: function(screen) {
+        return new Vect(
+            (screen.x - canvas.width / 2) / this.scale + this.pos.x,
+            (screen.y - canvas.height / 2) / this.scale + this.pos.y
+        );
     }
 };
 

@@ -11,7 +11,7 @@ class Player {
             Right: "d",
             Switch: " "
         };
-        this.weapons = [weapons.sword];
+        this.weapons = [weapons.sword, weapons.mace];
         this.selectedWeapon = -1;
         this.walkAnim = 0;
         this.dir = new Vect();
@@ -97,6 +97,9 @@ class Player {
         for(var i = 0; i < enemies.length; i ++) {
             enemies[i].dead = true;
         }
+        roundEnemies = []
+        switchState("gamble")
+
     }
 };
 var player;

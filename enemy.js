@@ -1580,7 +1580,7 @@ class Enemy {
                 let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
 
                 ctx.drawImage(
-                    assets.smallDashing,
+                    assets.fencer,
                     tilesheetPos * Player.spriteSize, 0,
                     Player.spriteSize,
                     Player.spriteSize,
@@ -1619,7 +1619,7 @@ class Enemy {
                         let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
                         ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
                         ctx.drawImage(
-                            assets.smallDashing,
+                            assets.fencer,
                             tilesheetPos * Player.spriteSize, 0,
                             Player.spriteSize,
                             Player.spriteSize,
@@ -1809,6 +1809,15 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
+            this.swording = false;
+            this.swordWindup = 0;
+            this.swordTimer = 0;
+            this.swordDir = 0;
+            this.swordTargetDir = 0;
+            this.swordVel = 0;
+            this.dashCharge = 0;
+            this.dashTimer = 0;//when you actually dash;
+            this.driftTimer = 0;
         }
     }
     static stack = {
@@ -2617,6 +2626,196 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
+        }
+    }
+    
+    static spear = {
+        drawDanger: function() {
+        },
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+        
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+            var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+            
+            //ctx.fillStyle = "red";
+            //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+            Enemy.drawImage(
+                assets[this.spearing? "swordless": this.asset],
+                tilesheetPos.x * Player.spriteSize,
+                tilesheetPos.y * Player.spriteSize,
+                Player.spriteSize,
+                Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8, this.iframes
+            );
+
+            if(this.spearing && !this.deathTimer) {
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(this.spearDir + Math.PI / 2);///it points up so im in pain
+
+                var opacity = limit(this.spearTimer - 20, 0, 20) / 20;
+                ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+
+                ctx.drawImage(assets.weapons, Player.spriteSize * 3, 0, Player.spriteSize, Player.spriteSize,
+                     -this.spearSize / 2 * cam.scale, -cam.scale * 3 - this.spearSize * cam.scale + this.spearDisplace*cam.scale,
+                    this.spearSize * cam.scale, this.spearSize * cam.scale
+                )
+
+                ctx.restore();
+                /*
+                ctx.fillStyle = "red";
+                if(this.swordTimer < 15) {
+                    ctx.beginPath();
+                    ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                */
+            }
+        },
+
+        update: function(toPlayer, dst) {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
+
+            this.vel.mult(0.5);
+            let moveAmt = 0.2 * (this.spearing? 0.1: 1);
+            this.vel.add(Vect.mult(toPlayer, moveAmt));
+            this.pos.add(this.vel);
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(!this.spearing) {
+                this.walkAnim ++;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+            
+            if(this.spearReload > 0) {
+                this.spearReload --;
+            }
+            else if(dst < 15 && !this.spearing) {
+                this.spearing = true;
+                this.spearTargetDir = Math.atan2(player.pos.y - this.pos.y, player.pos.x - this.pos.x);
+                this.spearDir = this.spearTargetDir;
+                this.spearDisplace = 5;
+                this.spearVel = -0;
+                this.spearWindup = 1;
+            }
+            else if(this.spearWindup) {
+                this.spearWindup ++;
+                this.spearVel += 0.04;
+                this.spearVel*=0.8;
+                this.spearDisplace += this.spearVel;
+                if(this.spearWindup >= 30) {
+                    this.spearWindup = 0;
+                    this.spearTimer = 1;
+                    this.spearVel = -1.4;
+                    soundEffects.sword.play();
+                }
+            }
+            else if(this.spearTimer) {
+                this.spearTimer ++;
+                this.spearDisplace += this.spearVel;
+                if(this.spearDir > this.spearTargetDir + Math.PI) {
+                    this.spearVel *= 0.8;
+                }
+                if(this.spearTimer > 10) {
+                    this.spearing = false;
+                    this.spearTimer = 0;
+                    this.spearReload = 40;
+                }
+                else if(this.spearTimer < 15) {
+                    var p = new Vect(
+                        this.pos.x + Math.cos(this.spearDir) * (this.spearSize+this.spearDisplace),
+                        this.pos.y + Math.sin(this.spearDir) * (this.spearSize+this.spearDisplace)
+                    );
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x,p.y, cam.scale * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    if(sqrDist(p.x, p.y, player.pos.x, player.pos.y) < (player.size + 2) * (player.size + 2)) {
+                        //die
+                        player.damage();
+                    }
+                }
+            }
+        },
+        init: function() {
+            this.health = 3;
+            this.size = 2.25;
+            this.walkAnimSpeed = 10;
+            this.spearing = false;
+            this.spearWindup = 0;
+            this.spearTimer = 0;
+            this.spearDir = 0;
+            this.spearTargetDir = 0;
+            this.spearVel = 0;
+            this.spearDisplace = 0;
+            this.spearSize = 10;
+            this.spearReload = 0;
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 3));
+            if(!this.spearing){
+                this.health++;
+                this.iframes=0; 
+            }else{
+                this.vel.sub(Vect.mult(this.toPlayer, 7));
+                this.spearing = false;
+                this.spearWindup = 0;
+                this.spearTimer = 0;
+                this.spearDir = 0;
+                this.spearTargetDir = 0;
+                this.spearVel = 0;
+                this.spearDisplace = 0;
+                this.spearReload = 30;
+            }
         }
     }
     constructor(x,y, type) {
