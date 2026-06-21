@@ -18,7 +18,7 @@ const weapons = {
                 for(var i = 0; i < enemies.length; i ++) {
                     if(!enemies[i].iframes && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (3 + enemies[i].size)*((3 + enemies[i].size))) {
                         //collide (they die)
-                        if(enemies[i].type === Enemy.arrow && !selected) {
+                        if((enemies[i].type === Enemy.arrow && !selected) || enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
                         enemies[i].damage(1);
