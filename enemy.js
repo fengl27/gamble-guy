@@ -347,20 +347,23 @@ class Enemy {
                 ctx.save();
                 ctx.translate(pos.x, pos.y + cam.scale * 2);
                 ctx.rotate(Math.atan2(this.dashDir.y, this.dashDir.x));
-                ctx.fillRect(-cam.scale * 2.5, -cam.scale * 2.5, cam.scale * 25, 5 * cam.scale);
+                ctx.fillRect(-cam.scale * 2.5, -cam.scale * 2.5, cam.scale * 70, 5 * cam.scale);
                 ctx.restore();
             }
         },
         display: function() {
             let pos = cam.toScreen(this.pos);
 
-            if(this.dashCharge) {
-                let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
-                let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
-
+            if(this.vel.mag() > 0.5) {
+                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+                
+                //ctx.fillStyle = "red";
+                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
                 ctx.drawImage(
                     assets.golumite,
-                    tilesheetPos * Player.spriteSize, 0,
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
                     Player.spriteSize,
                     pos.x - cam.scale * 4,
@@ -371,7 +374,9 @@ class Enemy {
             }
             else {
 
-                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+                //var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+                var walkCycle = 0;
+
 
                 var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
                 
@@ -388,7 +393,7 @@ class Enemy {
                     cam.scale * 8,
                     cam.scale * 8
                 );
-
+                /*
                 if(this.dashTimer || this.driftTimer) {
                     let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
                     let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
@@ -410,6 +415,7 @@ class Enemy {
                     }
                     ctx.globalAlpha = 1;
                 }
+                */
             }
         },
         update: function(toPlayer, dst) {
@@ -424,12 +430,12 @@ class Enemy {
             }
             else {
                 this.vel.mult(0.8);
-                let moveAmt = 0.15;
+                let moveAmt = 0;
                 if(this.driftTimer > 0) {
                     moveAmt *= 0.1;
                     this.vel.mult(0.95 / 0.85);
                 }
-                else if(dst < 10) {
+                else if(dst < 50) {
                     this.dashTrail = [];
                     this.dashCharge ++;
 
@@ -458,7 +464,7 @@ class Enemy {
             //timers
             if(this.dashCharge) {
                 this.dashCharge ++;
-                if(this.dashCharge > 60) {
+                if(this.dashCharge > 30) {
                     this.dashCharge = 0;
                     this.dashTimer ++;
                     this.vel.set(Vect.mult(this.dashDir, 3.5));
@@ -468,9 +474,9 @@ class Enemy {
             }
             else if(this.dashTimer) {
                 this.dashTimer ++;
-                if(this.dashTimer > 2) {
+                if(this.dashTimer > 25) {
                     this.dashTimer = 0;
-                    this.driftTimer = 120;
+                    this.driftTimer = 60;
                     this.vel.mult(0.6);
                 }
                 else if(!this.dashTrail.length || sqrDist(this.pos.x, this.pos.y, this.dashTrail.at(-1)[0].x, this.dashTrail.at(-1)[0].y) > 16) {
@@ -483,7 +489,7 @@ class Enemy {
         },
         init: function() {
             this.size = 1.5;
-            this.walkAnimSpeed = 7;
+            this.walkAnimSpeed = 3;
 
             this.dashCharge = 0;
             this.dashTimer = 0;//when you actually dash;
