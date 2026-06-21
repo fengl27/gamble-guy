@@ -1475,7 +1475,7 @@ class Enemy {
             }
         },
         init: function() {
-            this.health = 1;
+            this.health = 3;
             this.size = 1.5;
             this.walkAnimSpeed = 7;
 
@@ -1487,12 +1487,16 @@ class Enemy {
             this.dashTrail = [];
         },
         damage: function() {
-            this.vel.sub(Vect.mult(this.toPlayer, 10));
+            this.vel.sub(Vect.mult(this.toPlayer, 3));
             if(this.health <= 0) {
-                let bob = new Enemy(this.spawnPos.x, this.spawnPos.y, "small");
-                let joe = new Enemy(this.spawnPos.x, this.spawnPos.y, "small");
+                let bob = new Enemy(this.pos.x, this.pos.y, "small");
+                let joe = new Enemy(this.pos.x, this.pos.y, "small");
+                bob.iframes = 60;
+                joe.iframes = 60;
                 enemies.push(bob);
                 enemies.push(joe);
+                player.vel.add(Vect.mult(this.toPlayer, 2));
+                player.stun = 10;
             }
         }
     }
@@ -1908,19 +1912,13 @@ class Enemy {
     }
 
     damage(amt) {
-        var stuff = true;
-        if(this.type.damage) {
-            stuff = this.type.damage.call(this) !== false;
+        this.health -= amt;
+        this.iframes = 40;
+        this.type.damage.call(this);
+        if(this.health <= 0) {
+            this.deathAnim = 1;
+            console.log("i dead");
         }
-        if(stuff) {
-            this.health -= amt;
-            this.iframes = 40;
-            if(this.health <= 0) {
-                this.deathAnim = 1;
-                console.log("i dead");
-            }
-        }
-        return stuff;
     }
 };
 var enemies = [];

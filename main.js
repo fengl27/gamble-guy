@@ -34,7 +34,7 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "playing":
-            roundEnemies = ['deflector'];
+            roundEnemies = ['stack'];
             setupLevel();
             music.playing.play();
             break;
