@@ -42,6 +42,9 @@ class Vect {
     static dot(v1, v2) {
         return v1.x * v2.x + v1.y * v2.y;
     }
+    static lerp(v1, v2, t) {
+        return Vect.add(v1, Vect.mult(Vect.sub(v2, v1), t));
+    }
     add(vect, y) {
         if(arguments.length === 1) {
             this.x += vect.x;

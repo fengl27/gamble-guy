@@ -616,7 +616,11 @@ var otherSounds = {
     gambleSpin: "gamble-spin.mp3",
     gamble: "gamble.mp3",
     gambleFinish: "gamble-finish.mp3",
-    rockRoll: "rock-roll.mp3"
+    rockRoll: "rock-roll.mp3",
+    kill: "kill.mp3",
+    rockDeath: "rock-death.mp3",
+
+    sword: "sword.mp3"
 };
 var music = {
     playing: "song.mp3"

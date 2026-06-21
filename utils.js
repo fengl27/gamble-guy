@@ -126,6 +126,28 @@ function drawImgWithHue(img, hue, rect, shouldReturn) {//rect is an array with x
     }
 }
 
+function drawImgWithColor(img, col, sx, sy, sw, sh, x, y, w, h) {
+    var bob = new OffscreenCanvas(w, h);
+    var bctx = bob.getContext("2d");
+    bctx.imageSmoothingEnabled = false;//make my sad pixel art less sad (it still suck)
+    bctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);//draw original img
+    bctx.globalCompositeOperation = "source-atop";
+    bctx.fillStyle = col;
+    bctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bob, x, y);
+}
+
+function drawGrayedImage(img, sx, sy, sw, sh, x, y, w, h) {
+    var bob = new OffscreenCanvas(w, h);
+    var bctx = bob.getContext("2d");
+    bctx.imageSmoothingEnabled = false;//make my sad pixel art less sad (it still suck)
+    bctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);//draw original img
+    bctx.globalCompositeOperation = "source-atop";
+    bctx.fillStyle = "rgba(48, 48, 48, 0.3)";
+    bctx.fillRect(0, 0, w, h);
+    ctx.drawImage(bob, x, y);
+}
+
 //display functions
 var rect = function(ctx, x, y, w, h, fill, stroke) {
     /*

@@ -10,6 +10,8 @@ const h100 = canvas.height / 100;
 const w100 = canvas.width / 100;
 const ar = canvas.width / canvas.height;//16/9
 const settings = {
+    //emeny
+    deathDelay: 30,
     //archer
     archerWindupTime: 40,
     archerReloadTime: 100,
@@ -49,6 +51,7 @@ var assets = {
     swordless: "swordless.png",
     weapons: "weapons.png",
     
+    death: "death.png",
 
     plus: "plus.png"
 };

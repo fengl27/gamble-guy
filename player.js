@@ -8,9 +8,11 @@ class Player {
             Up: "w",
             Down: "s",
             Left: "a",
-            Right: "d"
+            Right: "d",
+            Switch: " "
         };
-        this.weapons = [];
+        this.weapons = [weapons.sword];
+        this.selectedWeapon = -1;
         this.walkAnim = 0;
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
@@ -33,6 +35,10 @@ class Player {
             cam.scale * 8,
             cam.scale * 8
         );
+
+        for(var i = 0; i < this.weapons.length; i ++) {
+            this.weapons[i].display();
+        }
     }
 
     update() {
@@ -60,12 +66,23 @@ class Player {
         this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
 
         for(var i = 0; i < enemies.length; i ++) {
-            if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size) * (this.size + enemies[i].size)) {
+            if(enemies[i].collisions && sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size) * (this.size + enemies[i].size)) {
                 //collision
                 //ya' die
                 this.damage();
             }
         }
+
+        //weepon spooping
+        if(justPressed[this.controls.Switch]) {
+            this.selectedWeapon = (this.selectedWeapon + 1) % this.weapons.length;
+        }
+        //weapon uupdating
+        for(var i = 0; i < this.weapons.length; i ++) {
+            this.weapons[i].update(this.selectedWeapon === i);
+        }
+
+        
     }
     damage() {
         soundEffects.finalKill.play();

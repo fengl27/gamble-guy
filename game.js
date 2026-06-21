@@ -180,9 +180,19 @@ var gamble = function() {
 
     if(gamble.gambleTimer === 250) {
         console.log("letS go GAMbliNG")
-        for(var i = 0; i < results.length; i ++) {
-            if(gambling[i][results[i]] !== "plus") {//add plussing later
-                roundEnemies.push(...Array(2).fill(gambling[i][results[i]]));
+        let cool = false;
+        if(gambling[1][results[1]] === "plus") {
+            let mergedEnemy = enemyMerges[enemyTypes.indexOf(gambling[0][results[0]])][enemyTypes.indexOf(gambling[2][results[2]])];
+            if(Enemy[mergedEnemy]) {//if it's actually a thing that exists
+                roundEnemies.push(mergedEnemy);//one merged guy cuz op
+                cool = true;
+            }
+        }
+        if(!cool) {
+            for(var i = 0; i < results.length; i ++) {
+                if(gambling[i][results[i]] !== "plus") {//don't spawn plusses ya dingus
+                    roundEnemies.push(...Array(2).fill(gambling[i][results[i]]));
+                }
             }
         }
     }
@@ -193,7 +203,7 @@ var gamble = function() {
         }
     }
 
-    if(mouse.justPressed && !gamble.gambleTimer) {
+    if(mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250)) {
         gamble.gambleTimer = 1;
         soundEffects.gamble.play();
         //gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];

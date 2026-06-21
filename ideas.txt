@@ -26,3 +26,9 @@ boulder     no
 trenchcoat  no          
 
 music       no          no
+
+wwweapons
+
+sword       yes
+bow         not yests
+thing       not yet
