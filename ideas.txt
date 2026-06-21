@@ -17,7 +17,7 @@ mini        yes         yes
 roller      yes         yes
 deflector   yee         yes
 controller  yes         yes
-crossbow    yee         
+crossbow    yee         tes
 spear       yes         
 rogue       yee         
 fencer      omg         
