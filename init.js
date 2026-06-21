@@ -43,6 +43,7 @@ var assets = {
     controller: "controller.png",
     rogue: "rogue.png",
     twoMini: "two-mini.png",
+    barbarian: "barbarian.png",
 
     sword: "sword.png",
     spear: "spear.png",
