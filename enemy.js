@@ -2809,6 +2809,106 @@ class Enemy {
             }
         }
     }
+
+    static dummy = {
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+
+            if(this.spawnAnim < 9) {
+                let frame = Math.floor(this.spawnAnim / 3);
+                this.spawnAnim ++;
+                ctx.drawImage(
+                    assets.death,
+                    frame * Player.spriteSize, 0,
+                    Player.spriteSize, Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+                return;
+            }
+        
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+            var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+            
+            //ctx.fillStyle = "red";
+            //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+            Enemy.drawImage(
+                assets.swordless,
+                tilesheetPos.x * Player.spriteSize,
+                tilesheetPos.y * Player.spriteSize,
+                Player.spriteSize,
+                Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8, this.iframes
+            );
+        },
+
+        update: function(toPlayer, dst) {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
+
+            this.vel.mult(0.5);
+            this.pos.add(this.vel);
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+        },
+        init: function() {
+            this.spawnAnim = 0;
+            this.health = 5;
+            this.size = 2.25;
+
+            if(sqrDist(this.pos.x, this.pos.y, player.pos.x, player.pos.y) < (player.size + this.size * 2) * (player.size + this.size * 2)) {
+                this.pos.set(30, 0);
+            }
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 10));
+        }
+    }
+
     constructor(x,y, type) {
         this.pos = new Vect(x||0,y||0);
         this.vel = new Vect(0, 0);

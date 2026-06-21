@@ -30,6 +30,7 @@ const l2 = Vect.div(settings.levelSize, 2);
 //LA GAME STATE FOR STAT MACHINEINE
 var gameState = "mainMenu";
 var paused = false;
+var tutorial = true;
 
 //assets lol
 var assets = {
@@ -40,7 +41,9 @@ var assets = {
     crossbow: "crossbow.png",
     crossbowShoot: "crossbow-shoot.png",
     //grass: "grass.png",
-    bricks: "bricks.png",
+    bricks: "bricks.png",//floor
+    wood: "wood.png",//tutorifloor
+
     arrow: "arrow.png",
     rock: "rock.png",
     rockDamaged: "rock-damaged.png",

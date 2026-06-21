@@ -1,4 +1,3 @@
-
 var displayGame = function() {
     //grass bg
     var tl = cam.toScreen(Vect.mult(l2, -1));
@@ -7,7 +6,7 @@ var displayGame = function() {
     let grassSize = cam.scale * 20;
     for(var x = tl.x; x < canvas.width; x += grassSize) {
         for(var y = tl.y; y < canvas.height; y += grassSize) {
-            ctx.drawImage(assets.bricks, x, y, grassSize, grassSize);
+            ctx.drawImage(assets[tutorial? "wood": "bricks"], x, y, grassSize, grassSize);
         }
     }
     //red danger stuff
@@ -62,7 +61,7 @@ var updateGame = function() {
             i --;
         }
     }
-    if(enemies.length===0&&roundEnemies.length!==0){
+    if(enemies.length===0 && roundEnemies.length!==0 && !tutorial){
         switchState("gamble");
         roundEnemies = [];
     }
@@ -206,7 +205,14 @@ var gamble = function() {
     else if(gamble.gambleTimer > 250) {
         gamble.button.go();
         if(gamble.button.pressed) {
-            switchState("playing");
+            if(tutorial) {
+                tutorialText[32].funnyThing = currTutorialMessage;
+                currTutorialMessage = 23;
+                tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            }
+            else {
+                switchState("playing");
+            }
         }
     }
 

@@ -1,3 +1,6 @@
+var playerStuff = {
+    weapons: []
+}
 class Player {
     static spriteSize = 18
     static walkAnimSpeed = 8 //5 frames per walk cycle
@@ -11,7 +14,7 @@ class Player {
             Right: "d",
             Switch: " "
         };
-        this.weapons = [weapons.sword, /*weapons.mace*/];
+        this.weapons = playerStuff.weapons;
         this.selectedWeapon = -1;
         this.walkAnim = 0;
         this.dir = new Vect();
@@ -98,8 +101,13 @@ class Player {
             enemies[i].dead = true;
         }
         roundEnemies = []
-        switchState("gamble")
-
+        if(tutorial) {
+            currTutorialMessage = 20;
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+        }
+        else {
+            switchState("gamble");
+        }
     }
 };
 var player;
