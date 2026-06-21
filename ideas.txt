@@ -14,16 +14,16 @@ rock        yes         yes
 bow         yes         yes
 sword       yes         yes
 mini        yes         yes
-roller      yes         
-deflector   yee         
-controller  yes         
+roller      yes         yes
+deflector   yee         yes
+controller  yes         yes
 crossbow    yee         
 spear       yes         
 rogue       yee         
 fencer      omg         
-barbarian   yes         
-boulder     no          
-trenchcoat  no          
+barbarian   yes         yes
+boulder     no          yes
+stack       no          yes
 
 music       no          no
 

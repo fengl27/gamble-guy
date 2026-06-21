@@ -34,11 +34,7 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "playing":
-<<<<<<< HEAD
-            roundEnemies = ['crossbow'];
-=======
-            roundEnemies.push("boulder");
->>>>>>> f90eff9e1fb79aa334830de915d42ea67c7cfef5
+            roundEnemies = ['fencer'];
             setupLevel();
             music.playing.play();
             break;
