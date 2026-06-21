@@ -40,11 +40,15 @@ var assets = {
     bricks: "bricks.png",
     arrow: "arrow.png",
     rock: "rock.png",
+    rockDamaged: "rock-damaged.png",
     small: "small.png",
     smallDashing: "small-dashing.png",
     controller: "controller.png",
     rogue: "rogue.png",
     twoMini: "two-mini.png",
+    barbarian: "barbarian.png",
+    golumite: "golumite.png",
+
 
     sword: "sword.png",
     spear: "spear.png",

@@ -54,6 +54,7 @@ class Enemy {
     }
     */
 
+    
     static arrow = {
         display: function() {
             var pos = cam.toScreen(this.pos);
@@ -283,7 +284,7 @@ class Enemy {
             */
 
             var particle = function(x, y, o) {
-                Particle.squareParticle(x, y, o, "99, 46, 8");
+                Particle.squareParticle(x, y, o, "46, 46, 46");
             }
             Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
         },
@@ -337,7 +338,249 @@ class Enemy {
         }
     }
     
+    static golumite = {
+        drawDanger: function() {
+            if(this.dashCharge && this.dashCharge % 10 < 8) {
+                var pos = cam.toScreen(this.pos);
+                //red rectangle (THE BATTLE CATS!!!)
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
+                ctx.save();
+                ctx.translate(pos.x, pos.y + cam.scale * 2);
+                ctx.rotate(Math.atan2(this.dashDir.y, this.dashDir.x));
+                ctx.fillRect(-cam.scale * 2.5, -cam.scale * 2.5, cam.scale * 25, 5 * cam.scale);
+                ctx.restore();
+            }
+        },
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+
+            if(this.dashCharge) {
+                let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+
+                ctx.drawImage(
+                    assets.golumite,
+                    tilesheetPos * Player.spriteSize, 0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+            }
+            else {
+
+                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+                
+                //ctx.fillStyle = "red";
+                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+                ctx.drawImage(
+                    assets.golumite,
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+
+                if(this.dashTimer || this.driftTimer) {
+                    let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                    let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+                    for(var i = 0; i < this.dashTrail.length; i ++) {
+                        let pos = cam.toScreen(this.dashTrail[i][0]);
+
+                        let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
+                        ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
+                        ctx.drawImage(
+                            assets.golumite,
+                            tilesheetPos * Player.spriteSize, 0,
+                            Player.spriteSize,
+                            Player.spriteSize,
+                            pos.x - cam.scale * 4,
+                            pos.y - cam.scale * 4,
+                            cam.scale * 8,
+                            cam.scale * 8
+                        );
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            }
+        },
+        update: function(toPlayer, dst) {
+            if(this.dashTimer) {
+                this.pos.add(this.vel);
+                this.vel.mult(0.95);
+            }
+            else if(this.dashCharge) {
+                //do funny
+                this.vel.add(Vect.mult(this.dashDir, -0));
+                this.pos.add(this.vel);
+            }
+            else {
+                this.vel.mult(0.8);
+                let moveAmt = 0.15;
+                if(this.driftTimer > 0) {
+                    moveAmt *= 0.1;
+                    this.vel.mult(0.95 / 0.85);
+                }
+                else if(dst < 10) {
+                    this.dashTrail = [];
+                    this.dashCharge ++;
+
+                    //cool maths
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+                    this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+
+                    this.vel.set(Vect.mult(this.dashDir, -0.1));
+                }
+                this.vel.add(Vect.mult(toPlayer, moveAmt));
+                this.pos.add(this.vel);
+            }
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(!this.dashCharge) {
+                this.walkAnim += this.driftTimer > 0? 0.5: 1;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+
+            //timers
+            if(this.dashCharge) {
+                this.dashCharge ++;
+                if(this.dashCharge > 60) {
+                    this.dashCharge = 0;
+                    this.dashTimer ++;
+                    this.vel.set(Vect.mult(this.dashDir, 3.5));
+
+                    soundEffects.smallDash.play();
+                }
+            }
+            else if(this.dashTimer) {
+                this.dashTimer ++;
+                if(this.dashTimer > 2) {
+                    this.dashTimer = 0;
+                    this.driftTimer = 120;
+                    this.vel.mult(0.6);
+                }
+                else if(!this.dashTrail.length || sqrDist(this.pos.x, this.pos.y, this.dashTrail.at(-1)[0].x, this.dashTrail.at(-1)[0].y) > 16) {
+                    this.dashTrail.push([new Vect(this.pos.x, this.pos.y), stateSwitchTimer]);
+                }
+            }
+            else {
+                this.driftTimer --;
+            }
+        },
+        init: function() {
+            this.size = 1.5;
+            this.walkAnimSpeed = 7;
+
+            this.dashCharge = 0;
+            this.dashTimer = 0;//when you actually dash;
+            this.driftTimer = 0;
+            this.dashDir = new Vect();
+
+            this.dashTrail = [];
+        }
+    }
+    static boulder = {
+        display: function() {
+            var pos = cam.toScreen(this.pos);
+
+            
+            //yes tilesheets for rocks :)
+            var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+            ctx.drawImage(
+                assets.rockDamaged,
+                tilesheetPos * Player.spriteSize, 0,
+                Player.spriteSize, Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8
+            );
+            /*
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, cam.scale * this.size, 0, Math.PI * 2);
+            ctx.fill();
+            */
+
+            var particle = function(x, y, o) {
+                Particle.squareParticle(x, y, o, "46, 46, 46");
+            }
+            Particle.AABBParticles(1, particle, new Vect(this.pos.x - 2, this.pos.y - 2), new Vect(4, 4), h100 / 20);
+        },
+        
+        update: function() {
+                
+            
+            this.vel.mult(0.9 / this.vel.mag())
+            this.pos.add(this.vel);
+            if(Math.abs(this.pos.x) > l2.x - this.size) {
+                //horizontal collision
+                this.vel.x *= -1;
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
+                soundEffects.bounce.play();
+                if(this.spawning ===false ){
+                    this.spawnDelay = 10;
+                    this.spawning = true;
+                    this.spawnPos.set(this.pos);
+                }
+            }
+            if(Math.abs(this.pos.y) > l2.y - this.size) {
+                this.vel.y *= -1;
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
+                soundEffects.bounce.play();
+                if(this.spawning ===false ){
+                    this.spawnDelay = 10;
+                    this.spawning = true;
+                    this.spawnPos.set(this.pos);
+                }
+            }
+            if(this.spawnDelay===0&&this.spawning === true){
+                let bob = new Enemy(this.spawnPos.x, this.spawnPos.y, "golumite");
+                enemies.push(bob);
+                this.spawning = false;
+            }
+            this.walkAnim ++;
+            this.spawnDelay = Math.max(0, this.spawnDelay-1);
+        },
+        init: function() {
+            this.size = 2;
+            let theta = Math.random() * Math.PI * 2;
+            this.vel.set(Math.cos(theta), Math.sin(theta));
+            this.walkAnimSpeed = 10;
+            this.spawnDelay = 10;
+            this.spawning = false;
+            this.spawnPos = new Vect();
+        }
+    }
+    
     static roller = {
+        drawDanger: function() {
+            if(this.shooting && Math.sin(this.shootTimer*this.shootTimer/144) > 0) {
+                var pos = cam.toScreen(this.pos);
+                //red rectangle (THE BATTLE CATS!!!)
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red
+                var aimDir = Vect.sub(this.aimPos, this.pos);
+                ctx.save();
+                ctx.translate(pos.x, pos.y);
+                ctx.rotate(Math.atan2(aimDir.y, aimDir.x));
+                ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * 200, 3 * cam.scale);
+                ctx.restore();
+            }
+        },
         display: function() {
             var pos = cam.toScreen(this.pos);
 
@@ -374,11 +617,12 @@ class Enemy {
             tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(roundedDir.x), Math.round(roundedDir.y)));
             ctx.drawImage(
                 assets.archerShootMoving,
-                tilesheetPos * Player.spriteSize, 0,
+                tilesheetPos.x * Player.spriteSize,
+                tilesheetPos.y * Player.spriteSize,
                 Player.spriteSize,
                 Player.spriteSize,
                 pos.x - cam.scale * 4,
-                pos.y - cam.scale * 8,
+                pos.y - cam.scale * 10,
                 cam.scale * 8,
                 cam.scale * 8
             );
@@ -430,6 +674,29 @@ class Enemy {
                 this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
                 soundEffects.bounce.play();
             }
+            if(this.shootReload <= 0 && !this.shooting) {
+                this.shooting = true;
+                var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, settings.archerWindupTime + dist(player.pos.x,player.pos.y,this.pos.x,this.pos.y) / 3 - Math.random() * 20));
+                this.aimPos.set(predictedPos);
+                soundEffects.arrowLoad.play();
+            }
+            if(this.shooting) {
+                this.shootTimer ++;
+                if(this.shootTimer > settings.archerWindupTime) {
+                    //school shooting
+                    this.shooting = false;
+                    this.shootTimer = 0;
+                    this.shootReload = settings.archerReloadTime;
+                    soundEffects.arrowLaunch.play();
+
+                    let bob = new Enemy(this.pos.x, this.pos.y, "arrow");
+                    bob.vel.set(Vect.mult(Vect.normalize(Vect.sub(this.aimPos, this.pos)), 2));
+                    enemies.push(bob);
+                }
+            }
+            else {
+                this.shootReload --;
+            }
             this.walkAnim ++;
         },
         init: function() {
@@ -438,6 +705,11 @@ class Enemy {
             this.vel.set(Math.cos(theta), Math.sin(theta));
             this.walkAnimSpeed = 10;
             this.health = 2;
+            
+            this.shooting = false;
+            this.shootReload = 0;
+            this.shootTimer = 0;
+            this.aimPos = new Vect();
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 7));
@@ -929,6 +1201,162 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
+        }
+    }
+    
+    static barbarian = {
+        drawDanger: function() {
+            if(this.dashCharge && this.dashCharge % 10 < 8) {
+                var pos = cam.toScreen(this.pos);
+                //red rectangle (THE BATTLE CATS!!!)
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
+                ctx.save();
+                ctx.translate(pos.x, pos.y + cam.scale * 2);
+                ctx.rotate(Math.atan2(this.dashDir.y, this.dashDir.x));
+                ctx.fillRect(-cam.scale * 2.5, -cam.scale * 2.5, cam.scale * 35, 5 * cam.scale);
+                ctx.restore();
+            }
+        },
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+
+            if(this.dashCharge) {
+                let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+
+                ctx.drawImage(
+                    assets.barbarian,
+                    tilesheetPos * Player.spriteSize, 0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+            }
+            else {
+
+                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+                
+                //ctx.fillStyle = "red";
+                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+                ctx.drawImage(
+                    assets.barbarian,
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+
+                if(this.dashTimer || this.driftTimer) {
+                    let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                    let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+                    for(var i = 0; i < this.dashTrail.length; i ++) {
+                        let pos = cam.toScreen(this.dashTrail[i][0]);
+
+                        let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
+                        ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
+                        ctx.drawImage(
+                            assets.smallDashing,
+                            tilesheetPos * Player.spriteSize, 0,
+                            Player.spriteSize,
+                            Player.spriteSize,
+                            pos.x - cam.scale * 4,
+                            pos.y - cam.scale * 4,
+                            cam.scale * 8,
+                            cam.scale * 8
+                        );
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            }
+        },
+        update: function(toPlayer, dst) {
+            if(this.dashTimer) {
+                this.pos.add(this.vel);
+                this.vel.mult(0.95);
+            }
+            else if(this.dashCharge) {
+                //do funny
+                this.vel.add(Vect.mult(this.dashDir, 0.1));
+                this.pos.add(this.vel);
+            }
+            else {
+                this.vel.mult(0.8);
+                let moveAmt = 0.15;
+                if(this.driftTimer > 0) {
+                    moveAmt *= 0.1;
+                    this.vel.mult(0.95 / 0.8);
+                }
+                else if(dst < 10) {
+                    this.dashTrail = [];
+                    this.dashCharge ++;
+
+                    //cool maths
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+                    this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+
+                    this.vel.set(Vect.mult(this.dashDir, -1.5));
+                }
+                this.vel.add(Vect.mult(toPlayer, moveAmt));
+                this.pos.add(this.vel);
+            }
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(!this.dashCharge) {
+                this.walkAnim += this.driftTimer > 0? 0.5: 1;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+
+            //timers
+            if(this.dashCharge) {
+                this.dashCharge ++;
+                if(this.dashCharge > 15) {
+                    this.dashCharge = 0;
+                    this.dashTimer ++;
+                    this.vel.set(Vect.mult(this.dashDir, 3));
+
+                    soundEffects.smallDash.play();
+                }
+            }
+            else if(this.dashTimer) {
+                this.dashTimer ++;
+                if(this.dashTimer > 10) {
+                    this.dashTimer = 0;
+                    this.driftTimer = 0;
+                    this.vel.mult(0.6);
+                }
+                else if(!this.dashTrail.length || sqrDist(this.pos.x, this.pos.y, this.dashTrail.at(-1)[0].x, this.dashTrail.at(-1)[0].y) > 16) {
+                    this.dashTrail.push([new Vect(this.pos.x, this.pos.y), stateSwitchTimer]);
+                }
+            }
+            else {
+                this.driftTimer --;
+            }
+        },
+        init: function() {
+            this.size = 1.5;
+            this.walkAnimSpeed = 7;
+
+            this.dashCharge = 0;
+            this.dashTimer = 0;//when you actually dash;
+            this.driftTimer = 0;
+            this.dashDir = new Vect();
+
+            this.dashTrail = [];
         }
     }
     static sword = {
