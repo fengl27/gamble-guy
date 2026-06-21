@@ -419,6 +419,45 @@ class Enemy {
             }
         },
         update: function(toPlayer, dst) {
+            
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
             if(this.dashTimer) {
                 this.pos.add(this.vel);
                 this.vel.mult(0.95);
@@ -488,6 +527,8 @@ class Enemy {
             }
         },
         init: function() {
+            
+            this.health = 1;
             this.size = 1.5;
             this.walkAnimSpeed = 3;
 
@@ -529,7 +570,45 @@ class Enemy {
         },
         
         update: function() {
+            
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
                 
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
             
             this.vel.mult(0.9 / this.vel.mag())
             this.pos.add(this.vel);
@@ -563,6 +642,8 @@ class Enemy {
             this.spawnDelay = Math.max(0, this.spawnDelay-1);
         },
         init: function() {
+            
+            this.health = 5;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
@@ -706,6 +787,8 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
+            
+            this.health = 2;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
@@ -1207,6 +1290,210 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
+        }
+    }
+    
+    static doubleMini = {
+        drawDanger: function() {
+            if(this.dashCharge && this.dashCharge % 10 < 8) {
+                var pos = cam.toScreen(this.pos);
+                //red rectangle (THE BATTLE CATS!!!)
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
+                ctx.save();
+                ctx.translate(pos.x, pos.y + cam.scale * 2);
+                ctx.rotate(Math.atan2(this.dashDir.y, this.dashDir.x));
+                ctx.fillRect(-cam.scale * 2.5, -cam.scale * 2.5, cam.scale * 50, 5 * cam.scale);
+                ctx.restore();
+            }
+        },
+        display: function() {
+            let pos = cam.toScreen(this.pos);
+
+            if(this.deathAnim) {
+                this.iframes = NaN;//white
+                if(this.deathAnim >= settings.deathDelay - 9) {
+                    let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
+                    ctx.drawImage(
+                        assets.death,
+                        frame * Player.spriteSize, 0,
+                        Player.spriteSize, Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
+                    return;
+                }
+            }
+
+            if(this.dashCharge) {
+                let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+
+                ctx.drawImage(
+                    assets.smallDashing,
+                    tilesheetPos * Player.spriteSize, 0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
+            }
+            else {
+
+                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
+
+                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
+                
+                //ctx.fillStyle = "red";
+                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+                Enemy.drawImage(
+                    assets[this.asset],
+                    tilesheetPos.x * Player.spriteSize,
+                    tilesheetPos.y * Player.spriteSize,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8, this.iframes
+                );
+
+                if(this.dashTimer || this.driftTimer) {
+                    let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
+                    let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+                    for(var i = 0; i < this.dashTrail.length; i ++) {
+                        let pos = cam.toScreen(this.dashTrail[i][0]);
+
+                        let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
+                        ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
+                        ctx.drawImage(
+                            assets.smallDashing,
+                            tilesheetPos * Player.spriteSize, 0,
+                            Player.spriteSize,
+                            Player.spriteSize,
+                            pos.x - cam.scale * 4,
+                            pos.y - cam.scale * 4,
+                            cam.scale * 8,
+                            cam.scale * 8
+                        );
+                    }
+                    ctx.globalAlpha = 1;
+                }
+            }
+        },
+        update: function(toPlayer, dst) {
+            if(this.deathAnim) {
+                if(this.deathAnim === 1) {
+                    this.vel.mult(0.5);
+                }
+                this.size = NaN;//don't collide
+                this.vel.mult(0.8);
+                this.pos.add(this.vel);
+                
+                //<3 walls my beloved
+                this.pos.x = limit(this.pos.x, -l2.x + 2, l2.x - 2);
+                this.pos.y = limit(this.pos.y, -l2.y - 2, l2.y - 2);
+                
+                this.deathAnim ++;
+                if(this.deathAnim === settings.deathDelay - 5) {
+                    soundEffects.kill.play();
+                }
+                if(this.deathAnim > settings.deathDelay) {
+                    this.dead = true;
+                }
+                return;
+            }
+            if(this.dashTimer) {
+                this.pos.add(this.vel);
+                this.vel.mult(0.95);
+            }
+            else if(this.dashCharge) {
+                //do funny
+                this.vel.add(Vect.mult(this.dashDir, 0.1));
+                this.pos.add(this.vel);
+            }
+            else {
+                this.vel.mult(0.8);
+                let moveAmt = 0.25;
+                if(this.driftTimer > 0) {
+                    moveAmt *= 0.2;
+                    this.vel.mult(0.95 / 0.8);
+                }
+                else if(dst < 30) {
+                    this.dashTrail = [];
+                    this.dashCharge ++;
+
+                    //cool maths
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+                    this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
+
+                    this.vel.set(Vect.mult(this.dashDir, -1.5));
+                }
+                this.vel.add(Vect.mult(toPlayer, moveAmt));
+                this.pos.add(this.vel);
+            }
+
+            //wall colllide
+            this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
+            this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
+
+            ///anim
+            if(!this.dashCharge) {
+                this.walkAnim += this.driftTimer > 0? 0.5: 1;
+            }
+            else {
+                this.walkAnim = 0;
+            }
+
+            //timers
+            if(this.dashCharge) {
+                this.dashCharge ++;
+                if(this.dashCharge > 20) {
+                    this.dashCharge = 0;
+                    this.dashTimer ++;
+                    this.vel.set(Vect.mult(this.dashDir, 3));
+
+                    soundEffects.smallDash.play();
+                }
+            }
+            else if(this.dashTimer) {
+                this.dashTimer ++;
+                if(this.dashTimer > 30) {
+                    this.dashTimer = 0;
+                    this.driftTimer = 40;
+                    this.vel.mult(0.7);
+                }
+                else if(!this.dashTrail.length || sqrDist(this.pos.x, this.pos.y, this.dashTrail.at(-1)[0].x, this.dashTrail.at(-1)[0].y) > 16) {
+                    this.dashTrail.push([new Vect(this.pos.x, this.pos.y), stateSwitchTimer]);
+                }
+            }
+            else {
+                this.driftTimer --;
+            }
+        },
+        init: function() {
+            this.health = 1;
+            this.size = 1.5;
+            this.walkAnimSpeed = 7;
+
+            this.dashCharge = 0;
+            this.dashTimer = 0;//when you actually dash;
+            this.driftTimer = 0;
+            this.dashDir = new Vect();
+
+            this.dashTrail = [];
+        },
+        damage: function() {
+            this.vel.sub(Vect.mult(this.toPlayer, 10));
+            if(this.health <= 0) {
+                let bob = new Enemy(this.spawnPos.x, this.spawnPos.y, "small");
+                let joe = new Enemy(this.spawnPos.x, this.spawnPos.y, "small");
+                enemies.push(bob);
+                enemies.push(joe);
+            }
         }
     }
     
