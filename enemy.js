@@ -1293,7 +1293,7 @@ class Enemy {
         }
     }
     
-    static doubleMini = {
+    static stack = {
         drawDanger: function() {
             if(this.dashCharge && this.dashCharge % 10 < 8) {
                 var pos = cam.toScreen(this.pos);
@@ -1331,7 +1331,7 @@ class Enemy {
                 let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
 
                 ctx.drawImage(
-                    assets.smallDashing,
+                    assets.twoMini,
                     tilesheetPos * Player.spriteSize, 0,
                     Player.spriteSize,
                     Player.spriteSize,
@@ -1350,7 +1350,7 @@ class Enemy {
                 //ctx.fillStyle = "red";
                 //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
                 Enemy.drawImage(
-                    assets[this.asset],
+                    assets.twoMini,
                     tilesheetPos.x * Player.spriteSize,
                     tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
@@ -1370,7 +1370,7 @@ class Enemy {
                         let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
                         ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
                         ctx.drawImage(
-                            assets.smallDashing,
+                            assets.twoMini,
                             tilesheetPos * Player.spriteSize, 0,
                             Player.spriteSize,
                             Player.spriteSize,
