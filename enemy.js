@@ -1815,6 +1815,9 @@ class Enemy {
             this.swordDir = 0;
             this.swordTargetDir = 0;
             this.swordVel = 0;
+            this.dashCharge = 0;
+            this.dashTimer = 0;//when you actually dash;
+            this.driftTimer = 0;
         }
     }
     static stack = {

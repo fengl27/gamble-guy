@@ -62,6 +62,10 @@ var updateGame = function() {
             i --;
         }
     }
+    if(enemies.length===0&&roundEnemies.length!==0){
+        switchState("gamble");
+        roundEnemies = [];
+    }
 
     //move screen
     var diff = Vect.sub(Vect.mult(player.pos, 0.2), cam.pos);
