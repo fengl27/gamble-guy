@@ -1,15 +1,20 @@
+
 const weapons = {
     sword: {
         dir: Math.random() * Math.PI * 2,
         dirVel: 0.15,
-        swordSize: 10,
+        stats:{
+            size:10,
+            dirVel:0.15
+        },
+        upgrades:[],
         update: function() {    
             //this.dirVel += (0.15 - this.dirVel) / 10;
-            this.dir += this.dirVel;
+            this.dir += this.stats.dirVel;
 
             let cPoss = [
-                new Vect(player.pos.x + Math.cos(this.dir) * this.swordSize, player.pos.y + Math.sin(this.dir) * this.swordSize),
-                new Vect(player.pos.x + Math.cos(this.dir) * this.swordSize / 2, player.pos.y + Math.sin(this.dir) * this.swordSize / 2),
+                new Vect(player.pos.x + Math.cos(this.dir) * this.stats.size, player.pos.y + Math.sin(this.dir) * this.stats.size),
+                new Vect(player.pos.x + Math.cos(this.dir) * this.stats.size / 2, player.pos.y + Math.sin(this.dir) * this.stats.size / 2),
             ];
             for(var j = 0; j < cPoss.length; j ++) {
                 let cPos = cPoss[j];
@@ -38,8 +43,8 @@ const weapons = {
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
             let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.swordSize / 2 * cam.scale, -cam.scale * 3 - this.swordSize * cam.scale,
-                    this.swordSize * cam.scale, this.swordSize * cam.scale
+                    -this.stats.size / 2 * cam.scale, -cam.scale * 3 - this.stats.size * cam.scale,
+                    this.stats.size * cam.scale, this.stats.size * cam.scale
             ];
             ctx.drawImage(...args);
 
@@ -48,27 +53,35 @@ const weapons = {
             ctx.fillStyle = "red";
             if(this.swordTimer < 15) {
                 ctx.beginPath();
-                ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                ctx.arc(pos.x + Math.cos(this.swordDir) * this.stats.size * cam.scale, pos.y + Math.sin(this.swordDir) * this.stats.size * cam.scale, cam.scale * 3, 0, Math.PI * 2);
                 ctx.fill();
             }
             */
+        },
+        reset: function(){
+            this.dir = Math.random() * Math.PI * 2
         }
     },
     throwMace:{
         pos: new Vect(),
         vel: new Vect(),
         nodePos: new Vect(),
-        size: 3,
+        stats: {
+            size:1,
+            playerSlow:0.3
+        },
         thrown: false,
         charge: 0,
         dir:0,
+        upgrades:[],
         update: function() {
             this.dir -= this.charge/18;
             let thrown = mouse.justReleased && mouse.button === 2;
             if(mouse.pressed&&!this.thrown&&!this.throwing && mouse.button === 2){
+                player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
                 this.charge=Math.min(6,this.charge+(this.charge<3?0.1:((6-this.charge)/10+0.01)))
             }
-            if(!this.thrown&&thrown){
+            if(!this.thrown&&thrown||mouse.button!==2){
                 this.thrown = true;
                 mousePos = cam.toGlobal(mouse);
                 offset = Vect.sub(mousePos,player.pos);
@@ -80,19 +93,19 @@ const weapons = {
             }
             let velMag = this.vel.mag();
             let sqrDistToPlayer = sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y);
-            if(this.thrown&&sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y)<(this.size+player.size)*(this.size+player.size)&&velMag<0.7){
+            if(this.thrown&&sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y)<(this.stats.size+player.size)*(this.stats.size+player.size)&&velMag<1.1){
                 this.thrown = false;
             }
             
-            if(Math.abs(this.pos.x) > l2.x - this.size) {
+            if(Math.abs(this.pos.x) > l2.x - this.stats.size) {
                 //horizontal collision
                 this.vel.x *= -1;
-                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.stats.size);
                 soundEffects.bounce.play();
             }
-            if(Math.abs(this.pos.y) > l2.y - this.size) {
+            if(Math.abs(this.pos.y) > l2.y - this.stats.size) {
                 this.vel.y *= -1;
-                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.stats.size);
                 soundEffects.bounce.play();
             }
             if(sqrDistToPlayer>400&&this.thrown){
@@ -134,17 +147,17 @@ const weapons = {
             for(var j = 0; j < cPoss.length; j ++) {
                 let cPos = cPoss[j];
                 for(var i = 0; i < enemies.length; i ++) {
-                    if((!enemies[i].iframes||velMag<0.5) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size)*(this.size + enemies[i].size)) {
+                    if((!enemies[i].iframes||velMag<1.1) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.stats.size + enemies[i].size)*(this.stats.size + enemies[i].size)) {
                         //collide (they die)
                         if((enemies[i].type === Enemy.arrow && !this.thrown) || enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
-                        if(velMag>0.5){
+                        if(velMag>1.1){
                             enemies[i].damage(1);
 
                         }else{
                             var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
-                            let wantedMag = (this.size+enemies[i].size) - dst;
+                            let wantedMag = (this.stats.size+enemies[i].size) - dst;
                             enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
                         }
                         soundEffects.sword.play();
@@ -163,15 +176,15 @@ const weapons = {
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
             let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.size / 2 * cam.scale+pos.x, -this.size / 2 * cam.scale+pos.y,
-                    this.size * cam.scale, this.size * cam.scale
+                    -this.stats.size / 2 * cam.scale+pos.x, -this.stats.size / 2 * cam.scale+pos.y,
+                    this.stats.size * cam.scale, this.stats.size * cam.scale
             ];
             if(this.thrown) {
                 ctx.drawImage(...args);
             }else if(this.charge!==0){
                 let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
                         -this.charge / 2 * cam.scale, -cam.scale * 3 - this.charge * cam.scale,
-                        this.size * cam.scale, this.size * cam.scale
+                        this.stats.size * cam.scale, this.stats.size * cam.scale
                 ];
                 
                 ctx.save();
@@ -179,18 +192,20 @@ const weapons = {
                 ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
                 ctx.drawImage(
                     assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.size / 2 * cam.scale, -cam.scale * 3 - this.charge * cam.scale,
-                    this.size * cam.scale, this.size * cam.scale
+                    -this.stats.size / 2 * cam.scale, -cam.scale * 3 - this.charge * cam.scale,
+                    this.stats.size * cam.scale, this.stats.size * cam.scale
                 );
                 ctx.restore();
                 if(this.charge>0){
                     ctx.save();
                     ctx.translate(playerPos.x, playerPos.y);
                     ctx.rotate(Math.atan2(toMouse.y,toMouse.x))
-                    ctx.fillStyle = "rgba(0, 255, 125, 0.15)";//real transparent red (not clickbait)
-                    ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * ((this.charge-1)*7), 3 * cam.scale);
+                    if(this.charge>1){
+                        ctx.fillStyle = "rgba(0, 255, 125, 0.15)";//real transparent red (not clickbait)
+                        ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * ((this.charge-1)*7), 3 * cam.scale);
+                    }
                     ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
-                    ctx.fillRect(-cam.scale * 1.5+ cam.scale* (this.charge-1)*7, -cam.scale * 1.5, cam.scale * (Math.min(1,this.charge)*20), 3 * cam.scale);
+                    ctx.fillRect(-cam.scale * 1+ cam.scale* (this.charge-1)*7, -cam.scale * 1, cam.scale * (Math.min(1,this.charge)*20), 2 * cam.scale);
 
                     ctx.restore();
                 }
@@ -207,9 +222,15 @@ const weapons = {
             /*
             ctx.fillStyle = "red";
             ctx.beginPath();
-            ctx.arc(pos.x, pos.y, this.size * cam.scale, 0, Math.PI * 2);
+            ctx.arc(pos.x, pos.y, this.stats.size * cam.scale, 0, Math.PI * 2);
             ctx.fill();
             */
+        },
+        reset:function() {
+            this.charge = 0;
+            this.pos = new Vect();
+            this.vel = new Vect();
+            this.thrown = false;
         }
     },
     /*
@@ -302,8 +323,8 @@ const weapons = {
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
             let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.swordSize / 2 * cam.scale, -this.swordSize / 2 * cam.scale,
-                    this.swordSize * cam.scale, this.swordSize * cam.scale
+                    -this.stats.size / 2 * cam.scale, -this.stats.size / 2 * cam.scale,
+                    this.stats.size * cam.scale, this.stats.size * cam.scale
             ];
             if(this.selected) {
                 ctx.drawImage(...args);
@@ -329,7 +350,9 @@ const weapons = {
     },
     */
     arrow: function(p, v) {
-        this.size = 5;
+        this.stats = {
+            size:5
+        };
         this.deathTimer = 0;
         this.pos = p;
         this.vel = v;
@@ -340,33 +363,16 @@ const weapons = {
         playerDst: 7,
         pullbackAmt: 0,
         pullbackVel: 0,
-        sizeMult: 10,
         chargeTimer: 0,
+        chargeMult:1,
+        stats:{
+            sizeMult: 10,
+            dirAccel:0.06,
+            playerSlow:0.5,
+        },
+        upgrades:[],
         update: function() {
-            let targetDirVel = -0.08;
-            if(this.chargeTimer) {
-                let closest = -1;
-                let dotProd = -2;
-                for(var i = 0; i < enemies.length; i ++) {
-                    if(enemies[i].type !== "arrow" && enemies[i].type !== "dagger" && enemies[i].type !== "golemite") {
-                        let diff = Vect.normalize(Vect.sub(enemies[i].pos, player.pos));
-                        let dp = diff.x * Math.cos(this.dir) + diff.y * Math.sin(this.dir);
-                        if(dp > dotProd) {
-                            dotProd = dp;
-                            closest = i;
-                        }
-                    }
-                }
-                if(dotProd > 0) {
-                    let diff = Vect.normalize(Vect.sub(enemies[closest].pos, player.pos));
-                    diff.set(diff.y, -diff.x);//rotate 90 deg
-                    targetDirVel = 0.4 * diff.x*Math.cos(this.dir)+diff.y*Math.sin(this.dir);
-                }
-                else {
-                    targetDirVel = 0;
-                }
-            }
-            this.dirVel += (targetDirVel - this.dirVel) / 5;
+            this.dirVel += ((this.chargeTimer? 0: -this.stats.dirAccel) - this.dirVel) / 5;
             this.dir += this.dirVel;
 
             this.pullbackAmt += this.pullbackVel;
@@ -379,7 +385,7 @@ const weapons = {
             }
             else if(this.chargeTimer) {
                 if(mouse.pressed && mouse.button === 0) {
-                    player.speedMult = 0.5;
+                    player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
                     this.chargeTimer = Math.min(this.chargeTimer + 1, 40);
                     this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/40) * 4;
                 }
@@ -413,17 +419,16 @@ const weapons = {
             ctx.translate(pos.x, pos.y);
             ctx.rotate(this.dir);///it points right so im relieved of pain
 
-            ctx.translate((this.playerDst + this.sizeMult / 2 + this.pullbackAmt) * cam.scale, 0);
+            ctx.translate((this.playerDst + this.stats.sizeMult / 2 + this.pullbackAmt) * cam.scale, 0);
             var vibrationAmt = this.chargeTimer / 40 * cam.scale/4;
             ctx.translate(lerp(-vibrationAmt, vibrationAmt, Math.random()), lerp(-vibrationAmt, vibrationAmt, Math.random()));
             ctx.scale(1 + easings.easeOutQuad(this.chargeTimer / 40) / 3, 1);
 
-            var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
-            ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+            ctx.globalAlpha = 1;
 
             let args = [assets.weapons, Player.spriteSize * (this.chargeTimer?1:0), 0, Player.spriteSize, Player.spriteSize,
-                    -cam.scale * this.sizeMult/2, -cam.scale * this.sizeMult/2,
-                    this.sizeMult * cam.scale, this.sizeMult * cam.scale
+                    -cam.scale * this.stats.sizeMult/2, -cam.scale * this.stats.sizeMult/2,
+                    this.stats.sizeMult * cam.scale, this.stats.sizeMult * cam.scale
             ];
             ctx.drawImage(...args);
 
@@ -432,10 +437,17 @@ const weapons = {
             ctx.fillStyle = "red";
             if(this.swordTimer < 15) {
                 ctx.beginPath();
-                ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                ctx.arc(pos.x + Math.cos(this.swordDir) * this.stats.size * cam.scale, pos.y + Math.sin(this.swordDir) * this.stats.size * cam.scale, cam.scale * 3, 0, Math.PI * 2);
                 ctx.fill();
             }
             */
+        },
+        reset: function(){
+            this.dir = Math.random() * Math.PI * 2,
+            this.dirVel = 0;
+            this.pullbackAmt = 0;
+            this.pullbackVel = 0;
+            this.chargeTimer = 0;
         }
     },
 };
@@ -461,7 +473,7 @@ if(this.deathTimer > 0) {
     }
     return;
 }
-if(Math.abs(this.pos.x) > l2.x - this.size || Math.abs(this.pos.y) > l2.y - this.size) {
+if(Math.abs(this.pos.x) > l2.x - this.stats.size || Math.abs(this.pos.y) > l2.y - this.stats.size) {
     //die
     this.deathTimer ++;
     this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
@@ -473,7 +485,7 @@ else {
 }
 
 for(var i = 0; i < enemies.length; i ++) {
-    if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size) * (this.size + enemies[i].size)) {
+    if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.stats.size + enemies[i].size) * (this.stats.size + enemies[i].size)) {
         //collide
         this.deathTimer ++;
         this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));

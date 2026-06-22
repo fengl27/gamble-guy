@@ -20,6 +20,7 @@ class Player {
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
         this.stun = 0;
+        this.iFrames = 0;
         this.speedMult = 1;
         this.exploding = 0;
         this.explodeThing = null;
@@ -41,7 +42,7 @@ class Player {
                 pos.x - cam.scale * 4,
                 pos.y - cam.scale * 4,
                 cam.scale * 8,
-                cam.scale * 8, this.exploding? NaN: 0
+                cam.scale * 8, (this.exploding||this.iFrames%20>10)? NaN: 0
             );
         }
 
@@ -106,6 +107,9 @@ class Player {
             this.vel.mult(0.5);
             this.vel.add(Vect.mult(input, 0.3 * this.speedMult));
         }
+        if(this.iFrames>0){
+            this.iFrames--;
+        }
         this.pos.add(this.vel);
 
         this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
@@ -141,6 +145,9 @@ class Player {
         }
     }
     damage() {
+        if(this.iFrames){
+            return;
+        }
         music.playing.pause();
         soundEffects.finalKill.play();
         for(var i = 0; i < enemies.length; i ++) {
@@ -153,6 +160,11 @@ class Player {
         }
         else {
             this.exploding = 1;
+        }
+    }
+    resetWeapons(){
+        for(var i =0;i<playerStuff.length;i++){
+            playerStuff[i].reset();
         }
     }
 };
