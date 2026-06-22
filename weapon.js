@@ -67,8 +67,7 @@ const weapons = {
                 this.pos.set(player.pos);
             }
             let velMag = this.vel.mag();
-            console.log(sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y));
-            console.log((this.size+player.size)*(this.size+player.size));
+            let sqrDistToPlayer = sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y);
             if(this.thrown&&sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y)<(this.size+player.size)*(this.size+player.size)&&velMag<0.1){
                 this.thrown = false;
             }
@@ -83,6 +82,11 @@ const weapons = {
                 this.vel.y *= -1;
                 this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
                 soundEffects.bounce.play();
+            }
+            if(sqrDistToPlayer>100){
+                var dst = Math.sqrt(sqrDistToPlayer);
+                let wantedMag = 10 - dst;
+                player.vel.sub(Vect.mult(Vect.sub(this.pos,player.pos),wantedMag / dst));
             }
             this.pos.add(this.vel)
             this.vel.mult(0.8);
@@ -102,7 +106,6 @@ const weapons = {
                             console.log("damaged " + enemies[i].asset);
 
                         }else{
-                            console.log("hi");
                             var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
                             let wantedMag = (this.size+enemies[i].size) - dst;
                             enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
