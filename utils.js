@@ -23,6 +23,7 @@ var mouse = {
     x: 0,
     y: 0,
     justPressed: false,
+    justReleased: false,
     button: 0
 };
 function handleMousePress(e) {
