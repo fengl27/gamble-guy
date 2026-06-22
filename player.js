@@ -1,5 +1,5 @@
 var playerStuff = {
-    weapons: []
+    weapons: [weapons.sword]
 }
 class Player {
     static spriteSize = 18
@@ -14,8 +14,8 @@ class Player {
             Right: "d",
             Switch: " "
         };
-        this.weapons = playerStuff.weapons;
-        this.selectedWeapon = -1;
+        this.weapons = tutorial? []: playerStuff.weapons;
+        this.selectedWeapon = tutorial? -1: 0;
         this.walkAnim = 0;
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
@@ -84,7 +84,7 @@ class Player {
         }
 
         //weepon spooping
-        if(justPressed[this.controls.Switch]) {
+        if(justPressed[this.controls.Switch] && this.weapons.length) {
             this.selectedWeapon = (this.selectedWeapon + 1) % this.weapons.length;
         }
         //weapon uupdating

@@ -1070,7 +1070,6 @@ class Enemy {
                     }
                 }
                 else if(this.deflectingTimer > 171 || this.deflectingTimer < 69) {
-                    console.log(this.deflectingTimer);
                     let frame = this.deflectingTimer < 69? 2-Math.floor((this.deflectingTimer-60) / 3): 2 - Math.floor((180 - this.deflectingTimer) / 3);
                     ctx.drawImage(
                         assets.death,
@@ -1857,7 +1856,7 @@ class Enemy {
                 let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
 
                 ctx.drawImage(
-                    assets.twoMini,
+                    assets.stack,
                     tilesheetPos * Player.spriteSize, 0,
                     Player.spriteSize,
                     Player.spriteSize,
@@ -1876,7 +1875,7 @@ class Enemy {
                 //ctx.fillStyle = "red";
                 //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
                 Enemy.drawImage(
-                    assets.twoMini,
+                    assets.stack,
                     tilesheetPos.x * Player.spriteSize,
                     tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
@@ -1896,7 +1895,7 @@ class Enemy {
                         let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
                         ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
                         ctx.drawImage(
-                            assets.twoMini,
+                            assets.stack,
                             tilesheetPos * Player.spriteSize, 0,
                             Player.spriteSize,
                             Player.spriteSize,
@@ -2392,7 +2391,7 @@ class Enemy {
                     this.dashCharge ++;
 
                     //cool maths
-                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 17));
                     this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
 
                     this.vel.set(Vect.mult(this.dashDir, -1.5));

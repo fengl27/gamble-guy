@@ -32,3 +32,11 @@ wwweapons
 sword       yes
 bow         not yests
 thing       not yet
+
+
+
+-transition to gamble screen                   :(
+-auto-select first weapon                           yee
+-fix lag                                            yee (it was because particles)
+-death screen or something to indicate die     :(
+-make music MUCH louder                             yee

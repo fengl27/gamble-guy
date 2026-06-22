@@ -27,6 +27,11 @@ var mouse = {
 function handleMousePress(e) {
     mouse.pressed = true;
     mouse.justPressed = true;
+
+    if(audioCtx.state === 'suspended') {
+        console.log("resume audioctx");
+        audioCtx.resume();
+    }
 }
 function handleMouseMove(e) {
     mouse.x = (e.clientX - canvas.offsetLeft) * canvas.width/canvas.offsetWidth;

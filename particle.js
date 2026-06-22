@@ -48,7 +48,7 @@ class Particle {
         let p = cam.toScreen(this.pos);
         this.disp(p.x, p.y, opacity);
 
-        if(this.pos.y > canvas.height * 1.2) {
+        if(this.timeToLive <= 0) {
             return true;
         }
     }
