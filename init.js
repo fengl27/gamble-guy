@@ -6,6 +6,10 @@ canvas.height = canvas.clientHeight;
 
 ctx.imageSmoothingEnabled = false;
 
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+});
+
 const h100 = canvas.height / 100;
 const w100 = canvas.width / 100;
 const ar = canvas.width / canvas.height;//16/9
