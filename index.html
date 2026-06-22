@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="icon" type="image/png" href="assets/icon.jpeg">
-        <title>jame gam</title>
+        <title>god kai's slot machine sucks</title>
         <style>
             body {
                 overflow: hidden;
@@ -39,10 +39,61 @@
                 border: 1px solid black;
                 border-radius: 5px;
             }
+
+            #pauseSettings {
+                position: fixed;
+                width: 80%;
+                top: 50vh;
+                bottom: 3em;
+                left: 3em;
+                right: 3em;
+                font-size: 5em;
+                font-family: pixelFont, sans-serif;
+                color: white;
+
+                pointer-events:visible;
+                user-select: none;
+
+                visibility: hidden;
+            }
+            input[type='range'] {
+                -webkit-appearance: none;
+                background: transparent;
+                appearance: none;
+                cursor: pointer;
+                outline: none;
+                margin-left: 2em;
+                margin-right: 2em;
+                width: 15em;
+                transform: translate(0, -1.5em);
+            }
+            input[type='range']::-webkit-slider-runnable-track {
+                background-color: rgb(149, 149, 149);
+                border: 0.4rem solid rgb(24, 24, 24);
+                height: 1rem;
+            }
+            input[type='range']::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                background-color: rgb(200, 200, 200);
+                width: 1.5rem;
+                height: 1.5rem;
+                margin-top: -0.6rem;
+                border: 0.4rem solid black;
+                border-radius: 0;
+            }
         </style>
     </head>
     <body onload = "startGame()">
         <canvas id = "canvas"></canvas>
+        <div id = "pauseSettings">
+            Music volume:
+            <input type = "range" value = "100" min = "0" max = "100" oninput = "document.getElementById('musicVolLabel').textContent=this.value" id = "musicVolSlider">
+            <label id = "musicVolLabel">100</label>%<br>
+            SFX volume:
+            <input type = "range" value = "100" min = "0" max = "100" oninput = "document.getElementById('sfxVolLabel').textContent=this.value" id = "sfxVolSlider">
+            <label id = "sfxVolLabel">100</label>%
+        </div>
     </body>
     <!--sound effect lib-->
     <script src = "sfxr.js"></script>

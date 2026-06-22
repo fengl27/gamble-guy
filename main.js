@@ -48,6 +48,9 @@ var switchState = function(target) {
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
             break;
+        case "gamble":
+            gamble.gambleTimer = 0;
+            gamble.offsetVels = [h100, -h100, h100];
     }
     if(target !== "playing") {
         music.playing.pause();
@@ -55,7 +58,7 @@ var switchState = function(target) {
 };
 var mainMenu = {
     buttons: [//button constructor (x,y,w,h,txt)
-        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState("gamble")}
+        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState(tutorial? "playing": "gamble")}
     ],
     go: function() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -65,6 +68,7 @@ var mainMenu = {
                 this.buttons[i].thing();
             }
         }
+        optionsMenu.runOptionsButton();
     }
 };
 var loseButtons = {
@@ -105,8 +109,20 @@ var frame = function() {
     //pause screen stuff
     if(justPressed["p"]) {
         paused = !paused;
+        if(gameState === "playing") {
+            music.playing.switchMuffled();
+        }
+        if(!paused) {
+            optionsMenu.isInOptions = false;
+        }
     }
-    if(paused) {
+    if((pauseSettingsEl.style.visibility === "visible") !== optionsMenu.isInOptions) {
+        pauseSettingsEl.style.visibility = optionsMenu.isInOptions? "visible": "hidden";
+    }
+    if(optionsMenu.isInOptions) {
+        optionsMenu.run();
+    }
+    else if(paused) {
         pauseScreen();
     }
     else {
@@ -192,6 +208,9 @@ var frame = function() {
                 }
                 break;
         }
+        if(tutorial) {
+            drawTutorial();
+        }
     }
 
     justPressed = [];
@@ -199,14 +218,15 @@ var frame = function() {
     mouse.justReleased = false;
     stateSwitchTimer ++;
     
+    /*
     ctx.fillStyle = "red";
     ctx.fillRect(0, 0, 100, 40);
     
     ctx.fillStyle = "green"
     ctx.fillRect(0, 0, performanceTracker.fps/60 * 100, 40);
+    */
 
-
-    ctx.font = "30px pixelFontSmall";
+    ctx.font = "20px pixelFontSmall";
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.textBaseline = "hanging";

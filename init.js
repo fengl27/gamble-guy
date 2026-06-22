@@ -10,6 +10,14 @@ const h100 = canvas.height / 100;
 const w100 = canvas.width / 100;
 const ar = canvas.width / canvas.height;//16/9
 const settings = {
+    get musicVolMult() {
+        var vol = pauseSettingsEl.querySelector("#musicVolSlider").value / 100;
+        return isNaN(vol)? 1: vol;
+    },
+    get sfxVolMult() {
+        var vol = pauseSettingsEl.querySelector("#sfxVolSlider").value / 100;
+        return 0.3*(isNaN(vol)? 1: vol);
+    },
     //emeny
     deathDelay: 30,
     //archer
@@ -22,14 +30,25 @@ const settings = {
     levelSize: new Vect(100*ar, 100),
     //misc
     screenshakeMult: h100,
-
-    sfxVolMult: 0.5,
 };
 const l2 = Vect.div(settings.levelSize, 2);
 
 //LA GAME STATE FOR STAT MACHINEINE
 var gameState = "mainMenu";
 var paused = false;
+var tutorial = true;//aee
+
+const pauseSettingsEl = document.getElementById("pauseSettings");
+
+const pauseSettingSoundTest = new Audio("assets/sounds/sound-test.mp3");
+pauseSettingsEl.querySelector("#musicVolSlider").addEventListener("change", (e) => {
+    pauseSettingSoundTest.volume = settings.musicVolMult;
+    pauseSettingSoundTest.currentTime = 0;
+    pauseSettingSoundTest.play();
+});
+pauseSettingsEl.querySelector("#sfxVolSlider").addEventListener("change", (e) => {
+    soundEffects.kill.play();
+});
 
 //assets lol
 var assets = {
@@ -40,7 +59,9 @@ var assets = {
     crossbow: "crossbow.png",
     crossbowShoot: "crossbow-shoot.png",
     //grass: "grass.png",
-    bricks: "bricks.png",
+    bricks: "bricks.png",//floor
+    wood: "wood.png",//tutorifloor
+
     arrow: "arrow.png",
     rock: "rock.png",
     rockDamaged: "rock-damaged.png",
@@ -48,7 +69,7 @@ var assets = {
     smallDashing: "small-dashing.png",
     controller: "controller.png",
     rogue: "rogue.png",
-    twoMini: "two-mini.png",
+    stack: "two-mini.png",
     barbarian: "barbarian.png",
     golemite: "golumite.png",
 

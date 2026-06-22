@@ -1,7 +1,7 @@
 
     static deflector = {
         display: function() {
-            var pos = cam.toScreen(this.deflectorPos);
+            var pos = cam.toScreen(this.rockPos);
 
             if(this.deathAnim) {
                 this.iframes = NaN;//white
@@ -53,7 +53,7 @@
                 if(this.deflectingTimer > 150&& this.deflectingTimer<160) {
                     ctx.save();
                     ctx.translate(pos.x, pos.y);
-                    ctx.rotate((this.deflectingTimer-150)*Math.PI/10 + Math.atan2(this.pos.y - this.deflectorPos.y, this.pos.x - this.deflectorPos.x)+Math.PI);///it points up so im in pain
+                    ctx.rotate((this.deflectingTimer-150)*Math.PI/10 + Math.atan2(this.pos.y - this.rockPos.y, this.pos.x - this.rockPos.x)+Math.PI);///it points up so im in pain
 
                     var opacity = 0;
                     ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
@@ -71,12 +71,12 @@
             var particle = function(x, y, o) {
                 Particle.squareParticle(x, y, o, "46, 46, 46");
             }
-            Particle.AABBParticles(1, particle, new Vect(this.deflectorPos.x - 2, this.deflectorPos.y - 2), new Vect(4, 4), h100 / 20);
+            Particle.AABBParticles(1, particle, new Vect(this.rockPos.x - 2, this.rockPos.y - 2), new Vect(4, 4), h100 / 20);
         },
         update: function() {
             if(Vect.dot(this.toPlayer,Vect.normalize(this.vel))<0&&this.deflectingTimer===0){
                 this.deflectingTimer=180;
-                this.pos=Vect.get(this.deflectorPos);
+                this.pos=Vect.get(this.rockPos);
                 var framesTraveled = 0;
                 var simVel = Vect.get(this.vel);
                 /*
@@ -143,16 +143,16 @@
                 }
             }
             this.vel.mult(1.8 / this.vel.mag())
-            this.deflectorPos.add(this.vel);
-            if(Math.abs(this.deflectorPos.x) > l2.x - this.size) {
+            this.rockPos.add(this.vel);
+            if(Math.abs(this.rockPos.x) > l2.x - this.size) {
                 //horizontal collision
                 this.vel.x *= -1;
-                this.deflectorPos.x = Math.sign(this.deflectorPos.x) * (l2.x - this.size);
+                this.rockPos.x = Math.sign(this.rockPos.x) * (l2.x - this.size);
                 soundEffects.bounce.play();
             }
-            if(Math.abs(this.deflectorPos.y) > l2.y - this.size) {
+            if(Math.abs(this.rockPos.y) > l2.y - this.size) {
                 this.vel.y *= -1;
-                this.deflectorPos.y = Math.sign(this.deflectorPos.y) * (l2.y - this.size);
+                this.rockPos.y = Math.sign(this.rockPos.y) * (l2.y - this.size);
                 soundEffects.bounce.play();
             }
             this.walkAnim ++;

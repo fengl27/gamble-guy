@@ -1,4 +1,3 @@
-
 var displayGame = function() {
     //grass bg
     var tl = cam.toScreen(Vect.mult(l2, -1));
@@ -7,7 +6,7 @@ var displayGame = function() {
     let grassSize = cam.scale * 20;
     for(var x = tl.x; x < canvas.width; x += grassSize) {
         for(var y = tl.y; y < canvas.height; y += grassSize) {
-            ctx.drawImage(assets.bricks, x, y, grassSize, grassSize);
+            ctx.drawImage(assets[tutorial? "wood": "bricks"], x, y, grassSize, grassSize);
         }
     }
     //red danger stuff
@@ -31,7 +30,6 @@ var displayGame = function() {
     ctx.fillRect(0, 0, tl.x - margin, canvas.height);
     ctx.fillRect(0, 0, canvas.width, tl.y - margin);
     ctx.fillRect(br.x + margin, 0, canvas.width, canvas.height);
-
     Particle.runParticles();
     
     //actual stuff
@@ -62,7 +60,7 @@ var updateGame = function() {
             i --;
         }
     }
-    if(enemies.length===0&&roundEnemies.length!==0){
+    if(enemies.length===0 && roundEnemies.length!==0 && !tutorial){
         switchState("gamble");
         roundEnemies = [];
     }
@@ -80,6 +78,15 @@ var game = function() {
 var upgradeScreen = function() {
 };
 var pauseScreen = function() {
+    ctx.fillStyle = "rgba(48, 48, 48, 0.05)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = 20 * h100 + "px pixelFont";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "hanging";
+    ctx.fillStyle = "white";
+    ctx.fillText("PAUSED!!!!!!!!!!!!!!!", canvas.width/2, canvas.height / 4);
+
+    optionsMenu.runOptionsButton();
 };
 
 var drawGamble = function(things, offset, thingSpacing, pos, size) {
@@ -173,6 +180,9 @@ var gamble = function() {
                 soundEffects.gambleFinish.play();
             }
         }
+        if(gamble.offsets[x] < 0) {
+            gamble.offsets[x] += gamble.spacing * gambling[x].length;//loop back around so ya don't run out of stuff
+        }
         results.push(drawGamble(
             gambling[x],
             gamble.offsets[x],
@@ -203,7 +213,14 @@ var gamble = function() {
     else if(gamble.gambleTimer > 250) {
         gamble.button.go();
         if(gamble.button.pressed) {
-            switchState("playing");
+            if(tutorial) {
+                tutorialText[32].funnyThing = currTutorialMessage;
+                currTutorialMessage = 23;
+                tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            }
+            else {
+                switchState("playing");
+            }
         }
     }
 
@@ -217,6 +234,7 @@ var gamble = function() {
         gamble.gambleTimer ++;
         if(gamble.gambleTimer === 10) {
             screenshake.shake(20, Math.random() - 1/2, 1);
+            gamble.offsets = [h100 * 20, h100 * 20, h100 * 20];//teehee
             gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];
             soundEffects.gambleSpin.play();
             soundEffects.gambleSpin.play(1);
@@ -230,3 +248,150 @@ gamble.offsets = [h100 * 20, h100 * 20, h100 * 20];
 gamble.offsetVels = [0, 0, 0];
 gamble.button = new Button(40 * w100 - 1.5 * h100, 80 * h100, 40 * w100, 10 * h100, "Next level!", "rgb(218, 193, 7)");
 //gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];
+
+
+var currTutorialMessage = 0;
+var tutorialText = [
+    {txt: "Welcome to kai's slop machine game! (Press enter to continue)", time: 0},
+    {txt: "You can move around with WASD (I think )"},
+    {txt: "Here, have a sword, i guess (idk)", thing: () => {player.weapons.push(weapons.sword);}},
+    {txt: "Oh, you don't know how to use the sword?"},
+    {txt: "Press space to select the sword (it will cycle between weapons when you have more later)."},
+    {txt: "Weapons will perform better while selected."},
+    {
+        txt: "Try beating this guy up with the sword! (you can continue once you beat him up)",
+        criteria: () => {return !enemies.length;},
+        thing: () => {
+            enemies.push(new Enemy(0, 0, "dummy"));
+        }
+        
+    },
+    {txt: "Good job! Killing normal people would give you money. (that guy wasn't normal)"},
+    {txt: "Now it's time to go gambling!", thing: () => {
+        switchState("gamble");
+    }},
+    {txt: "Click the funny nonexistant lever to gamble!"},
+    {txt: "The enemies the slot machine lands on are the enemies in the next round."},
+    {txt: "If the center one lands on a + sign, the two other enemies will merge together!"},
+    {txt: "You can gamble as many times as you want (as long as you have enough money)."},
+    {txt: "This will make the rounds harder, but you will get more $$$$$$$$"},
+    {txt: "Just make sure to get enough money to pay your rent!"},
+    {txt: "glhf go gambling now", thing: () => {
+        if(Math.random() < 0.01) {
+            currTutorialMessage += 2;
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+        }
+    }},
+    {txt: "ERROR 404", thing: () => {
+        tutorial = false;
+    }},
+
+
+
+    {txt: "there's a 1% chance of this text appearing"},
+    {txt: "A Bb F Bb A Bb F Bb A Bb F Bb A Bb F Bb G# A "},
+    {txt: "ERROR 403", thing: () => {
+        tutorialText[14].thing();
+    }},
+
+
+
+    {txt: "why'd you do that?"},
+    {txt: "have another one", criteria: () => {return !enemies.length;}, thing: () => {enemies.push(new Enemy(0, 0, "dummy"));}},
+    {txt: "ERROR 213", thing: () => {
+        currTutorialMessage = 8;
+        tutorialText[currTutorialMessage].time = stateSwitchTimer;
+        tutorialText[currTutorialMessage].thing();
+    }},
+
+    {txt: "finish the tutorial ya' doopid"},
+    {txt: "impatient"},
+    {txt: "mean"},
+    {txt: "depressing"},
+    {txt: "evil"},
+    {txt: "burger"},
+    {txt: "..."},
+    {txt: "...meanie"},
+    {txt: ":("},
+    {txt: "ERROR 212", thing: () => {
+        //console.log(tutorialText[32].funnyThing);
+        currTutorialMessage = tutorialText[32].funnyThing > 15? 9: tutorialText[32].funnyThing;
+        tutorialText[currTutorialMessage].time = stateSwitchTimer;
+        tutorialText[currTutorialMessage].thing();
+    }} 
+];
+var drawTutorial = function() {
+    if(gameState !== "mainMenu") {
+        ctx.fillStyle = "rgb(200, 200, 200)";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = h100;
+        var width = easings.easeInOutQuad(limit(stateSwitchTimer / 30, 0, 1)) * (canvas.width / 2 - 4 * h100);
+        var yPos = (easings.easeOutBack(limit(stateSwitchTimer / 30 - 0.1, 0, 1)) - 1) * canvas.height;
+        yPos += h100 * 73 + Math.sin(limit(stateSwitchTimer - tutorialText[currTutorialMessage].time, 0, 5) / 5 * Math.PI) * h100 * 5;
+        rect(ctx, h100 * 2, yPos, width, canvas.height / 4, true, true);
+        
+        if(stateSwitchTimer > 30) {
+            ctx.fillStyle = "black";
+            var currLine = "";
+            var lineIdx = 0;
+            var words = tutorialText[currTutorialMessage].txt.split(" ");
+            words.push("\n");//to make sure it draws the last line
+            ctx.font = 5 * h100 + "px pixelFontSmall";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "hanging";
+            for(var i = 0; i < words.length; i ++) {
+                if(words[i] === "\n" || ctx.measureText(currLine + words[i]).width > width-4*h100) {
+                    ctx.fillText(currLine, h100 * 4, yPos + h100 * 2 + h100 * 5 * lineIdx);
+                    lineIdx ++;
+                    currLine = "";
+                }
+                currLine += words[i] + " ";
+            }
+            if(justPressed['enter'] && (!tutorialText[currTutorialMessage].criteria || tutorialText[currTutorialMessage].criteria())) {
+                currTutorialMessage ++;
+                tutorialText[currTutorialMessage].time = stateSwitchTimer;
+                try {
+                    tutorialText[currTutorialMessage].thing();
+                }
+                catch {
+                    //do nothing
+                }
+            }
+        }
+    }
+};
+
+
+var optionsMenu = {
+    isInOptions: false,
+    run: function() {
+        ctx.fillStyle = "rgba(95, 95, 95, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 20 * h100 + "px pixelFont";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "hanging";
+        ctx.fillStyle = "white";
+        ctx.fillText("OPTIONS!!!", canvas.width/2, canvas.height / 4);
+
+        this.leaveOptionsButton.go();
+        if(this.leaveOptionsButton.pressed) {
+            this.isInOptions = false;
+        }
+    },
+    optionsButton: new Button(
+        canvas.width/2-h100*20, h100 * 63,
+        h100 * 40, h100 * 10,
+        "Options"
+    ),
+    leaveOptionsButton: new Button(
+        h100 * 3, h100 * 3,
+        h100 * 30, h100 * 10,
+        "Exi(s)t", "rgb(165, 165, 1)"
+    ),
+    runOptionsButton: function() {
+        this.optionsButton.go();
+        if(this.optionsButton.pressed) {
+            this.isInOptions = true;
+        }
+    }
+};

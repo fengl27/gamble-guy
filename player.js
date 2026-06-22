@@ -1,3 +1,6 @@
+var playerStuff = {
+    weapons: [weapons.sword]
+}
 class Player {
     static spriteSize = 18
     static walkAnimSpeed = 8 //5 frames per walk cycle
@@ -11,8 +14,8 @@ class Player {
             Right: "d",
             Switch: " "
         };
-        this.weapons = [weapons.sword, weapons.mace];
-        this.selectedWeapon = -1;
+        this.weapons = tutorial? []: playerStuff.weapons;
+        this.selectedWeapon = tutorial? -1: 0;
         this.walkAnim = 0;
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
@@ -81,7 +84,7 @@ class Player {
         }
 
         //weepon spooping
-        if(justPressed[this.controls.Switch]) {
+        if(justPressed[this.controls.Switch] && this.weapons.length) {
             this.selectedWeapon = (this.selectedWeapon + 1) % this.weapons.length;
         }
         //weapon uupdating
@@ -98,8 +101,13 @@ class Player {
             enemies[i].dead = true;
         }
         roundEnemies = []
-        switchState("gamble")
-
+        if(tutorial) {
+            currTutorialMessage = 20;
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+        }
+        else {
+            switchState("gamble");
+        }
     }
 };
 var player;

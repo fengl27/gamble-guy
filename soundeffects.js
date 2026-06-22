@@ -1,3 +1,5 @@
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
 //this script just stores sound effects...
 var soundEffects = {
     countdown1: {
@@ -656,6 +658,7 @@ for(let i in otherSounds) {
         path: "assets/sounds/" + otherSounds[i],
         play: function(startTime) {
             var sound = new Audio(this.path);
+            sound.volume = settings.sfxVolMult;
             sound.currentTime = startTime || 0;
             sound.play();
             sound.addEventListener("ended", e => {e.target = null;});
@@ -666,16 +669,58 @@ for(let i in otherSounds) {
 for(let i in music) {
     music[i] = {
         audio: new Audio("assets/sounds/" + music[i]),
+        muffled: new Audio("assets/sounds/" + music[i]),
+        isMuffled: false,
         play: function() {
             this.audio.currentTime = 0;
             this.audio.play();
         },
         pause: function() {
             this.audio.pause();
+        },
+        unpause: function() {
+            this.audio.play();//don't reset
+        },
+        switchMuffled: function() {
+            if(this.isMuffled) {
+                this.audio.currentTime = this.muffled.currentTime;
+                this.muffled.pause();
+                this.audio.play();
+            } 
+            else {
+                this.muffled.currentTime = this.audio.currentTime;
+                this.audio.pause();
+                this.muffled.play();
+            }
+            this.isMuffled = !this.isMuffled;
         }
     };
+    music[i].audio.volume = settings.musicVolMult;
     music[i].audio.loop = true;
+    music[i].muffled.volume = settings.musicVolMult * 0.3;
+    music[i].muffled.loop = true;
+    music[i].muffled.playbackRate = 0.5;
+    
+    const track = audioCtx.createMediaElementSource(music[i].muffled);
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 600;//200-600
+    track.connect(filter);
+    filter.connect(audioCtx.destination);
 }
+
+pauseSettingsEl.querySelector("#musicVolSlider").addEventListener("input", (e) => {
+    for(i in music) {
+        music[i].audio.volume = settings.musicVolMult;
+        music[i].muffled.volume = settings.musicVolMult * 0.5;
+    }
+});
+pauseSettingsEl.querySelector("#sfxVolSlider").addEventListener("input", (e) => {
+    for(i in music) {
+        music[i].audio.volume = settings.musicVolMult;
+        music[i].muffled.volume = settings.musicVolMult * 0.5;
+    }
+});
 
 //hi i made this weird aah sound
 /*{
