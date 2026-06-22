@@ -1,5 +1,5 @@
 var playerStuff = {
-    weapons: [weapons.sword]
+    weapons: [weapons.bow]
 }
 class Player {
     static spriteSize = 18
@@ -14,12 +14,13 @@ class Player {
             Right: "d",
             Switch: " "
         };
+        this.projectiles = [];
         this.weapons = tutorial? []: playerStuff.weapons;
-        this.selectedWeapon = tutorial? -1: 0;
         this.walkAnim = 0;
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
         this.stun = 0;
+        this.speedMult = 1;
     }
 
     display() {
@@ -42,6 +43,10 @@ class Player {
 
         for(var i = 0; i < this.weapons.length; i ++) {
             this.weapons[i].display();
+        }
+
+        for(var i = 0; i < this.projectiles.length; i ++) {
+            this.projectiles[i].display();
         }
     }
 
@@ -68,7 +73,7 @@ class Player {
         }
         else {
             this.vel.mult(0.5);
-            this.vel.add(Vect.mult(input, 0.3));
+            this.vel.add(Vect.mult(input, 0.3 * this.speedMult));
         }
         this.pos.add(this.vel);
 
@@ -83,16 +88,26 @@ class Player {
             }
         }
 
+
+        this.speedMult = 1;//aah
+
         //weepon spooping
+        /*
         if(justPressed[this.controls.Switch] && this.weapons.length) {
             this.selectedWeapon = (this.selectedWeapon + 1) % this.weapons.length;
         }
+        */
         //weapon uupdating
         for(var i = 0; i < this.weapons.length; i ++) {
-            this.weapons[i].update(this.selectedWeapon === i);
+            this.weapons[i].update();
         }
 
-        
+        for(var i = 0; i < this.projectiles.length; i ++) {
+            this.projectiles[i].update();
+            if(this.projectiles[i].dead) {
+                this.projectiles.splice(i, 1);
+            }
+        }
     }
     damage() {
         soundEffects.finalKill.play();

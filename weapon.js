@@ -1,12 +1,10 @@
 const weapons = {
     sword: {
-        selected: false,
         dir: Math.random() * Math.PI * 2,
-        dirVel: 0,
+        dirVel: 0.15,
         swordSize: 10,
-        update: function(selected) {    
-            this.selected = selected;
-            this.dirVel += ((this.selected? 0.15: 0.05) - this.dirVel) / 10;
+        update: function() {    
+            //this.dirVel += (0.15 - this.dirVel) / 10;
             this.dir += this.dirVel;
 
             let cPoss = [
@@ -18,7 +16,7 @@ const weapons = {
                 for(var i = 0; i < enemies.length; i ++) {
                     if(!enemies[i].iframes && !enemies[i].invincible && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (3 + enemies[i].size)*((3 + enemies[i].size))) {
                         //collide (they die)
-                        if((enemies[i].type === Enemy.arrow && !selected) || enemies[i].type === Enemy.dagger) {
+                        if(enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
                         enemies[i].damage(1);
@@ -42,12 +40,7 @@ const weapons = {
                     -this.swordSize / 2 * cam.scale, -cam.scale * 3 - this.swordSize * cam.scale,
                     this.swordSize * cam.scale, this.swordSize * cam.scale
             ];
-            if(this.selected) {
-                ctx.drawImage(...args);
-            }
-            else {
-                drawGrayedImage(...args);
-            }
+            ctx.drawImage(...args);
 
             ctx.restore();
             /*
@@ -61,7 +54,6 @@ const weapons = {
         }
     },
     throwMace:{
-        selected: false,
         pos: new Vect(),
         vel: new Vect(),
         swordSize: 10,
@@ -126,13 +118,11 @@ const weapons = {
         }
     },
     mace: {
-        selected: false,
         pos: new Vect(),
         vel: new Vect(),
         node: Array(3).fill(0).map((thing, idx) => [new Vect(idx * 5, 0), new Vect()]),
         swordSize: 10,
-        update: function(selected) {    
-            this.selected = selected;
+        update: function() {
             let lastNodePos = Vect.get(this.pos);
             let lastNodeVel = new Vect();
             for(var i = 0;i<this.node.length;i++){
@@ -249,5 +239,136 @@ const weapons = {
             }
             */
         }
-    }
+    },
+    arrow: function(p, v) {
+        this.size = 3;
+        this.deathTimer = 0;
+        this.pos = p;
+        this.vel = v;
+    },
+    bow: {
+        dir: Math.random() * Math.PI * 2,
+        dirVel: 0,
+        playerDst: 7,
+        pullbackAmt: 0,
+        pullbackVel: 0,
+        sizeMult: 10,
+        chargeTimer: 0,
+        update: function() {    
+            this.dirVel += ((this.chargeTimer? 0: -0.10) - this.dirVel) / 25;
+            this.dir += this.dirVel;
+
+            this.pullbackAmt += this.pullbackVel;
+            this.pullbackVel *= 0.8;
+            this.pullbackVel -= this.pullbackAmt * 0.3;
+
+            if(mouse.justPressed && mouse.button === 0 && !this.chargeTimer) {//0 = lb, 1 = wheel, 2 = rb
+                this.chargeTimer ++;
+                soundEffects.arrowLoad.play();
+            }
+            else if(this.chargeTimer) {
+                if(mouse.pressed && mouse.button === 0) {
+                    this.chargeTimer = Math.min(this.chargeTimer + 1, 40);
+                    this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/40) * 4;
+                }
+                else {
+                    //water bucket RELEASE
+                    if(this.chargeTimer > 20) {
+                        soundEffects.arrowLaunch.play();
+                        this.pullbackVel = 0.6;
+                        player.projectiles.push(new weapons.arrow(
+                            Vect.add(
+                                player.pos,
+                                new Vect(
+                                    Math.cos(this.dir) * this.playerDst,
+                                    Math.sin(this.dir) * this.playerDst
+                                )
+                            ),
+                            new Vect(
+                                Math.cos(this.dir) * this.chargeTimer / 40 * 3,
+                                Math.sin(this.dir) * this.chargeTimer / 40 * 3
+                            )
+                        ));
+                    }
+                    this.chargeTimer = 0;
+                }
+            }
+        },
+        display: function() {
+            //basically copied from enemy.js
+            var pos = cam.toScreen(player.pos);
+            ctx.save();
+            ctx.translate(pos.x, pos.y);
+            ctx.rotate(this.dir);///it points right so im relieved of pain
+
+            ctx.translate((this.playerDst + this.sizeMult / 2 + this.pullbackAmt) * cam.scale, 0);
+            var vibrationAmt = this.chargeTimer / 40 * cam.scale/4;
+            ctx.translate(lerp(-vibrationAmt, vibrationAmt, Math.random()), lerp(-vibrationAmt, vibrationAmt, Math.random()));
+            ctx.scale(1 + easings.easeOutQuad(this.chargeTimer / 40) / 3, 1);
+
+            var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
+            ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+
+            let args = [assets.weapons, Player.spriteSize * (this.chargeTimer?1:0), 0, Player.spriteSize, Player.spriteSize,
+                    -cam.scale * this.sizeMult/2, -cam.scale * this.sizeMult/2,
+                    this.sizeMult * cam.scale, this.sizeMult * cam.scale
+            ];
+            ctx.drawImage(...args);
+
+            ctx.restore();
+            /*
+            ctx.fillStyle = "red";
+            if(this.swordTimer < 15) {
+                ctx.beginPath();
+                ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            */
+        }
+    },
 };
+
+weapons.arrow.prototype.display = function() {
+    var pos = cam.toScreen(this.pos);
+    ctx.save();
+    ctx.translate(pos.x, pos.y);
+    ctx.rotate(Math.atan2(this.vel.y, this.vel.x) + Math.sign(this.deathTimer) * Math.PI);
+
+    let opacity = 1 - this.deathTimer / 10;
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(assets.arrow, -cam.scale * 5, -cam.scale * 3, cam.scale * 6, cam.scale * 6);
+    ctx.restore();
+};
+weapons.arrow.prototype.update = function() {
+if(this.deathTimer > 0) {
+    this.deathTimer ++;
+    this.vel.y += 0.05;
+    this.pos.add(this.vel);
+    if(this.deathTimer > 10) {
+        this.dead = true;
+    }
+    return;
+}
+if(Math.abs(this.pos.x) > l2.x - this.size || Math.abs(this.pos.y) > l2.y - this.size) {
+    //die
+    this.deathTimer ++;
+    this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
+    this.vel.mult(-0.2);
+    soundEffects.bounce.play();
+}
+else {
+    this.pos.add(this.vel);//and that's it
+}
+
+for(var i = 0; i < enemies.length; i ++) {
+    if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size) * (this.size + enemies[i].size)) {
+        //collide
+        this.deathTimer ++;
+        this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
+        this.vel.mult(-0.2);
+        soundEffects.bounce.play();
+        enemies[i].damage(1);
+        return;
+    }
+}
+}

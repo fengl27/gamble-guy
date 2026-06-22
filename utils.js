@@ -22,11 +22,13 @@ var mouse = {
     pressed: false,
     x: 0,
     y: 0,
-    justPressed: false
+    justPressed: false,
+    button: 0
 };
 function handleMousePress(e) {
     mouse.pressed = true;
     mouse.justPressed = true;
+    mouse.button = e.button;
 
     if(audioCtx.state === 'suspended') {
         console.log("resume audioctx");
