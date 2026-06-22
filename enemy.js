@@ -119,6 +119,8 @@ class Enemy {
         },
         update: function() {
             if(this.deathTimer > 0) {
+                this.invincible = true;
+                this.collisions = false;
                 this.deathTimer ++;
                 this.vel.y += 0.05;
                 this.pos.add(this.vel);
@@ -2794,7 +2796,8 @@ class Enemy {
             this.vel.sub(Vect.mult(this.toPlayer, 3));
             if(!this.spearing){
                 this.health++;
-                this.iframes=0; 
+                this.iframes=0;
+                return false; 
             }else{
                 this.vel.sub(Vect.mult(this.toPlayer, 7));
                 this.spearing = false;
@@ -2997,7 +3000,11 @@ class Enemy {
         this.health -= amt;
         this.iframes = 40;
         if(this.type.damage) {
-            this.type.damage.call(this);
+            if(this.type.damage.call(this) === "false") {
+                this.health += amt;
+                this.iframes = 0;
+                return false;//nah ya lyin
+            }
         }
         if(this.health <= 0) {
             this.deathAnim = 1;

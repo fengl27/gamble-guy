@@ -19,9 +19,10 @@ const weapons = {
                         if(enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
-                        enemies[i].damage(1);
-                        console.log("damaged " + enemies[i].asset);
-                        soundEffects.sword.play();
+                        if(enemies[i].damage(1) !== false) {
+                            console.log("damaged " + enemies[i].asset);
+                            soundEffects.sword.play();
+                        }
                     }
                 }
             }
@@ -328,7 +329,7 @@ const weapons = {
     },
     */
     arrow: function(p, v) {
-        this.size = 3;
+        this.size = 5;
         this.deathTimer = 0;
         this.pos = p;
         this.vel = v;
@@ -341,8 +342,31 @@ const weapons = {
         pullbackVel: 0,
         sizeMult: 10,
         chargeTimer: 0,
-        update: function() {    
-            this.dirVel += ((this.chargeTimer? 0: -0.06) - this.dirVel) / 5;
+        update: function() {
+            let targetDirVel = -0.08;
+            if(this.chargeTimer) {
+                let closest = -1;
+                let dotProd = -2;
+                for(var i = 0; i < enemies.length; i ++) {
+                    if(enemies[i].type !== "arrow" && enemies[i].type !== "dagger" && enemies[i].type !== "golemite") {
+                        let diff = Vect.normalize(Vect.sub(enemies[i].pos, player.pos));
+                        let dp = diff.x * Math.cos(this.dir) + diff.y * Math.sin(this.dir);
+                        if(dp > dotProd) {
+                            dotProd = dp;
+                            closest = i;
+                        }
+                    }
+                }
+                if(dotProd > 0) {
+                    let diff = Vect.normalize(Vect.sub(enemies[closest].pos, player.pos));
+                    diff.set(diff.y, -diff.x);//rotate 90 deg
+                    targetDirVel = 0.4 * diff.x*Math.cos(this.dir)+diff.y*Math.sin(this.dir);
+                }
+                else {
+                    targetDirVel = 0;
+                }
+            }
+            this.dirVel += (targetDirVel - this.dirVel) / 5;
             this.dir += this.dirVel;
 
             this.pullbackAmt += this.pullbackVel;

@@ -3,18 +3,26 @@ class Button {
         this.p = new Vect(x, y);
         this.s = new Vect(w, h);
         this.txt = txt;
+        this.hovered = false;
         this.baseCol = col/* || "rgb(150, 150, 150)"*/ || "#4A90E2";
     }
 
     go() {
         ctx.strokeStyle = "black";
-        ctx.lineWidth = h100/4;
+        ctx.lineWidth = h100 * 2;
         var hovered = mouse.x > this.p.x &&
                 mouse.x < this.p.x+this.s.x &&
                 mouse.y > this.p.y &&
                 mouse.y < this.p.y+this.s.y;
+
+        if(this.hovered !== hovered) {
+            this.hovered = hovered;
+            soundEffects.buttonHover.play();
+        }
         ctx.fillStyle = this.baseCol;
-        rect(ctx, this.p.x, this.p.y, this.s.x, this.s.y, true, true);
+        //specifically stroke first
+        ctx.strokeRect(this.p.x, this.p.y, this.s.x, this.s.y);
+        ctx.fillRect  (this.p.x, this.p.y, this.s.x, this.s.y);
 
         var shadow = "rgba(0,0,0,0.2)";
         var highlight = "rgba(255,255,255,0.2)";
@@ -51,11 +59,13 @@ class Button {
     }
 
     get pressed() {
-        if(mouse.justPressed) {
-            return mouse.x > this.p.x &&
+        if(mouse.justPressed && mouse.x > this.p.x &&
                 mouse.x < this.p.x+this.s.x &&
                 mouse.y > this.p.y &&
-                mouse.y < this.p.y+this.s.y;
+                mouse.y < this.p.y+this.s.y
+        ) {
+            soundEffects.buttonClick.play();
+            return true;
         }
         return false;
     }

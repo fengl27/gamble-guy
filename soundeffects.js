@@ -622,10 +622,15 @@ var otherSounds = {
     kill: "kill.mp3",
     rockDeath: "rock-death.mp3",
 
-    sword: "sword.mp3"
+    sword: "sword.mp3",
+
+    buttonHover: "button-hover.mp3",
+    buttonClick: "button-click.mp3"
 };
 var music = {
-    playing: "song.mp3"
+    playing: "song.mp3",
+    gambling: "gambleSong.mp3",
+    gaster: "gaster-blaster.mp3"
 };
 
 var toCringeAudio = function(sfx) {

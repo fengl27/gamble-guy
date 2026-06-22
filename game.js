@@ -75,12 +75,12 @@ var updateGame = function() {
         }
     }
 
-    if(enemies.length === 0 && !player.exploding) {
+    if(enemies.length === 0 && !player.exploding && !tutorial) {
         updateGame.transitionTimer ++;
     }
 
     //move screen
-    var targetPos = player.exploding? player.pos: updateGame.transitionTimer > 30? new Vect(l2.x*3.5, 0): Vect.mult(player.pos, 0.2);
+    var targetPos = player.exploding && !tutorial? player.pos: updateGame.transitionTimer > 30? new Vect(l2.x*3.5, 0): Vect.mult(player.pos, 0.2);
     var diff = Vect.sub(targetPos, cam.pos);
     cam.pos.add(Vect.mult(diff, 0.15));
     cam.scale += ((player.exploding && player.exploding < 30? h100*5: h100) - cam.scale) / 20;
@@ -308,11 +308,11 @@ gamble.button = new Button(40 * w100 - 1.5 * h100, 80 * h100, 40 * w100, 10 * h1
 var currTutorialMessage = 0;
 var tutorialText = [
     {txt: "Welcome to kai's slop machine game! (Press enter to continue)", time: 0},
-    {txt: "You can move around with WASD (I think )"},
-    {txt: "Here, have a sword, i guess (idk)", thing: () => {player.weapons.push(weapons.sword);}},
-    {txt: "Oh, you don't know how to use the sword?"},
-    {txt: "Press space to select the sword (it will cycle between weapons when you have more later)."},
-    {txt: "Weapons will perform better while selected."},
+    {txt: "You can move around with WASD"},
+    {txt: "Here, have a sword!", thing: () => {player.weapons.push(weapons.sword);}},
+    {txt: "The sword spins...\nand KILLS PEOPLE!"},
+    {txt: "MWAH HAH HAH HAH!!"},
+    {txt: "You'll get more weapons later on"},
     {
         txt: "Try beating this guy up with the sword! (you can continue once you beat him up)",
         criteria: () => {return !enemies.length;},
@@ -325,13 +325,13 @@ var tutorialText = [
     {txt: "Now it's time to go gambling!", thing: () => {
         switchState("gamble");
     }},
-    {txt: "Click the funny nonexistant lever to gamble!"},
+    {txt: "Click the lever to gamble!"},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
     {txt: "If the center one lands on a + sign, the two other enemies will merge together!"},
     {txt: "You can gamble as many times as you want (as long as you have enough money)."},
     {txt: "This will make the rounds harder, but you will get more $$$$$$$$"},
     {txt: "Just make sure to get enough money to pay your rent!"},
-    {txt: "glhf go gambling now", thing: () => {
+    {txt: "Now, go out and gamble your life away! (literally)", thing: () => {
         if(Math.random() < 0.01) {
             currTutorialMessage += 2;
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
@@ -344,15 +344,20 @@ var tutorialText = [
 
 
     {txt: "there's a 1% chance of this text appearing"},
-    {txt: "A Bb F Bb A Bb F Bb A Bb F Bb A Bb F Bb G# A "},
+    {txt: "A Bb F Bb A Bb F Bb A Bb F Bb A Bb F Bb G# A", thing: () => {
+        music.gambling.pause();
+        music.gaster.play();
+    }},
     {txt: "ERROR 403", thing: () => {
-        tutorialText[14].thing();
+        music.gambling.unpause();
+        music.gaster.pause();
+        tutorial = false;
     }},
 
 
 
-    {txt: "why'd you do that?"},
-    {txt: "have another one", criteria: () => {return !enemies.length;}, thing: () => {enemies.push(new Enemy(0, 0, "dummy"));}},
+    {txt: "Dude... \n you died to the guy that can't move"},
+    {txt: "Try again!", criteria: () => {return !enemies.length;}, thing: () => {enemies.push(new Enemy(0, 0, "dummy")); music.playing.unpause()}},
     {txt: "ERROR 213", thing: () => {
         currTutorialMessage = 8;
         tutorialText[currTutorialMessage].time = stateSwitchTimer;

@@ -49,11 +49,15 @@ var switchState = function(target) {
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
             break;
         case "gamble":
+            music.gambling.play();
             gamble.gambleTimer = 0;
             gamble.offsetVels = [h100, -h100, h100];
     }
     if(target !== "playing") {
         music.playing.pause();
+    }
+    else if(target !== "gamble") {
+        music.gambling.pause();
     }
 };
 var mainMenu = {
