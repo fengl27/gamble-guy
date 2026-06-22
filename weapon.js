@@ -56,64 +56,86 @@ const weapons = {
     throwMace:{
         pos: new Vect(),
         vel: new Vect(),
-        swordSize: 10,
+        size: 3,
         thrown: false,
         update: function(thrown) {
             if(!this.thrown&&thrown){
-                this.thrown = true;
+                this.thrown = true; 
                 mousePos = cam.toGlobal(mouse);
-                offset = Vect.sub(player.pos,mousePos);
-                this.vel.set(Vect.mult(offset,0.1));
+                offset = Vect.sub(mousePos,player.pos);
+                this.vel.set(Vect.mult(offset,0.2));
+                this.pos.set(player.pos);
+            }
+            let velMag = this.vel.mag();
+            console.log(sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y));
+            console.log((this.size+player.size)*(this.size+player.size));
+            if(this.thrown&&sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y)<(this.size+player.size)*(this.size+player.size)&&velMag<0.1){
+                this.thrown = false;
+            }
+            
+            if(Math.abs(this.pos.x) > l2.x - this.size) {
+                //horizontal collision
+                this.vel.x *= -1;
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
+                soundEffects.bounce.play();
+            }
+            if(Math.abs(this.pos.y) > l2.y - this.size) {
+                this.vel.y *= -1;
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
+                soundEffects.bounce.play();
             }
             this.pos.add(this.vel)
             this.vel.mult(0.8);
             let cPoss = [
-                this.pos()
+                this.pos
             ];
             for(var j = 0; j < cPoss.length; j ++) {
                 let cPos = cPoss[j];
                 for(var i = 0; i < enemies.length; i ++) {
-                    if(!enemies[i].iframes && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (3 + enemies[i].size)*((3 + enemies[i].size))) {
+                    if((!enemies[i].iframes||velMag<0.1) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size)*(this.size + enemies[i].size)) {
                         //collide (they die)
-                        if((enemies[i].type === Enemy.arrow && !selected) || enemies[i].type === Enemy.dagger) {
+                        if((enemies[i].type === Enemy.arrow && !this.thrown) || enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
-                        enemies[i].damage(1);
-                        console.log("damaged " + enemies[i].asset);
+                        if(velMag>0.1){
+                            enemies[i].damage(1);
+                            console.log("damaged " + enemies[i].asset);
+
+                        }else{
+                            console.log("hi");
+                            var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
+                            let wantedMag = (this.size+enemies[i].size) - dst;
+                            enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
+                        }
                         soundEffects.sword.play();
                     }
                 }
             }
+
         },
         display: function() {
             //basically copied from enemy.js
-            var pos = cam.toScreen(player.pos);
+            var pos = cam.toScreen(this.pos);
             ctx.save();
             ctx.translate(pos.x, pos.y);
-            ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
 
             var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
             let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.swordSize / 2 * cam.scale, -cam.scale * 3 - this.swordSize * cam.scale,
-                    this.swordSize * cam.scale, this.swordSize * cam.scale
+                    -this.size / 2 * cam.scale, -this.size / 2 * cam.scale,
+                    this.size * cam.scale, this.size * cam.scale
             ];
-            if(this.selected) {
+            if(this.thrown) {
                 ctx.drawImage(...args);
             }
-            else {
-                drawGrayedImage(...args);
-            }
-
+            
             ctx.restore();
             /*
             ctx.fillStyle = "red";
-            if(this.swordTimer < 15) {
-                ctx.beginPath();
-                ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, this.size * cam.scale, 0, Math.PI * 2);
+            ctx.fill();
             */
         }
     },

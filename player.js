@@ -1,5 +1,9 @@
 var playerStuff = {
+<<<<<<< HEAD
     weapons: [weapons.bow]
+=======
+    weapons: [weapons.sword,weapons.throwMace]
+>>>>>>> f22d6bbcd42693234c6fd529d18aa9fbbf0d32c7
 }
 class Player {
     static spriteSize = 18
