@@ -7,13 +7,27 @@ var possibleUpgrades = [
         description: "stuff",
         effect: function() {
             for(var i = 0; i < 3; i ++) {
-                inventory.push(["normal", 1]);
+                weapons.sword.swordSize+=2;
             }
         },
         amount: 1,
-        cost: 2,
         criteria: () => true, //normally omit when no criteria
-        branchThing: "self"//infinity annd beeeoyingd
+        branchThing: [
+            {
+                name: 'something',
+                description: "stuff",
+                effect: function() {
+                    for(var i = 0; i < 3; i ++) {
+                        weapons.sword.swordSize+=2;
+                    }
+                },
+                amount: 1,
+                criteria: () => true, //normally omit when no criteria
+                branchThing: [
+                    
+                ]//infinity annd beeeoyingd
+            },
+        ]//infinity annd beeeoyingd
     },
     /*
     {
