@@ -85,6 +85,8 @@ var pauseScreen = function() {
     ctx.textBaseline = "hanging";
     ctx.fillStyle = "white";
     ctx.fillText("PAUSED!!!!!!!!!!!!!!!", canvas.width/2, canvas.height / 4);
+
+    optionsMenu.runOptionsButton();
 };
 
 var drawGamble = function(things, offset, thingSpacing, pos, size) {
@@ -250,7 +252,7 @@ gamble.button = new Button(40 * w100 - 1.5 * h100, 80 * h100, 40 * w100, 10 * h1
 
 var currTutorialMessage = 0;
 var tutorialText = [
-    {txt: "Welcome to <insert gname here>! (Press enter to continue)", time: 0},
+    {txt: "Welcome to kai's slop machine game! (Press enter to continue)", time: 0},
     {txt: "You can move around with WASD (I think )"},
     {txt: "Here, have a sword, i guess (idk)", thing: () => {player.weapons.push(weapons.sword);}},
     {txt: "Oh, you don't know how to use the sword?"},
@@ -287,7 +289,7 @@ var tutorialText = [
 
 
     {txt: "there's a 1% chance of this text appearing"},
-    {txt: "good job"},
+    {txt: "A Bb F Bb A Bb F Bb A Bb F Bb A Bb F Bb G# A "},
     {txt: "ERROR 403", thing: () => {
         tutorialText[14].thing();
     }},
@@ -355,6 +357,41 @@ var drawTutorial = function() {
                     //do nothing
                 }
             }
+        }
+    }
+};
+
+
+var optionsMenu = {
+    isInOptions: false,
+    run: function() {
+        ctx.fillStyle = "rgba(95, 95, 95, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 20 * h100 + "px pixelFont";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "hanging";
+        ctx.fillStyle = "white";
+        ctx.fillText("OPTIONS!!!", canvas.width/2, canvas.height / 4);
+
+        this.leaveOptionsButton.go();
+        if(this.leaveOptionsButton.pressed) {
+            this.isInOptions = false;
+        }
+    },
+    optionsButton: new Button(
+        canvas.width/2-h100*20, h100 * 63,
+        h100 * 40, h100 * 10,
+        "Options"
+    ),
+    leaveOptionsButton: new Button(
+        h100 * 3, h100 * 3,
+        h100 * 30, h100 * 10,
+        "Exi(s)t", "rgb(165, 165, 1)"
+    ),
+    runOptionsButton: function() {
+        this.optionsButton.go();
+        if(this.optionsButton.pressed) {
+            this.isInOptions = true;
         }
     }
 };

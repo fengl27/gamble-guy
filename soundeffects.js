@@ -696,10 +696,11 @@ for(let i in music) {
         }
     };
     music[i].audio.volume = settings.musicVolMult;
-    music[i].muffled.volume = settings.musicVolMult * 0.5;
     music[i].audio.loop = true;
+    music[i].muffled.volume = settings.musicVolMult * 0.3;
     music[i].muffled.loop = true;
     music[i].muffled.playbackRate = 0.5;
+    
     const track = audioCtx.createMediaElementSource(music[i].muffled);
     const filter = audioCtx.createBiquadFilter();
     filter.type = "lowpass";

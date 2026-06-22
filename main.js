@@ -68,6 +68,7 @@ var mainMenu = {
                 this.buttons[i].thing();
             }
         }
+        optionsMenu.runOptionsButton();
     }
 };
 var loseButtons = {
@@ -108,12 +109,20 @@ var frame = function() {
     //pause screen stuff
     if(justPressed["p"]) {
         paused = !paused;
-        pauseSettingsEl.style.visibility = paused? "visible": "hidden";
         if(gameState === "playing") {
             music.playing.switchMuffled();
         }
+        if(!paused) {
+            optionsMenu.isInOptions = false;
+        }
     }
-    if(paused) {
+    if((pauseSettingsEl.style.visibility === "visible") !== optionsMenu.isInOptions) {
+        pauseSettingsEl.style.visibility = optionsMenu.isInOptions? "visible": "hidden";
+    }
+    if(optionsMenu.isInOptions) {
+        optionsMenu.run();
+    }
+    else if(paused) {
         pauseScreen();
     }
     else {

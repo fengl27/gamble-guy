@@ -40,6 +40,16 @@ var tutorial = true;//aee
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
 
+const pauseSettingSoundTest = new Audio("assets/sounds/sound-test.mp3");
+pauseSettingsEl.querySelector("#musicVolSlider").addEventListener("change", (e) => {
+    pauseSettingSoundTest.volume = settings.musicVolMult;
+    pauseSettingSoundTest.currentTime = 0;
+    pauseSettingSoundTest.play();
+});
+pauseSettingsEl.querySelector("#sfxVolSlider").addEventListener("change", (e) => {
+    soundEffects.kill.play();
+});
+
 //assets lol
 var assets = {
     player: "player.png",
