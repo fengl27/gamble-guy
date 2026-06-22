@@ -64,7 +64,7 @@ const weapons = {
         update: function() {
             this.dir -= this.charge/18;
             let thrown = mouse.justReleased && mouse.button === 2;
-            if(mouse.pressed&&!this.thrown&&!this.throwing){
+            if(mouse.pressed&&!this.thrown&&!this.throwing && mouse.button === 2){
                 this.charge=Math.min(6,this.charge+(this.charge<3?0.1:((6-this.charge)/10+0.01)))
             }
             if(!this.thrown&&thrown){
@@ -79,7 +79,7 @@ const weapons = {
             }
             let velMag = this.vel.mag();
             let sqrDistToPlayer = sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y);
-            if(this.thrown&&sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y)<(this.size+player.size)*(this.size+player.size)&&velMag<0.1){
+            if(this.thrown&&sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y)<(this.size+player.size)*(this.size+player.size)&&velMag<0.7){
                 this.thrown = false;
             }
             
@@ -133,12 +133,12 @@ const weapons = {
             for(var j = 0; j < cPoss.length; j ++) {
                 let cPos = cPoss[j];
                 for(var i = 0; i < enemies.length; i ++) {
-                    if((!enemies[i].iframes||velMag<0.1) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size)*(this.size + enemies[i].size)) {
+                    if((!enemies[i].iframes||velMag<0.5) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size)*(this.size + enemies[i].size)) {
                         //collide (they die)
                         if((enemies[i].type === Enemy.arrow && !this.thrown) || enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
-                        if(velMag>0.1){
+                        if(velMag>0.5){
                             enemies[i].damage(1);
 
                         }else{
@@ -186,8 +186,11 @@ const weapons = {
                     ctx.save();
                     ctx.translate(playerPos.x, playerPos.y);
                     ctx.rotate(Math.atan2(toMouse.y,toMouse.x))
+                    ctx.fillStyle = "rgba(0, 255, 125, 0.15)";//real transparent red (not clickbait)
+                    ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * ((this.charge-1)*7), 3 * cam.scale);
                     ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
-                    ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * ((this.charge-1)*7+Math.min(1,this.charge)*20), 3 * cam.scale);
+                    ctx.fillRect(-cam.scale * 1.5+ cam.scale* (this.charge-1)*7, -cam.scale * 1.5, cam.scale * (Math.min(1,this.charge)*20), 3 * cam.scale);
+
                     ctx.restore();
                 }
             }
