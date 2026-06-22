@@ -1,5 +1,5 @@
 var playerStuff = {
-    weapons: [weapons.sword]
+    weapons: [weapons.sword,weapons.throwMace]
 }
 class Player {
     static spriteSize = 18
