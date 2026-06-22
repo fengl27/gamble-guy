@@ -58,9 +58,10 @@ const weapons = {
         vel: new Vect(),
         size: 3,
         thrown: false,
-        update: function(thrown) {
+        update: function() {
+            let thrown = mouse.justPressed && mouse.button === 2;
             if(!this.thrown&&thrown){
-                this.thrown = true; 
+                this.thrown = true;
                 mousePos = cam.toGlobal(mouse);
                 offset = Vect.sub(mousePos,player.pos);
                 this.vel.set(Vect.mult(offset,0.2));
@@ -103,7 +104,6 @@ const weapons = {
                         }
                         if(velMag>0.1){
                             enemies[i].damage(1);
-                            console.log("damaged " + enemies[i].asset);
 
                         }else{
                             var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
@@ -142,6 +142,7 @@ const weapons = {
             */
         }
     },
+    /*
     mace: {
         pos: new Vect(),
         vel: new Vect(),
@@ -254,17 +255,9 @@ const weapons = {
             let pp = cam.toScreen(player.pos);
             ctx.lineTo(pp.x, pp.y);
             ctx.stroke();
-
-            /*
-            ctx.fillStyle = "red";
-            if(this.swordTimer < 15) {
-                ctx.beginPath();
-                ctx.arc(pos.x + Math.cos(this.swordDir) * this.swordSize * cam.scale, pos.y + Math.sin(this.swordDir) * this.swordSize * cam.scale, cam.scale * 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            */
         }
     },
+    */
     arrow: function(p, v) {
         this.size = 3;
         this.deathTimer = 0;
