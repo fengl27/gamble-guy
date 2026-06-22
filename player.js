@@ -21,32 +21,47 @@ class Player {
         this.size = 2.25;//kinda like a radius
         this.stun = 0;
         this.speedMult = 1;
+        this.exploding = 0;
+        this.explodeThing = null;
     }
 
     display() {
         var pos = cam.toScreen(this.pos);
+        
+        if(this.exploding < 30) {
+            var walkCycle = Math.floor(this.walkAnim / Player.walkAnimSpeed) % 4;
 
-        var walkCycle = Math.floor(this.walkAnim / Player.walkAnimSpeed) % 4;
-
-        var tilesheetPos = getTilesheetPos(walkCycle, this.dir);
-        ctx.drawImage(
-            assets.player,
-            tilesheetPos.x * Player.spriteSize,
-            tilesheetPos.y * Player.spriteSize,
-            Player.spriteSize,
-            Player.spriteSize,
-            pos.x - cam.scale * 4,
-            pos.y - cam.scale * 4,
-            cam.scale * 8,
-            cam.scale * 8
-        );
-
-        for(var i = 0; i < this.weapons.length; i ++) {
-            this.weapons[i].display();
+            var tilesheetPos = getTilesheetPos(walkCycle, this.dir);
+            Enemy.drawImage(
+                assets.player,
+                tilesheetPos.x * Player.spriteSize,
+                tilesheetPos.y * Player.spriteSize,
+                Player.spriteSize,
+                Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8, this.exploding? NaN: 0
+            );
         }
 
-        for(var i = 0; i < this.projectiles.length; i ++) {
-            this.projectiles[i].display();
+        if(!this.exploding) {
+            for(var i = 0; i < this.weapons.length; i ++) {
+                this.weapons[i].display();
+            }
+
+            for(var i = 0; i < this.projectiles.length; i ++) {
+                this.projectiles[i].display();
+            }
+        }
+        else if(this.explodeThing && this.exploding < 130) {
+            ctx.save();
+            ctx.globalAlpha = 1-easings.easeInOutQuad((this.exploding % 10) / 10);
+            ctx.translate(pos.x, pos.y);
+            ctx.rotate(this.explodeThing.rot);
+            ctx.scale(cam.scale, cam.scale);
+            ctx.drawImage(this.explodeThing.sprite, -80, -80, 160, 160);
+            ctx.restore();
         }
     }
 
@@ -55,6 +70,22 @@ class Player {
             !!keys[this.controls.Right] - !!keys[this.controls.Left],
             !!keys[this.controls.Down ] - !!keys[this.controls.Up  ]
         );
+        if(this.exploding) {
+            this.exploding ++;
+            if(this.exploding >= 30 && this.exploding % 10 === 0 && this.exploding <= 120) {
+                soundEffects.finalKill.play();
+                this.explodeThing = {
+                    sprite: assets["explode" + Math.floor(Math.random()*3+1)],
+                    rot: Math.random() * Math.PI * 2
+                };
+            }
+            
+            if(this.exploding > 185) {
+                switchState("gamble");
+            }
+            
+            input.mult(0);
+        }
         if(input.x || input.y) {
             this.dir.set(input);
             //you're moving so increase walkanim
@@ -110,8 +141,8 @@ class Player {
         }
     }
     damage() {
+        music.playing.pause();
         soundEffects.finalKill.play();
-        screenshake.shake(15);
         for(var i = 0; i < enemies.length; i ++) {
             enemies[i].dead = true;
         }
@@ -121,7 +152,7 @@ class Player {
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
         else {
-            switchState("gamble");
+            this.exploding = 1;
         }
     }
 };

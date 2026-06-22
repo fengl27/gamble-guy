@@ -58,17 +58,37 @@ var switchState = function(target) {
 };
 var mainMenu = {
     buttons: [//button constructor (x,y,w,h,txt)
-        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => switchState(tutorial? "playing": "gamble")}
+        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => mainMenu.transitionTimer++}
     ],
+    transitionTimer: 0,
     go: function() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for(var i = 0; i < this.buttons.length; i ++) {
-            this.buttons[i].b.go();
-            if(this.buttons[i].b.pressed) {
-                this.buttons[i].thing();
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(this.transitionTimer < 15) {
+            ctx.save();
+            if(this.transitionTimer) {
+                ctx.beginPath();
+                ctx.arc(canvas.width/2, canvas.height/2, canvas.width * 0.6 * (1-easings.easeInQuart(this.transitionTimer/15)), 0, Math.PI * 2);
+                ctx.clip();
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for(var i = 0; i < this.buttons.length; i ++) {
+                this.buttons[i].b.go();
+                if(this.buttons[i].b.pressed) {
+                    this.buttons[i].thing();
+                }
+            }
+            optionsMenu.runOptionsButton();
+            ctx.restore();
+        }
+
+        if(this.transitionTimer) {
+            this.transitionTimer ++;
+            if(this.transitionTimer >= 30) {
+                switchState(tutorial? "playing": "gamble");
             }
         }
-        optionsMenu.runOptionsButton();
+
     }
 };
 var loseButtons = {

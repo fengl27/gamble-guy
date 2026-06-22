@@ -267,7 +267,7 @@ const weapons = {
         sizeMult: 10,
         chargeTimer: 0,
         update: function() {    
-            this.dirVel += ((this.chargeTimer? 0: -0.10) - this.dirVel) / 25;
+            this.dirVel += ((this.chargeTimer? 0: -0.06) - this.dirVel) / 5;
             this.dir += this.dirVel;
 
             this.pullbackAmt += this.pullbackVel;
@@ -280,12 +280,13 @@ const weapons = {
             }
             else if(this.chargeTimer) {
                 if(mouse.pressed && mouse.button === 0) {
+                    player.speedMult = 0.5;
                     this.chargeTimer = Math.min(this.chargeTimer + 1, 40);
                     this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/40) * 4;
                 }
                 else {
                     //water bucket RELEASE
-                    if(this.chargeTimer > 20) {
+                    if(this.chargeTimer > 10) {
                         soundEffects.arrowLaunch.play();
                         this.pullbackVel = 0.6;
                         player.projectiles.push(new weapons.arrow(

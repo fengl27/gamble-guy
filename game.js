@@ -1,20 +1,28 @@
 var displayGame = function() {
-    //grass bg
+    //brick/wood bg
     var tl = cam.toScreen(Vect.mult(l2, -1));
     var br = cam.toScreen(l2);
 
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(tl.x, tl.y, br.x-tl.x, br.y-tl.y);
+    ctx.clip();
+
     let grassSize = cam.scale * 20;
-    for(var x = tl.x; x < canvas.width; x += grassSize) {
-        for(var y = tl.y; y < canvas.height; y += grassSize) {
+    for(var x = tl.x; x < br.x; x += grassSize) {
+        for(var y = tl.y; y < br.y; y += grassSize) {
             ctx.drawImage(assets[tutorial? "wood": "bricks"], x, y, grassSize, grassSize);
         }
     }
+
     //red danger stuff
     for(var i = 0; i < enemies.length; i ++) {
         if(enemies[i].type.drawDanger) {
             enemies[i].type.drawDanger.call(enemies[i]);
         }
     }
+
+    ctx.restore();
 
     //walls
 
@@ -26,7 +34,7 @@ var displayGame = function() {
     ctx.fillRect(br.x, 0, canvas.width, canvas.height);
 
     let margin = 4 * cam.scale;
-    ctx.fillStyle = "rgb(20, 20, 20)";
+    ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.fillRect(0, 0, tl.x - margin, canvas.height);
     ctx.fillRect(0, 0, canvas.width, tl.y - margin);
     ctx.fillRect(br.x + margin, 0, canvas.width, canvas.height);
@@ -42,8 +50,14 @@ var displayGame = function() {
     //more walls (bottom wall)
     ctx.fillStyle = "rgb(66, 66, 66)";
     ctx.fillRect(tl.x, br.y, settings.levelSize.x * cam.scale, canvas.height);
-    ctx.fillStyle = "rgb(20, 20, 20)";
+    ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.fillRect(0, br.y + margin, canvas.width, canvas.height);
+
+    //kablooey
+    if(player.exploding > 150) {
+        ctx.fillStyle = `rgba(0, 0, 0, ${(player.exploding - 150) / 25})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 };
 var updateGame = function() {
     /*
@@ -60,16 +74,23 @@ var updateGame = function() {
             i --;
         }
     }
-    if(enemies.length===0 && roundEnemies.length!==0 && !tutorial){
-        switchState("gamble");
-        roundEnemies = [];
+
+    if(enemies.length === 0 && !player.exploding) {
+        updateGame.transitionTimer ++;
     }
 
     //move screen
-    var diff = Vect.sub(Vect.mult(player.pos, 0.2), cam.pos);
-    cam.pos.add(Vect.mult(diff, 0.2));
-    cam.scale += (h100 - cam.scale) / 20;
+    var targetPos = player.exploding? player.pos: updateGame.transitionTimer > 30? new Vect(l2.x*3.5, 0): Vect.mult(player.pos, 0.2);
+    var diff = Vect.sub(targetPos, cam.pos);
+    cam.pos.add(Vect.mult(diff, 0.15));
+    cam.scale += ((player.exploding && player.exploding < 30? h100*5: h100) - cam.scale) / 20;
+    
+    if(updateGame.transitionTimer > 70) {
+        updateGame.transitionTimer = 0;
+        switchState("gamble");
+    }
 };
+updateGame.transitionTimer = 0;
 var game = function() {
 
     updateGame();
@@ -162,7 +183,9 @@ var gamble = function() {
         enemyTypes,
     ];
     ctx.fillStyle = "rgb(105, 11, 11)";
-    ctx.fillRect(w100 * 25, 0, w100 * 70 - h100 * 3, h100 * 100);
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2 * h100;
+    rect(ctx, w100 * 25, -canvas.height/2, w100 * 70 - h100 * 3, canvas.height*2, true, true);
     ctx.fillStyle = "rgb(255, 255, 255)";
     ctx.font = 15 * h100 + "px pixelFont";
     ctx.textAlign = "center";
@@ -192,6 +215,16 @@ var gamble = function() {
         ));
     }
 
+    
+    //draw arm
+    var frame = gamble.gambleTimer && gamble.gambleTimer < 255? gamble.gambleTimer > 250? 5: gamble.gambleTimer < 8? 2: gamble.gambleTimer < 16? 3: 4: stateSwitchTimer % 30 < 15? 1: 0;
+    ctx.drawImage(assets.arm, frame * 18 + 0.04, 0, 18 - 0.08, 40,
+        w100 * 25 - h100 * 36.5,
+        canvas.height / 4,
+        h100 * 36,
+        h100 * 80
+    );
+
     if(gamble.gambleTimer === 250) {
         console.log("letS go GAMbliNG")
         let cool = false;
@@ -219,12 +252,16 @@ var gamble = function() {
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
-                switchState("playing");
+                gamble.transitionTimer ++;
             }
         }
     }
 
-    if(mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250)) {
+    if(mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250) && IsPointInAABB(
+            mouse,
+            {x: w100 * 25 - h100 * 36.5, y: canvas.height / 4},
+            {x: h100 * 36, y: h100 * 40}
+    )) {
         gamble.gambleTimer = 1;
         soundEffects.gamble.play();
         //gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];
@@ -241,7 +278,25 @@ var gamble = function() {
             soundEffects.gambleSpin.play(2);
         }
     }
+
+
+    //funny transition
+    if(stateSwitchTimer < 15) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height * (1-easings.easeOutQuad(stateSwitchTimer / 15)));
+    }
+
+    if(gamble.transitionTimer) {
+        gamble.transitionTimer ++;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width * easings.easeInQuart(Math.min(gamble.transitionTimer/15,1)), canvas.height);
+        if(gamble.transitionTimer > 30) {
+            gamble.transitionTimer = 0;
+            switchState("playing");
+        }
+    }
 };
+gamble.transitionTimer = 0;
 gamble.gambleTimer = 0;
 gamble.spacing = h100 * 70;
 gamble.offsets = [h100 * 20, h100 * 20, h100 * 20];

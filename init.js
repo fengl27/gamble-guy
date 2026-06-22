@@ -86,7 +86,13 @@ var assets = {
     
     death: "death.png",
 
-    plus: "plus.png"
+    plus: "plus.png",
+
+    explode1: "player-explode-1.png",
+    explode2: "player-explode-2.png",
+    explode3: "player-explode-3.png",
+
+    arm: "slot-machine-arm.png"
 };
 for(var i in assets) {
     let bob = new Image();
