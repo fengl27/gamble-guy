@@ -136,6 +136,9 @@ var frame = function() {
         if(gameState === "playing") {
             music.playing.switchMuffled();
         }
+        else if(gameState === "gamble") {
+            music.gambling.switchMuffled();
+        }
         if(!paused) {
             optionsMenu.isInOptions = false;
         }
