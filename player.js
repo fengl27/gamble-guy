@@ -1,21 +1,31 @@
 var playerStuff = {
-    weapons: [weapons.sword]
+    weapons: [weapons.sword],
+    controls: {
+        Up: "w",
+        Down: "s",
+        Left: "a",
+        Right: "d",
+        Bow: "mouseLeft",
+        Mace: "mouseRight"
+    },
+    changeControl: function(control, newVal) {
+        this.controls[control] = newVal;
+    }
 }
+var bob = pauseSettingsEl.querySelector("#pauseSettings-keybinds");
+for(let i in playerStuff.controls) {
+    let span = document.createElement("span");
+    span.innerHTML = i + `:<br><input type = 'text' onchange = 'playerStuff.changeControl(this.name,this.value)' name = '${i}' value = '${playerStuff.controls[i]}'>`;
+    bob.appendChild(span);
+}
+console.log(bob);
 class Player {
     static spriteSize = 18
     static walkAnimSpeed = 8 //5 frames per walk cycle
     constructor() {
         this.pos = new Vect(0, 0);
         this.vel = new Vect(0, 0);
-        this.controls = {
-            Up: "w",
-            Down: "s",
-            Left: "a",
-            Right: "d",
-            Sword: " ",
-            Bow: "",
-            Mace: ""
-        };
+        this.controls = playerStuff.controls;
         this.projectiles = [];
         this.weapons = tutorial? []: playerStuff.weapons;
         this.walkAnim = 0;
@@ -70,8 +80,8 @@ class Player {
 
     update() {
         var input = new Vect(
-            !!keys[this.controls.Right] - !!keys[this.controls.Left],
-            !!keys[this.controls.Down ] - !!keys[this.controls.Up  ]
+            getInput(this.controls.Right) - getInput(this.controls.Left),
+            getInput(this.controls.Down ) - getInput(this.controls.Up  )
         );
         if(this.exploding) {
             this.exploding ++;

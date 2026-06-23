@@ -518,7 +518,7 @@ var optionsMenu = {
         "Exi(s)t", "rgb(165, 165, 1)"
     ),
     toKeybindsButton: new Button(
-        canvas.width/2-h100*20, h100 * 70,
+        canvas.width/2-h100*20, h100 * 85,
         h100 * 40, h100 * 10,
         "Keybinds"
     ),

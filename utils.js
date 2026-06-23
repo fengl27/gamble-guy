@@ -227,3 +227,17 @@ keys.handleKeyUp = function(e) {
 };
 document.body.addEventListener("keydown", keys.handleKeyDown);
 document.body.addEventListener("keyup", keys.handleKeyUp);
+
+
+function getInput(inputName, isJustPressed) {
+    if(isJustPressed) {
+        return inputName === "mouseLeft"? mouse.justPressed&&mouse.button===0:
+            input.name === "mouseRight"? mouse.justPressed&&mouse.button===2:
+            !!justPressed[inputName];
+    }
+    else {
+        return inputName === "mouseLeft"? mouse.pressed&&mouse.button===0:
+            inputName === "mouseRight"? mouse.pressed&&mouse.button===2:
+            !!keys[inputName];
+    }
+}

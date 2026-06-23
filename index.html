@@ -44,7 +44,7 @@
             #pauseSettings {
                 position: fixed;
                 width: 80%;
-                top: 50vh;
+                top: 40vh;
                 bottom: 3em;
                 left: 3em;
                 right: 3em;
@@ -59,6 +59,13 @@
             }
             .pauseSettings-screen {
                 visibility: hidden;
+                position: absolute;
+                width: 100%;
+                height: 100%;
+            }
+            #pauseSettings-keybinds {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
             }
             input[type='range'] {
                 -webkit-appearance: none;
@@ -111,6 +118,18 @@
                 background-color: rgb(96, 96, 96);
                 transform: translate(-50%, -50%) scale(0.8, 0.8);
             }
+
+            input[type='text'] {
+                font-family: pixelFontSmall;
+                font-size: 1.5rem;
+                margin-right: 1em;
+                transform: translate(0, -0.7em);
+
+                outline: none;
+
+                border: 0.2rem solid black;
+                border-radius: 0;
+            }
         </style>
     </head>
     <body>
@@ -126,7 +145,6 @@
                 <label id = "sfxVolLabel">100</label>%
             </div>
             <div id = "pauseSettings-keybinds" class = "pauseSettings-screen">
-                
             </div>
         </div>
     </body>

@@ -8,11 +8,10 @@ const weapons = {
             dirVel:0.15
         },
         upgrades:[],
-        update: function() {    
-            //this.dirVel += (0.15 - this.dirVel) / 10;
-            if((player.controls.Bow===""?mouse.button===2:keys[player.controls.Bow]&&!player.weapons.includes(weapons.bow))||(player.controls.Mace===""?mouse.button===2:keys[player.controls.Mace]&&!player.weapons.includes(weapons.throwMace))){
-                this.dir += this.stats.dirVel;
-            }
+        update: function() {
+            var movement = (!getInput(player.controls.Bow) && !getInput(player.controls.Mace))? this.stats.dirVel: 0;
+            this.dirVel += (movement - this.dirVel) / 10;
+            this.dir += this.dirVel;
 
             let cPoss = [
                 new Vect(player.pos.x + Math.cos(this.dir) * this.stats.size, player.pos.y + Math.sin(this.dir) * this.stats.size),
@@ -78,7 +77,7 @@ const weapons = {
         upgrades:[],
         update: function() {
             this.dir -= this.charge/18;
-            let thrown = mouse.justReleased && mouse.button === 2;
+            let thrown = getInput(player.controls.Mace);
             if(mouse.pressed&&!this.thrown&&!this.throwing && mouse.button === 2){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
                 this.charge=Math.min(7,this.charge+(this.charge<3?0.1:((7-this.charge)/60+0.01)))
@@ -382,7 +381,7 @@ const weapons = {
             this.pullbackVel *= 0.8;
             this.pullbackVel -= this.pullbackAmt * 0.3;
 
-            if(mouse.justPressed && mouse.button === 0 && !this.chargeTimer) {//0 = lb, 1 = wheel, 2 = rb
+            if(getInput(player.controls.Bow) && !this.chargeTimer) {//0 = lb, 1 = wheel, 2 = rb
                 this.chargeTimer ++;
                 soundEffects.arrowLoad.play();
             }

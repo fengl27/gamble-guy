@@ -141,6 +141,7 @@ var frame = function() {
         }
         if(!paused) {
             optionsMenu.isInOptions = false;
+            optionsMenu.run();
         }
     }
     if(optionsMenu.isInOptions) {
