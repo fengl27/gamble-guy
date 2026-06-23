@@ -370,7 +370,7 @@ const weapons = {
         chargeMult:1,
         stats:{
             sizeMult: 10,
-            dirAccel:0.06,
+            dirAccel:0.08,
             playerSlow:0.5,
         },
         upgrades:[],

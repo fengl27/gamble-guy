@@ -43,13 +43,14 @@ var paused = false;
 var tutorial = false;//aee
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
-
+/*
 const pauseSettingSoundTest = new Audio("assets/sounds/sound-test.mp3");
 pauseSettingsEl.querySelector("#musicVolSlider").addEventListener("change", (e) => {
     pauseSettingSoundTest.volume = settings.musicVolMult;
     pauseSettingSoundTest.currentTime = 0;
     pauseSettingSoundTest.play();
 });
+*/
 pauseSettingsEl.querySelector("#sfxVolSlider").addEventListener("change", (e) => {
     soundEffects.kill.play();
 });
@@ -119,6 +120,10 @@ async function loadFont() {
             document.fonts.add(loadedFont);
         }
         console.log("yay font worked");
+
+        const startButton = document.getElementById("start-button");
+        startButton.style.visibility = "visible";
+        startButton.style.filter = "opacity(100%)";
     }
     catch(error) {
         console.error("uhhhh the fon't:" + error);

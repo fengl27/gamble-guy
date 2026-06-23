@@ -679,39 +679,61 @@ for(let i in music) {
         play: function() {
             this.audio.currentTime = 0;
             this.audio.play();
+            this.aGain.gain.setValueAtTime(0, audioCtx.currentTime);
+            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1);
         },
         pause: function() {
-            this.audio.pause();
+            window.setTimeout((audio) => {audio.pause();}, 1000, this.audio);
+            this.aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
         },
         unpause: function() {
+            this.audio.currentTime --;
             this.audio.play();//don't reset
+            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1);
         },
         switchMuffled: function() {
             if(this.isMuffled) {
                 this.audio.currentTime = this.muffled.currentTime;
                 this.muffled.pause();
+                this.aGain.gain.setValueAtTime(1, audioCtx.currentTime);
                 this.audio.play();
             } 
             else {
                 this.muffled.currentTime = this.audio.currentTime;
                 this.audio.pause();
+                this.mGain.gain.setValueAtTime(1, audioCtx.currentTime);
                 this.muffled.play();
             }
             this.isMuffled = !this.isMuffled;
         }
     };
+
+
     music[i].audio.volume = settings.musicVolMult;
     music[i].audio.loop = true;
     music[i].muffled.volume = settings.musicVolMult * 0.3;
     music[i].muffled.loop = true;
     music[i].muffled.playbackRate = 0.5;
     
-    const track = audioCtx.createMediaElementSource(music[i].muffled);
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 600;//200-600
-    track.connect(filter);
-    filter.connect(audioCtx.destination);
+    const aTrack = audioCtx.createMediaElementSource(music[i].audio);
+
+    const mTrack = audioCtx.createMediaElementSource(music[i].muffled);
+    const mFilter = audioCtx.createBiquadFilter();
+
+    const aGain = audioCtx.createGain();
+    const mGain = audioCtx.createGain();
+
+    mFilter.type = "lowpass";
+    mFilter.frequency.value = 600;//200-600
+    mTrack.connect(mFilter);
+    aTrack.connect(aGain);
+    mTrack.connect(mGain);
+    mFilter.connect(audioCtx.destination);
+    aGain.connect(audioCtx.destination);
+    mGain.connect(audioCtx.destination);
+
+    music[i].aGain = aGain;
+    music[i].mGain = mGain;
 }
 
 pauseSettingsEl.querySelector("#musicVolSlider").addEventListener("input", (e) => {
