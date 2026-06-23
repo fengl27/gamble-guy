@@ -630,7 +630,9 @@ var otherSounds = {
     coinBounce: "coin-bounce.mp3",
     coinPickup: "coin-pickup.mp3",
 
-    buy: "buy.mp3"
+    buy: "buy.mp3",
+
+    bubble: "bubble.mp3",//for potion
 };
 var music = {
     playing: "song.mp3",

@@ -12,17 +12,19 @@ var setupLevel = function() {
     }
     roundEnemies = [];
 };
-var setupUpgrade = function(depressing) {
+var setupUpgrade = function(depressing, isReroll) {
+    prevUpgradeChoices = upgradeChoices.slice();
     upgradeChoices = [];
     //Choose three different upgrades from currPossibleUpgrades as the upgrades.
     var tempThing = currPossibleUpgrades.slice();//make tempThing so that we don't actually delete stuff fromcurrpossibleupgrades because you only do that hwen they actually buy it
     for(var i = 0; i < 3; i ++) {
-        while(true) {
+        var lim = 50;
+        while(--lim >= 0) {
             if(tempThing.length <= 0) {
                 break;
             }
-            var id = depressing? 0: Math.floor(Math.random() * tempThing.length);
-            if(!tempThing[id].criteria || tempThing[id].criteria()) {
+            var id = depressing? 0: limit < tempThing.length? limit: Math.floor(Math.random() * tempThing.length);
+            if((!tempThing[id].criteria || tempThing[id].criteria()) && (!isReroll || !prevUpgradeChoices.includes(tempThing[id]))) {
                 upgradeChoices.push(tempThing[id]);
                 tempThing.splice(id, 1);
                 break;

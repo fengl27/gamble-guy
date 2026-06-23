@@ -156,6 +156,47 @@ var upgradeScreen = function() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(assets.shopBackground, 0, 0, canvas.width, canvas.height);
 
+    if(!tutorial) {
+        if(upgradeScreen.potionAnim < 39 || upgradeScreen.canReroll) {
+            upgradeScreen.potionAnim ++;
+        }
+        var potionPos = [
+            new Vect(h100*100, h100 * 45), 
+            new Vect(h100 * 20, h100 * 20)
+        ];
+        //shadow??
+        ctx.fillStyle = "rgba(48, 48, 48, 0.1)";
+        ctx.fillRect(potionPos[0].x + potionPos[1].x * 0.2, potionPos[0].y + potionPos[1].y, potionPos[1].x * 0.6, h100 * 2);
+
+        var frame = Math.floor(upgradeScreen.potionAnim / 5) % 8;
+        var hovered = upgradeScreen.canReroll && IsPointInAABB(mouse, potionPos[0], potionPos[1]);
+        if(hovered) {
+
+            ctx.fillStyle = "white";
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = h100;
+            ctx.font = 5*h100 + "px pixelFont";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "hanging";
+            ctx.strokeText("Reroll", potionPos[0].x + potionPos[1].x/2, potionPos[0].y + potionPos[1].y*1.05);
+            ctx.fillText  ("Reroll", potionPos[0].x + potionPos[1].x/2, potionPos[0].y + potionPos[1].y*1.05);
+            ctx.filter = "brightness(120%)";
+        }
+        ctx.drawImage(
+            assets[upgradeScreen.canReroll? "potion": "potionDrain"],
+            Player.spriteSize * frame + 0.05, 0, Player.spriteSize - 0.1, Player.spriteSize,
+            potionPos[0].x,potionPos[0].y,potionPos[1].x,potionPos[1].y
+        );
+        ctx.filter = "none";
+        if(mouse.justReleased && hovered) {
+            soundEffects.bubble.play();
+            //reroll
+            upgradeScreen.potionAnim = 0;
+            upgradeScreen.canReroll = false;
+            setupUpgrade(false, true);
+        }
+    }
+
 
 
     //draw upgardesed
@@ -278,6 +319,7 @@ var upgradeScreen = function() {
     
     //money
     ctx.strokeStyle = "black";
+    ctx.lineWidth = h100;
     ctx.fillStyle = playerStuff.roundsLeft === 0 && stateSwitchTimer % 20 < 10? "rgb(180, 0, 0)": "white";
     ctx.font = 8*h100 + "px pixelFont";
     ctx.textAlign = "left";
@@ -326,10 +368,13 @@ var upgradeScreen = function() {
         ctx.fill();
         if(upgradeScreen.transitionTimer > 30) {
             upgradeScreen.transitionTimer = 0;
+            upgradeScreen.canReroll = true;
             switchState("gamble");
         }
     }
 };
+upgradeScreen.canReroll = true;
+upgradeScreen.potionAnim = 0;
 upgradeScreen.payTaxes = 0;
 upgradeScreen.taxButton = new Button(0, 0, h100 * 50, h100 * 10, "PAY RENT!", "red");
 upgradeScreen.transitionTimer = 0;
