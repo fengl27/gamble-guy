@@ -32,7 +32,7 @@ var possibleUpgrades = [
     {
         name: 'Get bow!',
         symbol: [assets.weapons, 1, 0],
-        description: "for people who don't like being close-up",
+        description: "For people who want to not die",
         effect: function() {
             playerStuff.weapons.push(weapons.bow);
         },

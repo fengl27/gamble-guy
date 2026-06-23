@@ -149,7 +149,6 @@ var game = function() {
 
 var upgradeScreen = function() {
     if(upgradeChoices.length === 0) {
-        console.log("ya suck");
         switchState("gamble");//no luck
     }
     
