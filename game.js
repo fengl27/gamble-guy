@@ -130,7 +130,14 @@ var updateGame = function() {
         updateGame.transitionTimer = 0;
         playerStuff.coins += coins.length;
         coins = [];
-        switchState("gamble");
+        if(tutorial){
+            switchState("upgrade");
+            music.gambling.play();
+            return;
+        }else {
+            switchState("gamble");
+        }
+
     }
 };
 updateGame.transitionTimer = 0;
@@ -147,6 +154,8 @@ var upgradeScreen = function() {
     
     ctx.fillStyle = "rgb(70,70,70)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(assets.shopBackground, 0, 0, cam.scale*100*16/9, cam.scale*100);
+
 
 
     //draw upgardesed
@@ -157,13 +166,14 @@ var upgradeScreen = function() {
     ctx.textBaseline = "hanging";
     
     var thingWidth = 10 * w100;
-    var thingOffsetY = 9*h100;
+    var thingOffsetY = 12*h100;
     var thingHeight = thingWidth;
 
     //Draw upgrade rectangles
     var hoveredThing = -1;
     for(var i = 0; i < upgradeChoices.length; i ++) {
-        var x = (1+i) * canvas.width/(upgradeChoices.length+1) - thingWidth/2;
+        spacing = 20*h100;
+        var x = (i - (upgradeChoices.length - 1) / 2) * spacing + canvas.width/2 - thingWidth/2;
         var pos = new Vect(x, thingOffsetY);
         var size = new Vect(thingWidth, thingHeight);
         //The rect part
@@ -195,6 +205,9 @@ var upgradeScreen = function() {
         //Buy detection
         if(mouse.justReleased && hovered && !upgradeScreen.transitionTimer) {
             //Purchase
+            if(tutorial){
+                currTutorialMessage++;
+            }
             upgradeChoices[i].effect();
             soundEffects.buy.play();
             
@@ -215,7 +228,10 @@ var upgradeScreen = function() {
         var pos = new Vect(h100 * 2, h100 * 50);
         var size = new Vect(canvas.width - h100 * 4, h100 * 48);
         var upgrade = upgradeChoices[hoveredThing];
-
+        if(tutorial){
+            tutorialText[currTutorialMessage].txt = upgrade.description;
+            return
+        }
         rect(ctx, pos.x, pos.y, size.x, size.y, true, true);
 
         //Struggle drawing text
@@ -427,12 +443,17 @@ var gamble = function() {
         }
     }
 
-    if(playerStuff.coins >= 2 && mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250) && IsPointInAABB(
+    if(mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250) && IsPointInAABB(
             mouse,
             {x: w100 * 25 - h100 * 36.5, y: canvas.height / 4},
             {x: h100 * 36, y: h100 * 40}
     )) {
-        playerStuff.coins -= 2;
+        if(playerStuff.coins >=2){
+            playerStuff.coins -= 2;
+        }else{
+            playerStuff.debt += 2-playerStuff.coins;
+            playerStuff.coins = 0;
+        }
         gamble.gambleTimer = 1;
         soundEffects.gamble.play();
         //gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];
@@ -451,7 +472,7 @@ var gamble = function() {
     }
 
     //ui
-    ctx.fillStyle = playerStuff.coins >= playerStuff.requiredRent? "rgb(75, 160, 18)": "rgb(180, 0, 0)";
+    ctx.fillStyle = playerStuff.coins >= (playerStuff.requiredRent+playerStuff.debt)? "rgb(75, 160, 18)": "rgb(180, 0, 0)";
     ctx.strokeStyle = "black";
     ctx.lineWidth = h100;
 
@@ -465,6 +486,11 @@ var gamble = function() {
     ctx.fillStyle = "white";
     ctx.strokeText("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);
     ctx.fillText  ("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);
+    if(playerStuff.debt>1){
+        ctx.fillStyle = "white";
+        ctx.strokeText("- " + playerStuff.debt + " debt", h100 * 3, h100 * 12);
+        ctx.fillText  ("- " + playerStuff.debt + " debt", h100 * 3, h100 * 12);
+    }
 
     ctx.fillStyle = playerStuff.roundsLeft < 2? "rgb(180, 0, 0)": "white";
     ctx.textBaseline = "bottom";
@@ -565,6 +591,7 @@ var tutorialText = [
     {txt: "Wow, he dropped money that time!"},
     {txt: "Speaking of money, where'd all your other money go? Aren't you the king?"},
     {txt: "Ohh... right, gambling addiction. Okay, moving on-"},
+    {txt: "here is my shop",switchstateplease: true,thing:() =>{switchState("upgrade");player.weapons = []}, criteria: () => {return gameState === "gamble"}},
     {txt: "It's time to fuel your gambling addiction!", switchstateplease: true, criteria: () => {return gameState === "gamble"}},
     {txt: "Click the lever to gamble! It costs 2 coins, though..."},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
