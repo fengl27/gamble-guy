@@ -87,6 +87,7 @@ var assets = {
     swordless: "swordless.png",
     weapons: "weapons.png",
     upgradeIcons: "upgrade-icons.png",
+    displayCase: "display-case.png",
     
     death: "death.png",
 
