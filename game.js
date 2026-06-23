@@ -247,8 +247,8 @@ var gamble = function() {
         gamble.button.go();
         if(gamble.button.pressed) {
             if(tutorial) {
-                tutorialText[32].funnyThing = currTutorialMessage;
-                currTutorialMessage = 23;
+                tutorialText[43].funnyThing = currTutorialMessage;
+                currTutorialMessage = 34;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
@@ -309,7 +309,7 @@ var currTutorialMessage = 0;
 var tutorialText = [
     {txt: "Welcome to kai's slop machine game! (Press enter to continue)", time: 0},
     {txt: "You can move around with WASD"},
-    {txt: "Here, have a sword!", thing: () => {player.weapons.push(weapons.sword);}},
+    {txt: "Here, have a sword!", thing: () => {player.weapons = [];player.weapons.push(weapons.sword);}},
     {txt: "The sword spins...\nand KILLS PEOPLE!"},
     {txt: "MWAH HAH HAH HAH!!"},
     {txt: "You'll get more weapons later on"},
@@ -317,7 +317,52 @@ var tutorialText = [
         txt: "Try beating this guy up with the sword! (you can continue once you beat him up)",
         criteria: () => {return !enemies.length;},
         thing: () => {
+            player.iFrames = 20;
             enemies.push(new Enemy(0, 0, "dummy"));
+        }
+        
+    },
+    {txt: "Here, have the aformentioned other weapons!", thing: () => {player.weapons = [];player.weapons.push(weapons.bow);}},
+    {txt: "The bow spins...\nbut, like in the opposite direction!"},
+    {
+        txt: "hold left click to start charging the bow!!"
+    },
+    {
+        txt: "look, it's this guy again! (run into the enemy to reset if you need to look at previous instructions)",
+        criteria: () => {return !enemies.length;},
+        thing: () => {
+            player.iFrames = 20;
+            enemies.push(new Enemy(0, 0, "dummy"));
+        }
+        
+    },
+    {txt: "Here, have another funny weapon!", thing: () => {player.weapons = [];player.weapons.push(weapons.throwMace);}},
+    {txt: "The mace exists...\nbut, it's hidden!"},
+    {
+        txt: "right click to start charging the mace!!",
+    },
+    {
+        txt: "I almost forgot, if the mace reaches the end of the rope...",
+    },
+    {
+        txt: "...it pulls you!!(don't forget to grab it)",
+    },
+    {
+        txt: "look, it's this guy again! (the dart exists, just press the button)",
+        criteria: () => {return !enemies.length;},
+        thing: () => {
+            player.iFrames = 20;
+            enemies.push(new Enemy(0, 0, "dummy"));
+        }
+        
+    },
+    {
+        txt: "he's angry now",
+        criteria: () => {return !enemies.length;},
+        thing: () => {
+            player.weapons.push(weapons.sword);
+            player.weapons.push(weapons.bow);
+            enemies.push(new Enemy(player.pos.x>0?50*16/9:-50*16/9, player.pos.x>0?50:-50, "sword"));
         }
         
     },
@@ -357,9 +402,9 @@ var tutorialText = [
 
 
     {txt: "Dude... \n you died to the guy that can't move"},
-    {txt: "Try again!", criteria: () => {return !enemies.length;}, thing: () => {enemies.push(new Enemy(0, 0, "dummy")); music.playing.unpause()}},
+    {txt: "Try again with the sword!", criteria: () => {return !enemies.length;}, thing: () => {player.iFrames = 20;player.weapons = [weapons.sword];enemies.push(new Enemy(0, 0, "dummy")); music.playing.unpause()}},
     {txt: "ERROR 213", thing: () => {
-        currTutorialMessage = 8;
+        currTutorialMessage = 7;
         tutorialText[currTutorialMessage].time = stateSwitchTimer;
         tutorialText[currTutorialMessage].thing();
     }},
@@ -375,7 +420,7 @@ var tutorialText = [
     {txt: ":("},
     {txt: "ERROR 212", thing: () => {
         //console.log(tutorialText[32].funnyThing);
-        currTutorialMessage = tutorialText[32].funnyThing > 15? 9: tutorialText[32].funnyThing;
+        currTutorialMessage = tutorialText[43].funnyThing > 15? 9: tutorialText[43].funnyThing;
         tutorialText[currTutorialMessage].time = stateSwitchTimer;
         tutorialText[currTutorialMessage].thing();
     }} 

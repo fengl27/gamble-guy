@@ -11,7 +11,10 @@ class Player {
             Up: "w",
             Down: "s",
             Left: "a",
-            Right: "d"
+            Right: "d",
+            Sword: " ",
+            Bow: "",
+            Mace: ""
         };
         this.projectiles = [];
         this.weapons = tutorial? []: playerStuff.weapons;
@@ -154,7 +157,7 @@ class Player {
         }
         roundEnemies = []
         if(tutorial) {
-            currTutorialMessage = 20;
+            currTutorialMessage = 31;
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
         else {
