@@ -67,6 +67,7 @@ var assets = {
     bricks: "bricks.png",//floor
     wood: "wood.png",//tutorifloor
     sadWood: "sad-wood.png",//flutoritor
+    shopBackground:"shop-background.png",//it does the existing
 
     arrow: "arrow.png",
     rock: "rock.png",

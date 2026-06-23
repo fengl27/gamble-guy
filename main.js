@@ -49,13 +49,13 @@ var switchState = function(target) {
             break;
         case "gamble":
             if(playerStuff.roundsLeft === 0) {
-                if(playerStuff.coins < playerStuff.requiredRent) {
+                if(playerStuff.coins < playerStuff.requiredRent + playerStuff.debt) {
                     //ya' die
                     switchState("lose");
                     break;
                 }
                 else {
-                    playerStuff.coins -= playerStuff.requiredRent;
+                    playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
                     playerStuff.roundsLeft = 3;
                     playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
                     music.gambling.play();
@@ -104,7 +104,7 @@ var mainMenu = {
         if(this.transitionTimer) {
             this.transitionTimer ++;
             if(this.transitionTimer >= 30) {
-                switchState(tutorial? "playing": "gamble");
+                switchState(tutorial? "playing": "upgrade");
             }
         }
 

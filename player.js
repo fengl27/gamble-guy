@@ -13,6 +13,7 @@ var playerStuff = {
     },
     coins: tutorial? 0: 6,
     requiredRent: 1,
+    debt: 0,
     roundsLeft: 4
 }
 var bob = pauseSettingsEl.querySelector("#pauseSettings-keybinds");
