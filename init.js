@@ -86,6 +86,7 @@ var assets = {
     fencer: "fencer.png",
     swordless: "swordless.png",
     weapons: "weapons.png",
+    displayCase: "display-case.png",
     
     death: "death.png",
 

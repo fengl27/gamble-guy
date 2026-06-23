@@ -148,7 +148,6 @@ var game = function() {
 };
 
 var upgradeScreen = function() {
-    console.log("does this even run?");
     if(upgradeChoices.length === 0) {
         console.log("ya suck");
         switchState("gamble");//no luck
@@ -156,7 +155,7 @@ var upgradeScreen = function() {
     
     ctx.fillStyle = "rgb(70,70,70)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(assets.shopBackground, 0, 0, cam.scale*100*16/9, cam.scale*100);
+    ctx.drawImage(assets.shopBackground, 0, 0, w100*100, h100*100);
 
 
 
@@ -168,14 +167,14 @@ var upgradeScreen = function() {
     ctx.textBaseline = "hanging";
     
     var thingWidth = 10 * w100;
-    var thingOffsetY = 12*h100;
+    var thingOffsetY = 15*h100;
     var thingHeight = thingWidth;
 
     //Draw upgrade rectangles
     var hoveredThing = -1;
     for(var i = 0; i < upgradeChoices.length; i ++) {
-        spacing = 20*h100;
-        var x = (i - (upgradeChoices.length - 1) / 2) * spacing + canvas.width/2 - thingWidth/2;
+        spacing = 25*h100;
+        var x = (i - (upgradeChoices.length - 1) / 2) * spacing + canvas.width/2 + h100*3 - thingWidth/2;
         var pos = new Vect(x, thingOffsetY);
         var size = new Vect(thingWidth, thingHeight);
         //The rect part
@@ -184,6 +183,7 @@ var upgradeScreen = function() {
             pos,
             size
         );
+        
         if(hovered) {
             hoveredThing = i;
             ctx.fillStyle = "rgb(76, 76, 76)";
@@ -191,18 +191,25 @@ var upgradeScreen = function() {
         else {
             ctx.fillStyle = "rgb(100,100,100)";
         }
-
+        /*
         rect(
             ctx, pos.x, pos.y, size.x, size.y,
             true,
             true
         );
+        */
         ctx.drawImage(
             upgradeChoices[i].symbol[0],
             upgradeChoices[i].symbol[1] * Player.spriteSize,
             upgradeChoices[i].symbol[2] * Player.spriteSize,
             Player.spriteSize, Player.spriteSize,
             pos.x + h100 * 2, pos.y + h100 * 2, size.x - h100 * 4, size.y - h100 * 4
+        );
+        
+        ctx.drawImage(
+            assets.displayCase,
+            pos.x, pos.y - h100 * 5,
+            size.x*1.25 - h100 * 4, size.y*1.25*34/26 - h100 * 4
         );
         //Buy detection
         if(mouse.justReleased && hovered && !upgradeScreen.transitionTimer) {
@@ -280,6 +287,7 @@ var upgradeScreen = function() {
         ctx.lineTo(canvas.width, canvas.height);
         ctx.fill();
         if(upgradeScreen.transitionTimer > 30) {
+            upgradeScreen.transitionTimer = 0;
             switchState("gamble");
         }
     }

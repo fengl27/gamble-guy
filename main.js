@@ -60,12 +60,7 @@ var switchState = function(target) {
                     break;
                 }
                 else {
-<<<<<<< HEAD
                     playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
-=======
-                    console.log("funny");
-                    playerStuff.coins -= playerStuff.requiredRent;
->>>>>>> a280bb2fccd5cff4a354396ea39c8c2554689853
                     playerStuff.roundsLeft = 3;
                     playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
                     music.gambling.play();
