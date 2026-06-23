@@ -277,6 +277,7 @@ var upgradeScreen = function() {
     ctx.fillText  ("Choose an upgrade!", canvas.width / 2, h100 * 2);
     
     //money
+    ctx.strokeStyle = "black";
     ctx.fillStyle = playerStuff.roundsLeft === 0 && stateSwitchTimer % 20 < 10? "rgb(180, 0, 0)": "white";
     ctx.font = 8*h100 + "px pixelFont";
     ctx.textAlign = "left";
