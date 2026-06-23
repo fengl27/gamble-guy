@@ -1,5 +1,5 @@
 var playerStuff = {
-    weapons: [weapons.sword],
+    weapons: [],
     controls: {
         Up: "w",
         Down: "s",
@@ -11,9 +11,14 @@ var playerStuff = {
     changeControl: function(control, newVal) {
         this.controls[control] = newVal;
     },
-    coins: tutorial? 0: 6,
+    coins: 6,
     requiredRent: 1,
-    roundsLeft: 4
+    roundsLeft: 3
+}
+var defaultPlayerStuff = JSON.parse(JSON.stringify(playerStuff));
+if(tutorial) {
+    playerStuff.coins = 0;
+    playerStuff.roundsLeft = 4;
 }
 var bob = pauseSettingsEl.querySelector("#pauseSettings-keybinds");
 for(let i in playerStuff.controls) {

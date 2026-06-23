@@ -10,6 +10,7 @@ var setupLevel = function() {
         var p = Math.random() < 0.5? new Vect(Math.sign(Math.random()-0.5) * l2.x, Math.random() * l2.y): new Vect(Math.random() * l2.x, Math.sign(Math.random()-0.5) * l2.y);
         enemies.push(new Enemy(p.x, p.y, roundEnemies[i]));
     }
+    roundEnemies = [];
 };
 var setupUpgrade = function() {
     upgradeChoices = [];
@@ -33,6 +34,9 @@ var switchState = function(target) {
     gameState = target;
     stateSwitchTimer = 0;
     switch(target) {
+        case "mainMenu":
+            playerStuff = JSON.parse(JSON.stringify(defaultPlayerStuff));
+            break;
         case "playing":
             setupLevel();
             playerStuff.roundsLeft --;
@@ -40,7 +44,8 @@ var switchState = function(target) {
             break;
         case "upgrade":
             setupUpgrade();
-            break;
+            music.gambling.play();
+            return;
         case "lose":
             console.log("ha ya' died");
             break;
@@ -55,6 +60,7 @@ var switchState = function(target) {
                     break;
                 }
                 else {
+                    console.log("funny");
                     playerStuff.coins -= playerStuff.requiredRent;
                     playerStuff.roundsLeft = 3;
                     playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
@@ -63,7 +69,10 @@ var switchState = function(target) {
                     return;
                 }
             }
-            music.gambling.play();
+
+            if(music.gambling.audio.paused) {
+                music.gambling.play();
+            }
             gamble.gambleTimer = 0;
             gamble.offsetVels = [h100, -h100, h100];
             break;
@@ -104,7 +113,7 @@ var mainMenu = {
         if(this.transitionTimer) {
             this.transitionTimer ++;
             if(this.transitionTimer >= 30) {
-                switchState(tutorial? "playing": "gamble");
+                switchState(tutorial? "playing": "upgrade");
             }
         }
 
@@ -225,23 +234,15 @@ var frame = function() {
                 ctx.strokeText("press space to yee", canvas.width / 2, canvas.height * 7/8);
                 ctx.fillText(  "press space to yes", canvas.width / 2, canvas.height * 7/8);
                 */
-                if(true) {
-                    loseButtons.gambleButton.go();
-                }
-                else {
-                    loseButtons.menuButton.go();
-                }
+                
+                loseButtons.menuButton.go();
+                
                 ctx.globalAlpha = 1;
                 
                 Particle.runParticles();//do the particling
 
-                if(/*justPressed[" "]*/loseButtons.equipButton.pressed) {//press button
-                    if(true) {
-                        switchState("gamble");
-                    }
-                    else {
-                        switchState("mainMenu");
-                    }
+                if(/*justPressed[" "]*/loseButtons.menuButton.pressed) {//press button
+                    switchState("mainMenu");
                 }
                 break;
         }

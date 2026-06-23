@@ -1,9 +1,13 @@
 var displayGame = function() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if(gameState !== "playing") {
+        //crashout
+        return;//this fixes the one frame of jumpscare between transitions i was having
+    }
     ctx.save();
     if(updateGame.transitionTimer) {
-        ctx.translate(easings.easeInQuart(limit(updateGame.transitionTimer / 20, 0, 1)) * canvas.width, 0);
+        ctx.translate(easings.easeInQuart(limit((updateGame.transitionTimer - 30) / 20, 0, 1)) * canvas.width, 0);
     }
     //brick/wood bg
     var tl = cam.toScreen(Vect.mult(l2, -1));
@@ -19,7 +23,7 @@ var displayGame = function() {
     for(var x = tl.x; xid < 10; x += grassSize) {
         yid = 0;
         for(var y = tl.y; yid < 8; y += grassSize) {
-            ctx.drawImage(assets[tutorial? getRand(xid + yid * 100) < 0.1? "sadWood": "wood": "bricks"], x, y, grassSize, grassSize);
+            ctx.drawImage(assets[tutorial? getRand(xid + yid * 100) < 0.1? "sadWood": "wood": "bricks"], x, y, grassSize+1, grassSize+1);
             
             //ctx.fillStyle = `rgb(${255*getRand(xid+yid*100)}, 255, 255)`;
             //ctx.fillRect(x,y,grassSize,grassSize);
@@ -97,7 +101,7 @@ var updateGame = function() {
     */
 
     for(var i = 0; i < coins.length; i ++) {
-        coins[i].update();
+        coins[i].update(updateGame.transitionTimer > 0);
         if(coins[i].dead) {
             coins.splice(i, 1);
             i --;
@@ -122,7 +126,7 @@ var updateGame = function() {
     cam.pos.add(Vect.mult(diff, 0.15));
     cam.scale += ((player.exploding && player.exploding < 30? h100*5: h100) - cam.scale) / 20;
     
-    if(updateGame.transitionTimer > 30) {
+    if(updateGame.transitionTimer > 50) {
         updateGame.transitionTimer = 0;
         playerStuff.coins += coins.length;
         coins = [];
@@ -137,7 +141,9 @@ var game = function() {
 };
 
 var upgradeScreen = function() {
+    console.log("does this even run?");
     if(upgradeChoices.length === 0) {
+        console.log("ya suck");
         switchState("gamble");//no luck
     }
     
@@ -189,10 +195,10 @@ var upgradeScreen = function() {
             pos.x + h100 * 2, pos.y + h100 * 2, size.x - h100 * 4, size.y - h100 * 4
         );
         //Buy detection
-        if(mouse.justReleased && hovered) {
+        if(mouse.justReleased && hovered && !upgradeScreen.transitionTimer) {
             //Purchase
             upgradeChoices[i].effect();
-            soundEffects.purchase.play();
+            soundEffects.buy.play();
             
             currPossibleUpgrades = currPossibleUpgrades.concat(upgradeChoices[i].branchThing);
             var currId = currPossibleUpgrades.indexOf(upgradeChoices[i]);
@@ -200,7 +206,8 @@ var upgradeScreen = function() {
             if(currPossibleUpgrades[currId].amount <= 0) {//delete now now now now now now now now
                 currPossibleUpgrades.splice(currId, 1);
             }
-            switchState('gamble');
+            upgradeScreen.transitionTimer ++;
+            //switchState('gamble');
             //break;
         }
     }
@@ -245,7 +252,23 @@ var upgradeScreen = function() {
     ctx.fillText  ("Choose an upgrade!", canvas.width / 2 + h100/5, h100 * 2 + h100/3);
     ctx.fillStyle = "white";
     ctx.fillText  ("Choose an upgrade!", canvas.width / 2, h100 * 2);
+    
+    if(upgradeScreen.transitionTimer) {
+        upgradeScreen.transitionTimer ++;
+        let width = canvas.width - (canvas.width + canvas.height) * easings.easeInOutQuad(Math.min(1, upgradeScreen.transitionTimer/15));
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(canvas.width, 0);
+        ctx.lineTo(width, 0);
+        ctx.lineTo(width + canvas.height, canvas.height);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.fill();
+        if(upgradeScreen.transitionTimer > 30) {
+            switchState("gamble");
+        }
+    }
 };
+upgradeScreen.transitionTimer = 0;
 var pauseScreen = function() {
     ctx.fillStyle = "rgba(48, 48, 48, 0.05)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -575,8 +598,8 @@ var tutorialText = [
 
 
 
-    {txt: "Dude... \n you died to the guy that can't move"},
-    {txt: "Try again with the sword!", criteria: () => {return !enemies.length;}, thing: () => {
+    {txt: "Dude... \n you died to the tutorial guy"},
+    {txt: "Lets review again!", criteria: () => {return !enemies.length;}, thing: () => {
         player.iframes = 20;
         player.weapons = [weapons.sword];
         enemies.push(new Enemy(0, 0, "dummy"));
@@ -605,15 +628,17 @@ var tutorialText = [
     }} 
 ];
 var drawTutorial = function() {
-    if(gameState !== "mainMenu") {
+    if(gameState !== "mainMenu" && !updateGame.transitionTimer) {
         ctx.strokeStyle = "black";
         ctx.lineWidth = h100;
-        var width = easings.easeInOutQuad(limit(stateSwitchTimer / 30, 0, 1)) * (canvas.width / 2 - 4 * h100);
-        var yPos = (easings.easeOutBack(limit(stateSwitchTimer / 30 - 0.1, 0, 1)) - 1) * canvas.height;
+        var t = gameState === "playing"? limit(stateSwitchTimer / 30, 0, 1): 1;
+        var width = easings.easeInOutQuad(t) * (canvas.width / 2 - 4 * h100);
+        var yPos = (easings.easeOutBack(t) - 1) * canvas.height;
         yPos += h100 * 73 + Math.sin(limit(stateSwitchTimer - tutorialText[currTutorialMessage].time, 0, 5) / 5 * Math.PI) * h100 * 3;
 
         if(stateSwitchTimer > 30) {
-            var gooberY = h100 * 46 + (1-easings.easeInOutQuad(limit((stateSwitchTimer - 10) / 60, 0, 1))) * h100 * 54;
+            t = gameState === "playing"? limit((stateSwitchTimer - 10)/60, 0, 1): 1;
+            var gooberY = h100 * 46 + (1-easings.easeInOutQuad(t)) * h100 * 54;
             ctx.save();
             ctx.rect(h100 * 5, h100 * 41, h100 * 40, h100 * 40);
             ctx.clip();
@@ -637,6 +662,7 @@ var drawTutorial = function() {
             var currLine = "";
             var lineIdx = 0;
             var words = tutorialText[currTutorialMessage].txt.split(" ");
+
             words.push("\n");//to make sure it draws the last line
             ctx.font = 5 * h100 + "px pixelFontSmall";
             ctx.textAlign = "left";

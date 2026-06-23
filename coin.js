@@ -17,13 +17,13 @@ class Coin {
         ctx.restore();
     }
 
-    update() {
+    update(collect) {
         this.spawnTimer ++;
         this.rot += this.vel.x / 4;
 
         this.vel.mult(0.8);
         let diff = Vect.sub(player.pos, this.pos);
-        if(diff.sqrMag() < 100 && this.spawnTimer > 30) {
+        if(collect || (diff.sqrMag() < 100 && this.spawnTimer > 30)) {
             if(diff.sqrMag() < 16) {
                 this.dead = true;
                 soundEffects.coinPickup.play();

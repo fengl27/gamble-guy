@@ -5,7 +5,7 @@ var possibleUpgrades = [
     {
         name: 'Get sword!',
         symbol: [assets.weapons, 2, 0],//sword
-        description: "classic weapon :)",
+        description: "The classic",
         effect: function() {
             playerStuff.weapons.push(weapons.sword);
         },
@@ -32,7 +32,7 @@ var possibleUpgrades = [
     {
         name: 'Get bow!',
         symbol: [assets.weapons, 1, 0],
-        description: "for people who are lame and don't like being close-up",
+        description: "For people who want to not die",
         effect: function() {
             playerStuff.weapons.push(weapons.bow);
         },
