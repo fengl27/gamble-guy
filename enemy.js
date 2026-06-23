@@ -2897,8 +2897,8 @@ class Enemy {
             this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
         },
         init: function() {
-            this.numCoins = 2;//enough to gamble 2 times
-            this.health = 5;
+            this.numCoins = 0;//enough to gamble 0 times (duh)
+            this.health = 3;
             this.size = 2.25;
 
             if(sqrDist(this.pos.x, this.pos.y, player.pos.x, player.pos.y) < (player.size + this.size * 2) * (player.size + this.size * 2)) {

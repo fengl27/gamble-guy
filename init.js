@@ -40,7 +40,7 @@ const l2 = Vect.div(settings.levelSize, 2);
 //LA GAME STATE FOR STAT MACHINEINE
 var gameState = "mainMenu";
 var paused = false;
-var tutorial = false;//aee
+var tutorial = true;//aee
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
 /*
@@ -99,7 +99,9 @@ var assets = {
     coin: "coin.png",
     chain: "chain.png",//for mace
 
-    mouse: "mouse.png"
+    mouse: "mouse.png",
+
+    tutorialNpc: "tutorial-npc.png"
 };
 for(var i in assets) {
     let bob = new Image();

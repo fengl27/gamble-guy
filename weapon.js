@@ -154,7 +154,7 @@ const weapons = {
                             continue;//don't or else it would be kinda op
                         }
                         if(velMag>1.1){
-                            enemies[i].damage(1);
+                            enemies[i].damage(2);
                             soundEffects.sword.play();
 
                         }

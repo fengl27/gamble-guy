@@ -1,4 +1,10 @@
 var displayGame = function() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    if(updateGame.transitionTimer) {
+        ctx.translate(easings.easeInQuart(limit(updateGame.transitionTimer / 20, 0, 1)) * canvas.width, 0);
+    }
     //brick/wood bg
     var tl = cam.toScreen(Vect.mult(l2, -1));
     var br = cam.toScreen(l2);
@@ -81,6 +87,7 @@ var displayGame = function() {
         ctx.fillStyle = `rgba(0, 0, 0, ${(player.exploding - 150) / 25})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
+    ctx.restore();
 };
 var updateGame = function() {
     /*
@@ -105,18 +112,20 @@ var updateGame = function() {
         }
     }
 
-    if(enemies.length === 0 && !player.exploding && !tutorial) {
+    if(enemies.length === 0 && !player.exploding && (!tutorial || tutorialText[currTutorialMessage].switchstateplease)) {
         updateGame.transitionTimer ++;
     }
 
     //move screen
-    var targetPos = player.exploding && !tutorial? player.pos: updateGame.transitionTimer > 30? new Vect(l2.x*3.5, 0): Vect.mult(player.pos, 0.2);
+    var targetPos = player.exploding && !tutorial? player.pos: Vect.mult(player.pos, 0.2);
     var diff = Vect.sub(targetPos, cam.pos);
     cam.pos.add(Vect.mult(diff, 0.15));
     cam.scale += ((player.exploding && player.exploding < 30? h100*5: h100) - cam.scale) / 20;
     
-    if(updateGame.transitionTimer > 70) {
+    if(updateGame.transitionTimer > 30) {
         updateGame.transitionTimer = 0;
+        playerStuff.coins += coins.length;
+        coins = [];
         switchState("gamble");
     }
 };
@@ -527,15 +536,14 @@ var tutorialText = [
             player.weapons.push(weapons.sword);
             player.weapons.push(weapons.bow);
             enemies.push(new Enemy(player.pos.x>0?50*16/9:-50*16/9, player.pos.x>0?50:-50, "sword"));
+            enemies[0].numCoins = 6;
         }
         
     },
     {txt: "Wow, he dropped money that time!"},
     {txt: "Speaking of money, where'd all your other money go? Aren't you the king?"},
     {txt: "Ohh... right, gambling addiction. Okay, moving on-"},
-    {txt: "It's time to fuel your gambling addiction!", thing: () => {
-        switchState("gamble");
-    }},
+    {txt: "It's time to fuel your gambling addiction!", switchstateplease: true, criteria: () => {return gameState === "gamble"}},
     {txt: "Click the lever to gamble! It costs 2 coins, though..."},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
     {txt: "If the center one lands on a + sign, the two other enemies will merge together!"},
@@ -598,13 +606,31 @@ var tutorialText = [
 ];
 var drawTutorial = function() {
     if(gameState !== "mainMenu") {
-        ctx.fillStyle = "rgb(200, 200, 200)";
         ctx.strokeStyle = "black";
         ctx.lineWidth = h100;
         var width = easings.easeInOutQuad(limit(stateSwitchTimer / 30, 0, 1)) * (canvas.width / 2 - 4 * h100);
         var yPos = (easings.easeOutBack(limit(stateSwitchTimer / 30 - 0.1, 0, 1)) - 1) * canvas.height;
-        yPos += h100 * 73 + Math.sin(limit(stateSwitchTimer - tutorialText[currTutorialMessage].time, 0, 5) / 5 * Math.PI) * h100 * 5;
+        yPos += h100 * 73 + Math.sin(limit(stateSwitchTimer - tutorialText[currTutorialMessage].time, 0, 5) / 5 * Math.PI) * h100 * 3;
+
+        if(stateSwitchTimer > 30) {
+            var gooberY = h100 * 46 + (1-easings.easeInOutQuad(limit((stateSwitchTimer - 10) / 60, 0, 1))) * h100 * 54;
+            ctx.save();
+            ctx.rect(h100 * 5, h100 * 41, h100 * 40, h100 * 40);
+            ctx.clip();
+            ctx.fillStyle = "rgb(243, 243, 178)";
+            rect(
+                ctx, h100 * 10, gooberY, h100 * 30, h100 * 30, true, true
+            );
+            ctx.drawImage(assets.tutorialNpc, (stateSwitchTimer - tutorialText[currTutorialMessage].time) < 15? 0: 53, 0, 53, 53,
+                h100 * 10, gooberY, h100 * 30, h100 * 30
+            );
+            ctx.restore();
+        }
+        ctx.fillStyle = "rgb(200, 200, 200)";
+
         rect(ctx, h100 * 2, yPos, width, canvas.height / 4, true, true);
+
+        
         
         if(stateSwitchTimer > 30) {
             ctx.fillStyle = "black";

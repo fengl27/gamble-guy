@@ -11,9 +11,9 @@ var playerStuff = {
     changeControl: function(control, newVal) {
         this.controls[control] = newVal;
     },
-    coins: tutorial? 0: 2,
+    coins: tutorial? 0: 6,
     requiredRent: 1,
-    roundsLeft: 1
+    roundsLeft: 4
 }
 var bob = pauseSettingsEl.querySelector("#pauseSettings-keybinds");
 for(let i in playerStuff.controls) {
