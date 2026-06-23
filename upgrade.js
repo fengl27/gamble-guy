@@ -3,18 +3,18 @@ var upgradeChoices = [];
 var currPossibleUpgrades = [];
 var possibleUpgrades = [
     {
-        name: 'something',
-        description: "stuff",
+        name: 'Get sword!',
+        symbol: [assets.weapons, 2, 0],//sword
+        description: "classic weapon :)",
         effect: function() {
-            for(var i = 0; i < 3; i ++) {
-                weapons.sword.swordSize+=2;
-            }
+            playerStuff.weapons.push(weapons.sword);
         },
         amount: 1,
         criteria: () => true, //normally omit when no criteria
         branchThing: [
             {
                 name: 'something',
+                symbol: [assets.weapons, 2, 0],
                 description: "stuff",
                 effect: function() {
                     for(var i = 0; i < 3; i ++) {
@@ -29,6 +29,46 @@ var possibleUpgrades = [
             },
         ]//infinity annd beeeoyingd
     },
+    {
+        name: 'Get bow!',
+        symbol: [assets.weapons, 1, 0],
+        description: "for people who are lame and don't like being close-up",
+        effect: function() {
+            playerStuff.weapons.push(weapons.bow);
+        },
+        amount: 1,
+        criteria: () => true, //normally omit when no criteria
+        branchThing: [
+            {
+                name: 'something',
+                symbol: [assets.weapons, 2, 0],
+                description: "weapons.sword.swordSize+=2;",
+                effect: function() {
+                    for(var i = 0; i < 3; i ++) {
+                        weapons.sword.swordSize+=2;
+                    }
+                },
+                amount: 1,
+                criteria: () => true, //normally omit when no criteria
+                branchThing: [
+                    
+                ]//infinity annd beeeoyingd
+            },
+        ]//infinity annd beeeoyingd
+    },
+    {
+        name: 'Get mace!',
+        symbol: [assets.weapons, 4, 0],
+        description: "Technically a ball on a chain and not a mace but ehhh",
+        effect: function() {
+            playerStuff.weapons.push(weapons.throwMace);
+        },
+        amount: 1,
+        criteria: () => true,
+        branchThing: [
+
+        ]//infinity annd beeeoyingd
+    }
     /*
     {
         name: '1 MORBILLION UBeRS GET',

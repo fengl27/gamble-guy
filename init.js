@@ -1,8 +1,8 @@
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = canvas.clientWidth;
-canvas.height = canvas.clientHeight;
+canvas.width = 1920;
+canvas.height = 1080;
 
 ctx.imageSmoothingEnabled = false;
 
@@ -40,7 +40,7 @@ const l2 = Vect.div(settings.levelSize, 2);
 //LA GAME STATE FOR STAT MACHINEINE
 var gameState = "mainMenu";
 var paused = false;
-var tutorial = true;//aee
+var tutorial = false;//aee
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
 /*
@@ -66,6 +66,7 @@ var assets = {
     //grass: "grass.png",
     bricks: "bricks.png",//floor
     wood: "wood.png",//tutorifloor
+    sadWood: "sad-wood.png",//flutoritor
 
     arrow: "arrow.png",
     rock: "rock.png",
@@ -95,7 +96,10 @@ var assets = {
 
     arm: "slot-machine-arm.png",
 
-    coin: "coin.png"
+    coin: "coin.png",
+    chain: "chain.png",//for mace
+
+    mouse: "mouse.png"
 };
 for(var i in assets) {
     let bob = new Image();

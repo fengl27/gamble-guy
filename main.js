@@ -20,8 +20,8 @@ var setupUpgrade = function() {
             if(tempThing.length <= 0) {
                 break;
             }
-            var id = Math.floor(getRand() * tempThing.length);
-            if(!tempThing[i].criteria || tempThing[i].criteria()) {
+            var id = Math.floor(Math.random() * tempThing.length);
+            if(!tempThing[id].criteria || tempThing[id].criteria()) {
                 upgradeChoices.push(tempThing[id]);
                 tempThing.splice(id, 1);
                 break;
@@ -34,25 +34,39 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "playing":
-            roundEnemies.push("fencer");
             setupLevel();
+            playerStuff.roundsLeft --;
             music.playing.play();
             break;
-        case "win":
-            currLevel ++;
-            winUpgrades = 3;
+        case "upgrade":
             setupUpgrade();
             break;
         case "lose":
-            console.log("AHA YIOU GOT TO level " + (currLevel+1));
+            console.log("ha ya' died");
             break;
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
             break;
         case "gamble":
+            if(playerStuff.roundsLeft === 0) {
+                if(playerStuff.coins < playerStuff.requiredRent) {
+                    //ya' die
+                    switchState("lose");
+                    break;
+                }
+                else {
+                    playerStuff.coins -= playerStuff.requiredRent;
+                    playerStuff.roundsLeft = 3;
+                    playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
+                    music.gambling.play();
+                    switchState("upgrade");
+                    return;
+                }
+            }
             music.gambling.play();
             gamble.gambleTimer = 0;
             gamble.offsetVels = [h100, -h100, h100];
+            break;
     }
     if(target !== "playing") {
         music.playing.pause();
@@ -162,17 +176,14 @@ var frame = function() {
             case "gamble":
                 gamble();
                 break;
-            case "win":
+            case "upgrade":
+                ctx.fillStyle = "black";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 //offset of doom
-                var t = limit(stateSwitchTimer / 45 - 1, 0, 1);
-                if(t < 1) {
-                    updateGame(false, 0.5);
-                }
+                var t = limit(stateSwitchTimer / 15-1, 0, 1);
                 var offsetY = -easings.easeInOutQuad(t) * canvas.height;
                 ctx.save();
-                ctx.translate(0, offsetY);
-                displayGame();
-                ctx.translate(0, canvas.height);
+                ctx.translate(0, offsetY + canvas.height);
                 upgradeScreen();
                 ctx.restore();
                 break;
@@ -243,7 +254,6 @@ var frame = function() {
     mouse.justPressed = false;
     mouse.justReleased = false;
     stateSwitchTimer ++;
-    
     /*
     ctx.fillStyle = "red";
     ctx.fillRect(0, 0, 100, 40);
@@ -251,13 +261,13 @@ var frame = function() {
     ctx.fillStyle = "green"
     ctx.fillRect(0, 0, performanceTracker.fps/60 * 100, 40);
     */
-
+    /*
     ctx.font = "20px pixelFontSmall";
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.textBaseline = "hanging";
     ctx.fillText(performanceTracker.fps.toFixed(2), 10, 10);
-    
+    */
 
     if(!keys.x) {
         window.requestAnimationFrame(frame);

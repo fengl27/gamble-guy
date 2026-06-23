@@ -9,10 +9,17 @@ var displayGame = function() {
     ctx.clip();
 
     let grassSize = cam.scale * 20;
-    for(var x = tl.x; x < br.x; x += grassSize) {
-        for(var y = tl.y; y < br.y; y += grassSize) {
-            ctx.drawImage(assets[tutorial? "wood": "bricks"], x, y, grassSize, grassSize);
+    var xid = yid = 0;
+    for(var x = tl.x; xid < 10; x += grassSize) {
+        yid = 0;
+        for(var y = tl.y; yid < 8; y += grassSize) {
+            ctx.drawImage(assets[tutorial? getRand(xid + yid * 100) < 0.1? "sadWood": "wood": "bricks"], x, y, grassSize, grassSize);
+            
+            //ctx.fillStyle = `rgb(${255*getRand(xid+yid*100)}, 255, 255)`;
+            //ctx.fillRect(x,y,grassSize,grassSize);
+            yid ++;
         }
+        xid ++;
     }
 
     //red danger stuff
@@ -56,6 +63,18 @@ var displayGame = function() {
     ctx.fillRect(tl.x, br.y, settings.levelSize.x * cam.scale, canvas.height);
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.fillRect(0, br.y + margin, canvas.width, canvas.height);
+
+    //ui
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = h100;
+
+    ctx.font = 8*h100 + "px pixelFont";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "hanging";
+    ctx.drawImage(assets.coin, h100, h100, 6 * h100, 6 * h100);
+    ctx.strokeText(playerStuff.coins, h100 * 8, h100 * 2);
+    ctx.fillText(playerStuff.coins, h100 * 8, h100 * 2);
 
     //kablooey
     if(player.exploding > 150) {
@@ -107,7 +126,116 @@ var game = function() {
     updateGame();
     displayGame();
 };
+
 var upgradeScreen = function() {
+    if(upgradeChoices.length === 0) {
+        switchState("gamble");//no luck
+    }
+    
+    ctx.fillStyle = "rgb(70,70,70)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+    //draw upgardesed
+
+    ctx.strokeStyle = "rgb(255, 255, 255)";
+    ctx.lineWidth = h100 / 2;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "hanging";
+    
+    var thingWidth = 10 * w100;
+    var thingOffsetY = 9*h100;
+    var thingHeight = thingWidth;
+
+    //Draw upgrade rectangles
+    var hoveredThing = -1;
+    for(var i = 0; i < upgradeChoices.length; i ++) {
+        var x = (1+i) * canvas.width/(upgradeChoices.length+1) - thingWidth/2;
+        var pos = new Vect(x, thingOffsetY);
+        var size = new Vect(thingWidth, thingHeight);
+        //The rect part
+        var hovered = IsPointInAABB(
+            mouse,
+            pos,
+            size
+        );
+        if(hovered) {
+            hoveredThing = i;
+            ctx.fillStyle = "rgb(76, 76, 76)";
+        }
+        else {
+            ctx.fillStyle = "rgb(100,100,100)";
+        }
+
+        rect(
+            ctx, pos.x, pos.y, size.x, size.y,
+            true,
+            true
+        );
+        ctx.drawImage(
+            upgradeChoices[i].symbol[0],
+            upgradeChoices[i].symbol[1] * Player.spriteSize,
+            upgradeChoices[i].symbol[2] * Player.spriteSize,
+            Player.spriteSize, Player.spriteSize,
+            pos.x + h100 * 2, pos.y + h100 * 2, size.x - h100 * 4, size.y - h100 * 4
+        );
+        //Buy detection
+        if(mouse.justReleased && hovered) {
+            //Purchase
+            upgradeChoices[i].effect();
+            soundEffects.purchase.play();
+            
+            currPossibleUpgrades = currPossibleUpgrades.concat(upgradeChoices[i].branchThing);
+            var currId = currPossibleUpgrades.indexOf(upgradeChoices[i]);
+            currPossibleUpgrades[currId].amount --;
+            if(currPossibleUpgrades[currId].amount <= 0) {//delete now now now now now now now now
+                currPossibleUpgrades.splice(currId, 1);
+            }
+            switchState('gamble');
+            //break;
+        }
+    }
+    if(hoveredThing !== -1) {
+        ctx.fillStyle = "rgb(100, 100, 100)";
+        var margin = h100 * 2;
+        var pos = new Vect(h100 * 2, h100 * 50);
+        var size = new Vect(canvas.width - h100 * 4, h100 * 48);
+        var upgrade = upgradeChoices[hoveredThing];
+
+        rect(ctx, pos.x, pos.y, size.x, size.y, true, true);
+
+        //Struggle drawing text
+        ctx.fillStyle = "rgb(255, 255, 255)";
+        ctx.font = 10*h100 + "px pixelFont";
+        ctx.fillText(upgrade.name, pos.x + margin, pos.y + margin);
+        ctx.font = 4*h100 + "px pixelFontSmall";
+
+        //descrpitgion
+        var words = upgrade.description.split(" ");
+        words.push("\n");//so that it displays the last line
+        var currLine = "";
+        var lineIdx = 0;
+        for(var j = 0; j < words.length; j ++) {
+            if(words[j] === "\n" || ctx.measureText(currLine + words[j]).width > size.x - 2 * margin) {
+                ctx.fillText(currLine, pos.x + margin, pos.y + margin + 7 * h100 + 5 * h100 * lineIdx);
+                currLine = "";
+                lineIdx ++;
+            }
+            if(words[j] !== "\n") {
+                currLine += words[j] + " ";
+            }
+        }
+    }
+    //draw title thingy
+    
+
+    ctx.textAlign = "center";
+    ctx.font = 10*h100 + "px pixelFont";
+
+    ctx.fillStyle = "black";
+    ctx.fillText  ("Choose an upgrade!", canvas.width / 2 + h100/5, h100 * 2 + h100/3);
+    ctx.fillStyle = "white";
+    ctx.fillText  ("Choose an upgrade!", canvas.width / 2, h100 * 2);
 };
 var pauseScreen = function() {
     ctx.fillStyle = "rgba(48, 48, 48, 0.05)";
@@ -268,11 +396,12 @@ var gamble = function() {
         }
     }
 
-    if(mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250) && IsPointInAABB(
+    if(playerStuff.coins >= 2 && mouse.justPressed && (!gamble.gambleTimer || gamble.gambleTimer > 250) && IsPointInAABB(
             mouse,
             {x: w100 * 25 - h100 * 36.5, y: canvas.height / 4},
             {x: h100 * 36, y: h100 * 40}
     )) {
+        playerStuff.coins -= 2;
         gamble.gambleTimer = 1;
         soundEffects.gamble.play();
         //gamble.offsetVels = [40 * h100, 40 * h100, 40 * h100];
@@ -289,6 +418,30 @@ var gamble = function() {
             soundEffects.gambleSpin.play(2);
         }
     }
+
+    //ui
+    ctx.fillStyle = playerStuff.coins >= playerStuff.requiredRent? "rgb(75, 160, 18)": "rgb(180, 0, 0)";
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = h100;
+
+    ctx.font = 8*h100 + "px pixelFont";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "hanging";
+    ctx.drawImage(assets.coin, h100, h100, 6 * h100, 6 * h100);
+    ctx.strokeText(playerStuff.coins + " coins", h100 * 8, h100 * 2);
+    ctx.fillText(playerStuff.coins   + " coins", h100 * 8, h100 * 2);
+
+    ctx.fillStyle = "white";
+    ctx.strokeText("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);
+    ctx.fillText  ("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);
+
+    ctx.fillStyle = playerStuff.roundsLeft < 2? "rgb(180, 0, 0)": "white";
+    ctx.textBaseline = "bottom";
+    var thing = 5 + Math.sin(stateSwitchTimer / 20) * 1.5;
+    ctx.font = (8 + (playerStuff.roundsLeft === 1) * thing)*h100 + "px pixelFont";
+    var txt = playerStuff.roundsLeft === 0? "RENT TODAY!!": `RENT IN ${playerStuff.roundsLeft + " DAY" + (playerStuff.roundsLeft===1? "!!!!!!!!!!!!!": "S!!")}`;
+    ctx.strokeText(txt, h100 * 2, h100 * 102);
+    ctx.fillText  (txt, h100 * 2, h100 * 102);
 
 
     //funny transition
@@ -325,7 +478,7 @@ var tutorialText = [
     {txt: "MWAH HAH HAH HAH!!"},
     {txt: "You'll get more weapons later on"},
     {
-        txt: "Try beating this guy up with the sword! (you can continue once you beat him up)",
+        txt: "Try beating this guy up with the sword! (You can continue once you beat him up)",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -336,10 +489,10 @@ var tutorialText = [
     {txt: "Here, have the aformentioned other weapons!", thing: () => {player.weapons = [];player.weapons.push(weapons.bow);}},
     {txt: "The bow spins...\nbut, like in the opposite direction!"},
     {
-        txt: "hold left click to start charging the bow!!"
+        txt: "Hold left click to start charging the bow!!"
     },
     {
-        txt: "look, it's this guy again! (run into the enemy to reset if you need to look at previous instructions)",
+        txt: "Look, it's this guy again! (Run into the enemy to reset if you need to look at previous instructions.)",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -350,16 +503,16 @@ var tutorialText = [
     {txt: "Here, have another funny weapon!", thing: () => {player.weapons = [];player.weapons.push(weapons.throwMace);}},
     {txt: "The mace exists...\nbut, it's hidden!"},
     {
-        txt: "right click to start charging the mace!!",
+        txt: "Right click to start charging the mace!!",
     },
     {
         txt: "I almost forgot, if the mace reaches the end of the rope...",
     },
     {
-        txt: "...it pulls you!!(don't forget to grab it)",
+        txt: "...It pulls you! (Don't forget to grab it!)",
     },
     {
-        txt: "look, it's this guy again! (the mace exists, just press the button)",
+        txt: "Look, it's this guy again! (The mace exists, just press the button!)",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -368,7 +521,7 @@ var tutorialText = [
         
     },
     {
-        txt: "he's angry now",
+        txt: "He's angry now...",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.weapons.push(weapons.sword);
@@ -377,13 +530,13 @@ var tutorialText = [
         }
         
     },
-    {txt: "Good job! Killing those guys got you enough cash to go gambling."},
-    {txt: "Speaking of cash, where'd all your other money go? Aren't you the king?"},
-    {txt: "Ohh... right, gambling addiction. Okay, moving on"},
-    {txt: "Now it's time to go gambling!", thing: () => {
+    {txt: "Wow, he dropped money that time!"},
+    {txt: "Speaking of money, where'd all your other money go? Aren't you the king?"},
+    {txt: "Ohh... right, gambling addiction. Okay, moving on-"},
+    {txt: "It's time to fuel your gambling addiction!", thing: () => {
         switchState("gamble");
     }},
-    {txt: "Click the lever to gamble!"},
+    {txt: "Click the lever to gamble! It costs 2 coins, though..."},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
     {txt: "If the center one lands on a + sign, the two other enemies will merge together!"},
     {txt: "You can gamble as many times as you want (as long as you have enough money)."},
@@ -401,7 +554,7 @@ var tutorialText = [
 
 
 
-    {txt: "there's a 1% chance of this text appearing"},
+    {txt: "There's a 1% chance of this text appearing"},
     {txt: "A Bb F Bb A Bb F Bb A Bb F Bb A Bb F Bb G# A", thing: () => {
         music.gambling.pause();
         music.gaster.play();

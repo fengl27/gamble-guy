@@ -68,7 +68,7 @@ const weapons = {
         vel: new Vect(),
         nodePos: new Vect(),
         stats: {
-            size:1,
+            size:2,
             playerSlow:0.3
         },
         thrown: false,
@@ -77,8 +77,8 @@ const weapons = {
         upgrades:[],
         update: function() {
             this.dir -= this.charge/18;
-            let thrown = getInput(player.controls.Mace);
-            if(thrown&&!this.thrown&&!this.throwing){
+            let thrown = !getInput(player.controls.Mace, false)&&this.charge;
+            if(getInput(player.controls.Mace, false)&&!this.thrown){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
                 this.charge=Math.min(7,this.charge+(this.charge<3?0.1:((7-this.charge)/60+0.01)))
             }
@@ -155,13 +155,13 @@ const weapons = {
                         }
                         if(velMag>1.1){
                             enemies[i].damage(1);
+                            soundEffects.sword.play();
 
-                        }else{
-                            var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
-                            let wantedMag = (this.stats.size+enemies[i].size) - dst;
-                            enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
                         }
-                        soundEffects.sword.play();
+                        var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
+                        let wantedMag = (this.stats.size+enemies[i].size) - dst;
+                        enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
+                        enemies[i].vel.add(Vect.mult(this.vel, 6));
                     }
                 }
             }
@@ -176,32 +176,34 @@ const weapons = {
             var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
-            let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size * cam.scale+pos.x, -this.stats.size * cam.scale+pos.y,
-                    this.stats.size * cam.scale*2, this.stats.size * cam.scale*2
+            let args = [assets.weapons, Player.spriteSize * 4, 0, Player.spriteSize, Player.spriteSize,
+                    -this.stats.size * cam.scale*1.5+pos.x, -this.stats.size*1.5 * cam.scale+pos.y,
+                    this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
             ];
-            if(this.thrown) {
-                ctx.drawImage(...args);
-            }else if(this.charge!==0){
-                let args = [
-                    assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size * cam.scale, -cam.scale * 3.5 - this.charge * cam.scale,
-                    this.stats.size * cam.scale*2, this.stats.size * cam.scale*2
-                ];
-                
+            if(!this.thrown && this.charge!==0){
+                //chan
+                ctx.save();
+                ctx.translate(playerPos.x, playerPos.y);
+                ctx.rotate(this.dir);
+                for(var x = 0; x < cam.scale * 3.5 + this.charge * cam.scale; x += cam.scale * 4) {
+                    ctx.drawImage(assets.chain, x, -cam.scale * 2, cam.scale * 4, cam.scale * 4);
+                }
+                ctx.restore();
+                //mac
                 ctx.save();
                 ctx.translate(playerPos.x, playerPos.y);
                 ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
                 ctx.drawImage(
-                    assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size * cam.scale, -cam.scale * 3.5 - this.charge * cam.scale,
-                    this.stats.size * cam.scale*2, this.stats.size * cam.scale*2
+                    assets.weapons, Player.spriteSize * 4, 0, Player.spriteSize, Player.spriteSize,
+                    -this.stats.size * cam.scale*1.5, -cam.scale * 6.5 - this.charge * cam.scale,
+                    this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
                 );
                 ctx.restore();
                 if(this.charge>0){
                     ctx.save();
                     ctx.translate(playerPos.x, playerPos.y);
-                    ctx.rotate(Math.atan2(toMouse.y,toMouse.x))
+                    ctx.rotate(Math.atan2(toMouse.y,toMouse.x));
+
                     if(this.charge>1){
                         ctx.fillStyle = "rgba(0, 255, 125, 0.15)";//real transparent red (not clickbait)
                         ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * ((this.charge-1)*7), 3 * cam.scale);
@@ -212,21 +214,35 @@ const weapons = {
                     ctx.restore();
                 }
             }
-            if(this.thrown) {
-                ctx.strokeStyle = "brown";
-                ctx.lineWidth = 5
+            else if(this.thrown) {
+                //chain of doom
                 ctx.beginPath();
-                ctx.moveTo(pos.x,pos.y);
-                ctx.quadraticCurveTo(nodePos.x,nodePos.y, playerPos.x, playerPos.y);
-                ctx.stroke();
-                ctx.strokeStyle = "black";
+                ctx.moveTo(pos.x, pos.y);
+                var lastPoint = Vect.get(pos);
+                for(var i = 0; i <= 1; i += 0.01) {
+                    let p1 = Vect.lerp(pos, nodePos, i);
+                    let p2 = Vect.lerp(nodePos, playerPos, i);
+                    let p = Vect.lerp(p1, p2, i);
+                    
+                    if(sqrDist(p.x, p.y, lastPoint.x, lastPoint.y) > cam.scale * cam.scale * 9 || i + 0.01 > 1) {
+                        ctx.save();
+                        ctx.translate(lastPoint.x, lastPoint.y);
+                        ctx.rotate(Math.atan2(p.y - lastPoint.y, p.x - lastPoint.x));
+                        ctx.drawImage(assets.chain, -cam.scale / 2, -cam.scale * 2, cam.scale * 3.5, cam.scale * 4);
+                        //ctx.fillRect(-2, -2, cam.scale * 3 + 4, 4);
+                        ctx.restore();
+                        lastPoint.set(p);
+                    }
+                }
+                //mace of dom
+                ctx.drawImage(...args);
+                /*
+                ctx.fillStyle = "red";
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, this.stats.size * cam.scale, 0, Math.PI * 2);
+                ctx.fill();
+                */
             }
-            /*
-            ctx.fillStyle = "red";
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, this.stats.size * cam.scale, 0, Math.PI * 2);
-            ctx.fill();
-            */
         },
         reset:function() {
             this.charge = 0;
@@ -235,122 +251,6 @@ const weapons = {
             this.thrown = false;
         }
     },
-    /*
-    mace: {
-        pos: new Vect(),
-        vel: new Vect(),
-        node: Array(3).fill(0).map((thing, idx) => [new Vect(idx * 5, 0), new Vect()]),
-        swordSize: 10,
-        update: function() {
-            let lastNodePos = Vect.get(this.pos);
-            let lastNodeVel = new Vect();
-            for(var i = 0;i<this.node.length;i++){
-                let offset = Vect.sub(this.node[i][0],lastNodePos)
-                let targetMag = 5-offset.mag();
-                offset.mult(targetMag/offset.mag());
-                this.node[i][1].add(Vect.mult(offset,0.2));
-                offset = Vect.sub(this.node[i][0],i===this.node.length-1?player.pos:this.node[i+1][0]);
-
-                targetMag = 5-offset.mag();
-                offset.mult(targetMag/offset.mag());
-                
-                this.node[i][1].mult(0.99);
-
-                let normal = Vect.normalize(Vect.sub(this.node[i][0], lastNodePos));
-                let dotProd = Vect.mult(normal, Vect.dot(normal, (Vect.sub(this.node[i][1], lastNodeVel))));
-                dotProd.mult(-0.1);
-                this.node[i][1].add(dotProd);
-                if(i !== 0) this.node[i-1][1].sub(dotProd);
-
-                dotProd = Vect.mult(normal, Vect.dot(normal, this.node[i][1]));
-                this.node[i][1].sub(Vect.mult(dotProd, 0.2));
-                dotProd = Vect.mult(normal, Vect.dot(normal, lastNodeVel));
-                if(i !== 0) this.node[i-1][1].sub(Vect.mult(dotProd, 0.2));
-
-                this.node[i][1].add(Vect.mult(offset,0.8));
-
-
-                lastNodePos.set(this.node[i][0]);
-                lastNodeVel.set(this.node[i][1]);
-            }
-            for(var i = 0;i<this.node.length;i++){
-                this.node[i][0].add(this.node[i][1]);
-            }
-            let mousePos = cam.toGlobal(new Vect(mouse.x,mouse.y))
-            let offset = Vect.sub(this.pos, mousePos);
-            let playerOffset = Vect.sub(this.pos, this.node[this.node.length-1][0]);
-            let mouseDist = offset.mag();
-            let offsetDir = Vect.normalize(offset);
-            let targetMag = 15 - playerOffset.mag();
-            playerOffset.mult(targetMag / playerOffset.mag());
-            
-            if(this.selected){
-                this.vel.sub(Vect.mult(Vect.mult(Vect.normalize(offset),Math.min(mouseDist,15)),0.2));
-            }
-            this.vel.add(Vect.mult(playerOffset,0.2));
-            this.vel.mult(this.selected?0.5:0.99);
-
-            let normal = Vect.normalize(Vect.sub(this.pos, this.node.at(-1)[0]));
-            let dotProd = Vect.mult(normal, Vect.dot(normal, this.vel));
-            this.vel.sub(Vect.mult(dotProd, 0.2));
-
-            this.pos.add(this.vel);
-            let cPoss = [
-                this.pos
-            ];
-            for(var j = 0; j < cPoss.length; j ++) {
-                let cPos = cPoss[j];
-                for(var i = 0; i < enemies.length; i ++) {
-                    if(!enemies[i].iframes && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (3 + enemies[i].size)*((3 + enemies[i].size))) {
-                        //collide (they die)
-                        if((enemies[i].type === Enemy.arrow && !selected) || enemies[i].type === Enemy.dagger) {
-                            continue;//don't or else it would be kinda op
-                        }
-                        enemies[i].damage(1);
-                        console.log("damaged " + enemies[i].asset);
-                        soundEffects.sword.play();
-                    }
-                }
-
-            }
-        },
-        display: function() {
-            //basically copied from enemy.js
-            var pos = cam.toScreen(this.pos);
-            ctx.save();
-            ctx.translate(pos.x, pos.y);
-            //ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
-
-            var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
-            ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
-
-            let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size / 2 * cam.scale, -this.stats.size / 2 * cam.scale,
-                    this.stats.size * cam.scale, this.stats.size * cam.scale
-            ];
-            if(this.selected) {
-                ctx.drawImage(...args);
-            }
-            else {
-                drawGrayedImage(...args);
-            }
-
-            ctx.restore();
-            ctx.lineJoin = "round";
-            ctx.lineWidth = h100;
-            ctx.strokeStyle = "black";
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            for(var i = 0; i < this.node.length; i ++) {
-                let nodePos = cam.toScreen(this.node[i][0]);
-                ctx.lineTo(nodePos.x, nodePos.y);
-            }
-            let pp = cam.toScreen(player.pos);
-            ctx.lineTo(pp.x, pp.y);
-            ctx.stroke();
-        }
-    },
-    */
     arrow: function(p, v) {
         this.stats = {
             size:5
@@ -370,6 +270,7 @@ const weapons = {
         stats:{
             sizeMult: 10,
             dirAccel:0.08,
+            chargeMult: 1,
             playerSlow:0.5,
         },
         upgrades:[],
@@ -381,14 +282,14 @@ const weapons = {
             this.pullbackVel *= 0.8;
             this.pullbackVel -= this.pullbackAmt * 0.3;
 
-            if(getInput(player.controls.Bow) && !this.chargeTimer) {//0 = lb, 1 = wheel, 2 = rb
+            if(getInput(player.controls.Bow, true) && !this.chargeTimer) {
                 this.chargeTimer ++;
                 soundEffects.arrowLoad.play();
             }
             else if(this.chargeTimer) {
-                if(mouse.pressed && mouse.button === 0) {
+                if(getInput(player.controls.Bow, false)) {
                     player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
-                    this.chargeTimer = Math.min(this.chargeTimer + 1, 40);
+                    this.chargeTimer = Math.min(this.chargeTimer + this.stats.chargeMult, 40);
                     this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/40) * 4;
                 }
                 else {

@@ -11,7 +11,9 @@ var playerStuff = {
     changeControl: function(control, newVal) {
         this.controls[control] = newVal;
     },
-    coins: 0
+    coins: tutorial? 0: 2,
+    requiredRent: 1,
+    roundsLeft: 1
 }
 var bob = pauseSettingsEl.querySelector("#pauseSettings-keybinds");
 for(let i in playerStuff.controls) {
@@ -42,6 +44,16 @@ class Player {
     display() {
         var pos = cam.toScreen(this.pos);
         
+        if(!this.exploding) {
+            for(var i = 0; i < this.weapons.length; i ++) {
+                this.weapons[i].display();
+            }
+
+            for(var i = 0; i < this.projectiles.length; i ++) {
+                this.projectiles[i].display();
+            }
+        }
+
         if(this.exploding < 30) {
             var walkCycle = Math.floor(this.walkAnim / Player.walkAnimSpeed) % 4;
 
@@ -59,16 +71,7 @@ class Player {
             );
         }
 
-        if(!this.exploding) {
-            for(var i = 0; i < this.weapons.length; i ++) {
-                this.weapons[i].display();
-            }
-
-            for(var i = 0; i < this.projectiles.length; i ++) {
-                this.projectiles[i].display();
-            }
-        }
-        else if(this.explodeThing && this.exploding < 130) {
+        if(this.explodeThing && this.exploding < 130) {
             ctx.save();
             ctx.globalAlpha = 1-easings.easeInOutQuad((this.exploding % 10) / 10);
             ctx.translate(pos.x, pos.y);

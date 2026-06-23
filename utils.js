@@ -48,6 +48,21 @@ canvas.addEventListener("mousedown", handleMousePress   );
 canvas.addEventListener("mousemove", handleMouseMove    );
 canvas.addEventListener("mouseup",   handleMouseRelease );
 
+//hash function for literally just the floorboards
+//hash function for setseed for um testing
+function mulberry32(a) {
+  return function(b) {
+    let t = a + b*0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+
+//var seed = 150;//setseed
+var seed = (Math.random()*2**32)>>>0;
+const getRand = mulberry32(seed)
+
 //very yes functions
 var distRectToPoint = function(tl, br, p) {
     var x = Math.min(br.x, Math.max(tl.x, p.x));
@@ -232,7 +247,7 @@ document.body.addEventListener("keyup", keys.handleKeyUp);
 function getInput(inputName, isJustPressed) {
     if(isJustPressed) {
         return inputName === "mouseLeft"? mouse.justPressed&&mouse.button===0:
-            input.name === "mouseRight"? mouse.justPressed&&mouse.button===2:
+            inputName === "mouseRight"? mouse.justPressed&&mouse.button===2:
             !!justPressed[inputName];
     }
     else {
