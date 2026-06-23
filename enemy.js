@@ -92,6 +92,8 @@ class Enemy {
             }
         },
         init: function() {
+            this.spawnAnim = 0;//don't spawnnimation
+            this.numCoins = 0;
             this.mass = 0;//don't collision
             this.size = 1;//smol
             this.deathTimer = 0;
@@ -141,6 +143,8 @@ class Enemy {
             }
         },
         init: function() {
+            this.spawnAnim = 0;//don't spawnnimation
+            this.numCoins = 0;
             this.mass = 0;//don't collision
             this.size = 1;//smol
             this.deathTimer = 0;
@@ -444,6 +448,7 @@ class Enemy {
             }
         },
         init: function() {
+            this.numCoins = 3;
             this.shooting = false;
             this.shootReload = 0;
             this.shootTimer = 0;
@@ -729,6 +734,7 @@ class Enemy {
             }
         },
         init: function() {
+            this.numCoins = 0;
             
             this.health = 1;
             this.size = 1.5;
@@ -997,7 +1003,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
-            
+            this.numCoins = 2;
             this.health = 2;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
@@ -1229,6 +1235,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
+            this.numCoins = 5;
             this.health = 3;
             this.size = 2;
             this.mass = 0;
@@ -1336,6 +1343,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
+            this.numCoins = 2;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
@@ -1563,75 +1571,58 @@ class Enemy {
                 this.iframes = NaN;//white
                 if(this.deathAnim >= settings.deathDelay - 9) {
                     let frame = Math.floor((this.deathAnim - settings.deathDelay + 9) / 3);
-                    ctx.drawImage(
+                    Enemy.drawImage(
                         assets.death,
                         frame * Player.spriteSize, 0,
                         Player.spriteSize, Player.spriteSize,
                         pos.x - cam.scale * 4,
                         pos.y - cam.scale * 4,
                         cam.scale * 8,
-                        cam.scale * 8
+                        cam.scale * 8, this.iframes
                     );
                     return;
                 }
             }
+            var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
 
-            if(this.dashCharge) {
+            let pointDir = this.dashCharge? this.dashDir: this.toPlayer;
+
+            var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(pointDir.x),Math.round(pointDir.y)));
+            
+            //ctx.fillStyle = "red";
+            //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+            Enemy.drawImage(
+                assets.fencer,
+                tilesheetPos.x * Player.spriteSize,
+                tilesheetPos.y * Player.spriteSize,
+                Player.spriteSize,
+                Player.spriteSize,
+                pos.x - cam.scale * 4,
+                pos.y - cam.scale * 4,
+                cam.scale * 8,
+                cam.scale * 8, this.iframes
+            );
+
+            if(this.dashTimer || this.driftTimer) {
                 let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
                 let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+                for(var i = 0; i < this.dashTrail.length; i ++) {
+                    let pos = cam.toScreen(this.dashTrail[i][0]);
 
-                ctx.drawImage(
-                    assets.fencer,
-                    tilesheetPos * Player.spriteSize, 0,
-                    Player.spriteSize,
-                    Player.spriteSize,
-                    pos.x - cam.scale * 4,
-                    pos.y - cam.scale * 4,
-                    cam.scale * 8,
-                    cam.scale * 8
-                );
-            }
-            else {
-
-                var walkCycle = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
-
-                var tilesheetPos = getTilesheetPos(walkCycle, new Vect(Math.round(this.toPlayer.x),Math.round(this.toPlayer.y)));
-                
-                //ctx.fillStyle = "red";
-                //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
-                Enemy.drawImage(
-                    assets.fencer,
-                    tilesheetPos.x * Player.spriteSize,
-                    tilesheetPos.y * Player.spriteSize,
-                    Player.spriteSize,
-                    Player.spriteSize,
-                    pos.x - cam.scale * 4,
-                    pos.y - cam.scale * 4,
-                    cam.scale * 8,
-                    cam.scale * 8, this.iframes
-                );
-
-                if(this.dashTimer || this.driftTimer) {
-                    let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
-                    let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
-                    for(var i = 0; i < this.dashTrail.length; i ++) {
-                        let pos = cam.toScreen(this.dashTrail[i][0]);
-
-                        let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
-                        ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
-                        ctx.drawImage(
-                            assets.fencer,
-                            tilesheetPos * Player.spriteSize, 0,
-                            Player.spriteSize,
-                            Player.spriteSize,
-                            pos.x - cam.scale * 4,
-                            pos.y - cam.scale * 4,
-                            cam.scale * 8,
-                            cam.scale * 8
-                        );
-                    }
-                    ctx.globalAlpha = 1;
+                    let stuffTime = stateSwitchTimer - this.dashTrail[i][1];
+                    ctx.globalAlpha = Math.exp(-stuffTime / 10) * 0.5;
+                    ctx.drawImage(
+                        assets.fencer,
+                        tilesheetPos * Player.spriteSize, 0,
+                        Player.spriteSize,
+                        Player.spriteSize,
+                        pos.x - cam.scale * 4,
+                        pos.y - cam.scale * 4,
+                        cam.scale * 8,
+                        cam.scale * 8
+                    );
                 }
+                ctx.globalAlpha = 1;
             }
             
             if(this.swording && !this.deathTimer) {
@@ -1691,7 +1682,7 @@ class Enemy {
             }
             else {
                 this.vel.mult(0.8);
-                let moveAmt = 0.15;
+                let moveAmt = this.driftTimer > 0? -0.05: 0.1;
                 if(this.swordWindup) { 
                     moveAmt*=0.5;
                     this.swordWindup ++;
@@ -1727,18 +1718,19 @@ class Enemy {
                             //die
                             player.damage();
                         }
-                        if(this.swordTimer>13){
-                            this.vel.add(Vect.mult(toPlayer,-4));
-                        }
+                    }
+                    if(this.swordTimer===30){
+                        this.vel.add(Vect.mult(toPlayer,-4));
+                        this.driftTimer = 30;//reload
                     }
                 }
                 
-                else if(dst < 30) {
+                else if(dst < 30 && this.driftTimer <= 0) {
                     this.dashTrail = [];
                     this.dashCharge ++;
 
                     //cool maths
-                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 15));
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 10));
                     this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
 
                     this.vel.set(Vect.mult(this.dashDir, -1.5));
@@ -1790,9 +1782,10 @@ class Enemy {
             }
         },
         init: function() {
+            this.numCoins = 7;
             this.size = 1.5;
             this.walkAnimSpeed = 7;
-            this.health = 5;
+            this.health = 4;
 
             this.dashCharge = 0;
             this.dashTimer = 0;//when you actually dash;
@@ -1803,13 +1796,13 @@ class Enemy {
             this.swordDir = 0;
             this.swordTargetDir = 0;
             this.swordVel = 0;
-            this.swordSize = 10;
+            this.swordSize = 7;
             this.dashDir = new Vect();
 
             this.dashTrail = [];
         },
         damage: function() {
-            this.vel.sub(Vect.mult(this.toPlayer, 10));
+            this.vel.sub(Vect.mult(this.toPlayer, 5));
             this.swording = false;
             this.swordWindup = 0;
             this.swordTimer = 0;
@@ -1818,7 +1811,7 @@ class Enemy {
             this.swordVel = 0;
             this.dashCharge = 0;
             this.dashTimer = 0;//when you actually dash;
-            this.driftTimer = 0;
+            this.driftTimer = 30;//drift away into nothingness
         }
     }
     static stack = {
@@ -2002,7 +1995,7 @@ class Enemy {
             }
         },
         init: function() {
-            this.health = 3 ;
+            this.health = 3;
             this.size = 1.5;
             this.walkAnimSpeed = 7;
 
@@ -2226,7 +2219,7 @@ class Enemy {
                                 Vect.sub(
                                     Vect.add(
                                         player.pos,
-                                        Vect.mult(player.vel, dst / 2)
+                                        Vect.mult(player.vel, /*dst / 2*/dst * 0.2)
                                     ),
                                     this.pos
                                 )
@@ -2239,6 +2232,7 @@ class Enemy {
             }
         },
         init: function() {
+            this.numCoins = 5;
             this.size = -0.5;
             this.walkAnimSpeed = 7;
 
@@ -2441,7 +2435,9 @@ class Enemy {
             }
         },
         init: function() {
-            this.health = 3;
+            this.numCoins = 3;
+
+            this.health = 5;
 
             this.size = 1.5;
             this.walkAnimSpeed = 7;
@@ -2612,7 +2608,8 @@ class Enemy {
                 }
             }
         },
-        init: function() {
+        init: function() {            
+            this.numCoins = 2;
             this.health = 3;
             this.size = 2.25;
             this.walkAnimSpeed = 10;
@@ -2779,6 +2776,7 @@ class Enemy {
             }
         },
         init: function() {
+            this.numCoins = 3;
             this.health = 3;
             this.size = 2.25;
             this.walkAnimSpeed = 10;
@@ -2815,6 +2813,7 @@ class Enemy {
     static dummy = {
         display: function() {
             let pos = cam.toScreen(this.pos);
+            /*
 
             if(this.spawnAnim < 9) {
                 let frame = Math.floor(this.spawnAnim / 3);
@@ -2830,7 +2829,7 @@ class Enemy {
                 );
                 return;
             }
-        
+            */
             if(this.deathAnim) {
                 this.iframes = NaN;//white
                 if(this.deathAnim >= settings.deathDelay - 9) {
@@ -2898,7 +2897,7 @@ class Enemy {
             this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
         },
         init: function() {
-            this.spawnAnim = 0;
+            this.numCoins = 2;//enough to gamble 2 times
             this.health = 5;
             this.size = 2.25;
 
@@ -2927,24 +2926,45 @@ class Enemy {
         this.asset = type || "archer";
         this.type = Enemy[type || "archer"];
 
+        this.spawnAnim = 30 + 5 * enemies.length;
+
         this.invincible = false;
         this.size = 0;
         this.health = 1;
         this.collisions = true;
         this.mass = 1;//0 means don't collide (i'm not doing actual mass physics it's just whoever's heavier doesn't get moved)
 
+        this.numCoins = 1;
+
         this.dead = false;
         this.deathAnim = 0;
         this.type.init.call(this);
 
-        this.iframes = 0;
+        this.iframes = 1;//don't die while spawning
     }
 
     display() {
+        if(this.spawnAnim) {
+            if(this.spawnAnim < 9) {
+                let pos = cam.toScreen(this.pos);
+                let frame = Math.floor(this.spawnAnim / 3);
+                ctx.drawImage(
+                    assets.death, frame * Player.spriteSize, 0, Player.spriteSize, Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8, cam.scale * 8
+                );
+            }
+            return;
+        }
         this.type.display.call(this);
     }
 
     update() {
+        if(this.spawnAnim) {
+            this.spawnAnim --;
+            return;
+        }
         var toPlayer = new Vect(
             player.pos.x - this.pos.x,
             player.pos.y - this.pos.y
@@ -3008,7 +3028,9 @@ class Enemy {
         }
         if(this.health <= 0) {
             this.deathAnim = 1;
-            console.log("i dead");
+            for(var i = 0; i < this.numCoins; i ++) {
+                coins.push(new Coin(this.pos.x, this.pos.y));
+            }
         }
     }
 };

@@ -625,7 +625,10 @@ var otherSounds = {
     sword: "sword.mp3",
 
     buttonHover: "button-hover.mp3",
-    buttonClick: "button-click.mp3"
+    buttonClick: "button-click.mp3",
+
+    coinBounce: "coin-bounce.mp3",
+    coinPickup: "coin-pickup.mp3"
 };
 var music = {
     playing: "song.mp3",

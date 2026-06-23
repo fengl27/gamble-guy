@@ -34,6 +34,7 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "playing":
+            roundEnemies.push("fencer");
             setupLevel();
             music.playing.play();
             break;
@@ -141,10 +142,8 @@ var frame = function() {
         }
         if(!paused) {
             optionsMenu.isInOptions = false;
+            optionsMenu.run();
         }
-    }
-    if((pauseSettingsEl.style.visibility === "visible") !== optionsMenu.isInOptions) {
-        pauseSettingsEl.style.visibility = optionsMenu.isInOptions? "visible": "hidden";
     }
     if(optionsMenu.isInOptions) {
         optionsMenu.run();
