@@ -143,9 +143,6 @@ var frame = function() {
             optionsMenu.isInOptions = false;
         }
     }
-    if((pauseSettingsEl.style.visibility === "visible") !== optionsMenu.isInOptions) {
-        pauseSettingsEl.style.visibility = optionsMenu.isInOptions? "visible": "hidden";
-    }
     if(optionsMenu.isInOptions) {
         optionsMenu.run();
     }

@@ -57,6 +57,9 @@
 
                 visibility: hidden;
             }
+            .pauseSettings-screen {
+                visibility: hidden;
+            }
             input[type='range'] {
                 -webkit-appearance: none;
                 background: transparent;
@@ -114,12 +117,17 @@
         <button onclick = "startGame.call(this);" id = "start-button">Run game</button>
         <canvas id = "canvas"></canvas>
         <div id = "pauseSettings">
-            Music volume:
-            <input type = "range" value = "100" min = "0" max = "100" oninput = "document.getElementById('musicVolLabel').textContent=this.value" id = "musicVolSlider">
-            <label id = "musicVolLabel">100</label>%<br>
-            SFX volume:
-            <input type = "range" value = "100" min = "0" max = "100" oninput = "document.getElementById('sfxVolLabel').textContent=this.value" id = "sfxVolSlider">
-            <label id = "sfxVolLabel">100</label>%
+            <div id = "pauseSettings-main" class = "pauseSettings-screen">
+                Music volume:
+                <input type = "range" value = "100" min = "0" max = "100" oninput = "document.getElementById('musicVolLabel').textContent=this.value" id = "musicVolSlider">
+                <label id = "musicVolLabel">100</label>%<br>
+                SFX volume:
+                <input type = "range" value = "100" min = "0" max = "100" oninput = "document.getElementById('sfxVolLabel').textContent=this.value" id = "sfxVolSlider">
+                <label id = "sfxVolLabel">100</label>%
+            </div>
+            <div id = "pauseSettings-keybinds" class = "pauseSettings-screen">
+                
+            </div>
         </div>
     </body>
     <!--sound effect lib-->

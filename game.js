@@ -424,8 +424,9 @@ var drawTutorial = function() {
 
 var optionsMenu = {
     isInOptions: false,
+    currScreen: "main",
     run: function() {
-        ctx.fillStyle = "rgba(95, 95, 95, 0.05)";
+        ctx.fillStyle = "rgb(95, 95, 95)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.font = 20 * h100 + "px pixelFont";
         ctx.textAlign = "center";
@@ -433,10 +434,33 @@ var optionsMenu = {
         ctx.fillStyle = "white";
         ctx.fillText("OPTIONS!!!", canvas.width/2, canvas.height / 4);
 
+        switch(this.currScreen) {
+            case "main":
+                this.toKeybindsButton.go();
+                if(this.toKeybindsButton.pressed) {
+                    this.currScreen = "keybinds";
+                }
+                break;
+        }
+
         this.leaveOptionsButton.go();
         if(this.leaveOptionsButton.pressed) {
-            this.isInOptions = false;
+            if(this.currScreen === "main") {
+                this.isInOptions = false;
+            }
+            else {
+                this.currScreen = "main";
+            }
         }
+
+        for(var i = 0; i < pauseSettingsEl.children.length; i ++) {
+            var shouldShow = this.isInOptions && pauseSettingsEl.children[i].id === "pauseSettings-" + this.currScreen;
+            if(shouldShow !== (pauseSettingsEl.children[i].style.visibility === "visible")) {
+                pauseSettingsEl.children[i].style.visibility = shouldShow? "visible": "hidden";
+            }
+        }
+
+        
     },
     optionsButton: new Button(
         canvas.width/2-h100*20, h100 * 63,
@@ -448,10 +472,16 @@ var optionsMenu = {
         h100 * 30, h100 * 10,
         "Exi(s)t", "rgb(165, 165, 1)"
     ),
+    toKeybindsButton: new Button(
+        canvas.width/2-h100*20, h100 * 70,
+        h100 * 40, h100 * 10,
+        "Keybinds"
+    ),
     runOptionsButton: function() {
         this.optionsButton.go();
         if(this.optionsButton.pressed) {
             this.isInOptions = true;
+            this.currScreen = "main";
         }
     }
 };

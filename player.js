@@ -11,8 +11,7 @@ class Player {
             Up: "w",
             Down: "s",
             Left: "a",
-            Right: "d",
-            Switch: " "
+            Right: "d"
         };
         this.projectiles = [];
         this.weapons = tutorial? []: playerStuff.weapons;
