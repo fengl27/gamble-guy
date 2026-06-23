@@ -10,7 +10,9 @@ const weapons = {
         upgrades:[],
         update: function() {    
             //this.dirVel += (0.15 - this.dirVel) / 10;
-            this.dir += this.stats.dirVel;
+            if((player.controls.Bow===""?mouse.button===2:keys[player.controls.Bow]&&!player.weapons.includes(weapons.bow))||(player.controls.Mace===""?mouse.button===2:keys[player.controls.Mace]&&!player.weapons.includes(weapons.throwMace))){
+                this.dir += this.stats.dirVel;
+            }
 
             let cPoss = [
                 new Vect(player.pos.x + Math.cos(this.dir) * this.stats.size, player.pos.y + Math.sin(this.dir) * this.stats.size),
@@ -79,7 +81,7 @@ const weapons = {
             let thrown = mouse.justReleased && mouse.button === 2;
             if(mouse.pressed&&!this.thrown&&!this.throwing && mouse.button === 2){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
-                this.charge=Math.min(6,this.charge+(this.charge<3?0.1:((6-this.charge)/10+0.01)))
+                this.charge=Math.min(7,this.charge+(this.charge<3?0.1:((7-this.charge)/60+0.01)))
             }
             if(!this.thrown&&thrown||mouse.button!==2){
                 this.thrown = true;
@@ -176,15 +178,16 @@ const weapons = {
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
             let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size / 2 * cam.scale+pos.x, -this.stats.size / 2 * cam.scale+pos.y,
-                    this.stats.size * cam.scale, this.stats.size * cam.scale
+                    -this.stats.size * cam.scale+pos.x, -this.stats.size * cam.scale+pos.y,
+                    this.stats.size * cam.scale*2, this.stats.size * cam.scale*2
             ];
             if(this.thrown) {
                 ctx.drawImage(...args);
             }else if(this.charge!==0){
-                let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                        -this.charge / 2 * cam.scale, -cam.scale * 3 - this.charge * cam.scale,
-                        this.stats.size * cam.scale, this.stats.size * cam.scale
+                let args = [
+                    assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
+                    -this.stats.size * cam.scale, -cam.scale * 3.5 - this.charge * cam.scale,
+                    this.stats.size * cam.scale*2, this.stats.size * cam.scale*2
                 ];
                 
                 ctx.save();
@@ -192,8 +195,8 @@ const weapons = {
                 ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
                 ctx.drawImage(
                     assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size / 2 * cam.scale, -cam.scale * 3 - this.charge * cam.scale,
-                    this.stats.size * cam.scale, this.stats.size * cam.scale
+                    -this.stats.size * cam.scale, -cam.scale * 3.5 - this.charge * cam.scale,
+                    this.stats.size * cam.scale*2, this.stats.size * cam.scale*2
                 );
                 ctx.restore();
                 if(this.charge>0){
@@ -418,9 +421,13 @@ const weapons = {
             ctx.save();
             ctx.translate(pos.x, pos.y);
             ctx.rotate(this.dir);///it points right so im relieved of pain
-
+            
             ctx.translate((this.playerDst + this.stats.sizeMult / 2 + this.pullbackAmt) * cam.scale, 0);
             var vibrationAmt = this.chargeTimer / 40 * cam.scale/4;
+            if(this.chargeTimer>10){
+                ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
+                ctx.fillRect(cam.scale * 2, -cam.scale * 1.5, 150*cam.scale, 3 * cam.scale);
+            }
             ctx.translate(lerp(-vibrationAmt, vibrationAmt, Math.random()), lerp(-vibrationAmt, vibrationAmt, Math.random()));
             ctx.scale(1 + easings.easeOutQuad(this.chargeTimer / 40) / 3, 1);
 

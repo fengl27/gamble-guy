@@ -40,7 +40,7 @@ const l2 = Vect.div(settings.levelSize, 2);
 //LA GAME STATE FOR STAT MACHINEINE
 var gameState = "mainMenu";
 var paused = false;
-var tutorial = true;//aee
+var tutorial = false;//aee
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
 
