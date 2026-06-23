@@ -5,7 +5,8 @@ const weapons = {
         dirVel: 0.15,
         stats:{
             size:10,
-            dirVel:0.15
+            dirVel:0.15,
+            damage:1
         },
         upgrades:[],
         update: function() {
@@ -25,7 +26,7 @@ const weapons = {
                         if(enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
-                        if(enemies[i].damage(1) !== false) {
+                        if(enemies[i].damage(this.stats.damage) !== false) {
                             console.log("damaged " + enemies[i].asset);
                             soundEffects.sword.play();
                         }
@@ -69,18 +70,23 @@ const weapons = {
         nodePos: new Vect(),
         stats: {
             size:2,
-            playerSlow:0.3
+            playerSlow:0.3,
+            damage:2,
+            maxCharge:7,
+            weightPercentage:0.1,
+            pullStrength:0,
         },
         thrown: false,
         charge: 0,
         dir:0,
         upgrades:[],
         update: function() {
+            let weightPercentage = limit(this.stats.weightPercentage, 0, 1);
             this.dir -= this.charge/18;
             let thrown = !getInput(player.controls.Mace, false)&&this.charge;
             if(getInput(player.controls.Mace, false)&&!this.thrown){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
-                this.charge=Math.min(7,this.charge+(this.charge<3?0.1:((7-this.charge)/60+0.01)))
+                this.charge=Math.min(this.stats.maxCharge,this.charge+(this.charge<3?0.1:((this.stats.maxCharge-this.charge)/60+0.01)))
             }
             if(!this.thrown&&thrown){
                 this.thrown = true;
@@ -91,6 +97,12 @@ const weapons = {
                 this.pos.set(player.pos);
                 console.log(this.charge);
                 this.charge = 0;
+            }
+            if(this.thrown && getInput(player.controls.Mace,false)){
+                mousePos = cam.toGlobal(mouse);
+                offset = Vect.sub(mousePos,player.pos);
+                offset = Vect.normalize(offset);
+                this.vel.add(Vect.mult(offset,this.stats.pullStrength*(1-this.weightPercentage)));
             }
             let velMag = this.vel.mag();
             let sqrDistToPlayer = sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y);
@@ -113,8 +125,8 @@ const weapons = {
                 var dst = Math.sqrt(sqrDistToPlayer);
                 let wantedMag = 20 - dst;
                 let force = Vect.mult(Vect.sub(this.pos,player.pos),wantedMag / dst);
-                player.vel.sub(Vect.mult(force,0.9));
-                this.vel.add(Vect.mult(force,0.1));
+                player.vel.sub(Vect.mult(force,1-weightPercentage));
+                this.vel.add(Vect.mult(force,weightPercentage));
             }
             
             if(this.thrown){
@@ -154,7 +166,7 @@ const weapons = {
                             continue;//don't or else it would be kinda op
                         }
                         if(velMag>1.1){
-                            enemies[i].damage(2);
+                            enemies[i].damage(this.stats.damage);
                             soundEffects.sword.play();
 
                         }
@@ -204,12 +216,33 @@ const weapons = {
                     ctx.translate(playerPos.x, playerPos.y);
                     ctx.rotate(Math.atan2(toMouse.y,toMouse.x));
 
+                    let things = [
+                        {p: 0, v: 0},
+                        {p: 0, v: this.charge}
+                    ];
+
+                    for(var i = 0; i < 60; i ++) {
+                        things[1].p += things[1].v;
+                        things[1].v *= 0.95;
+                        things[0].v *= 0.5;
+                        things[0].p += things[0].v;
+                        if(Math.abs(things[1].p - things[0].p) > 20) {
+                            var dst = Math.abs(things[1].p - things[0].p);
+                            let wantedMag = 20 - dst;
+                            things[0].v -= wantedMag * (1-weightPercentage);
+                            things[1].v += wantedMag * weightPercentage;
+                        }
+                    }
+
+                    console.log(things[0].p);
+
                     if(this.charge>1){
                         ctx.fillStyle = "rgba(0, 255, 125, 0.15)";//real transparent red (not clickbait)
-                        ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * ((this.charge-1)*7), 3 * cam.scale);
+                        console.log(1/lerp(0.5,0.05,1-weightPercentage));
+                        ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * (things[0].p + 1.5), 3 * cam.scale);
                     }
                     ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
-                    ctx.fillRect(-cam.scale * 1+ cam.scale* (this.charge-1)*7, -cam.scale * 1, cam.scale * (Math.min(1,this.charge)*20), 2 * cam.scale);
+                    ctx.fillRect(-cam.scale * 1+ cam.scale * (things[0].p + 1.5), -cam.scale * 1,(things[1].p-things[0].p+1.5)*cam.scale, 2 * cam.scale);
 
                     ctx.restore();
                 }
@@ -252,9 +285,6 @@ const weapons = {
         }
     },
     arrow: function(p, v) {
-        this.stats = {
-            size:5
-        };
         this.deathTimer = 0;
         this.pos = p;
         this.vel = v;
@@ -272,10 +302,19 @@ const weapons = {
             dirAccel:0.08,
             chargeMult: 1,
             playerSlow:0.5,
+            mouseAiming: false
         },
         upgrades:[],
         update: function() {
-            this.dirVel += ((this.chargeTimer? 0: -this.stats.dirAccel) - this.dirVel) / 5;
+            if(this.mouseAiming){
+                let aimVect = new Vect(cos(this.dir),sin(this.dir));
+                let rotatedAimVect = new Vect(sin(this.dir),-cos(this.dir));
+                let toMouse = Vect.sub(toScreen(mouse),player.pos.x)
+                let mouseClockwise = Vect.dot(rotatedAimVect,toMouse)>0;
+                this.dirVel += ((this.chargeTimer? 0: (mouseClockwise?1:-1)*this.stats.dirAccel) - this.dirVel) / 5;
+            }else{
+                this.dirVel += ((this.chargeTimer? 0: -this.stats.dirAccel) - this.dirVel) / 5;
+            }
             this.dir += this.dirVel;
 
             this.pullbackAmt += this.pullbackVel;
@@ -358,6 +397,11 @@ const weapons = {
         }
     },
 };
+weapons.arrow.stats = {
+    size:5,
+    damage:1,
+    isSpear:false,
+};
 
 weapons.arrow.prototype.display = function() {
     var pos = cam.toScreen(this.pos);
@@ -367,39 +411,39 @@ weapons.arrow.prototype.display = function() {
 
     let opacity = 1 - this.deathTimer / 10;
     ctx.globalAlpha = opacity;
-    ctx.drawImage(assets.arrow, -cam.scale * 5, -cam.scale * 3, cam.scale * 6, cam.scale * 6);
+    ctx.drawImage(this.isSpear?assets.spear:assets.arrow, -cam.scale * 5, -cam.scale * 3, cam.scale * 6, cam.scale * 6);
     ctx.restore();
 };
 weapons.arrow.prototype.update = function() {
-if(this.deathTimer > 0) {
-    this.deathTimer ++;
-    this.vel.y += 0.05;
-    this.pos.add(this.vel);
-    if(this.deathTimer > 10) {
-        this.dead = true;
+    if(this.deathTimer > 0) {
+        this.deathTimer ++;
+        this.vel.y += 0.05;
+        this.pos.add(this.vel);
+        if(this.deathTimer > 10) {
+            this.dead = true;
+        }
+        return;
     }
-    return;
-}
-if(Math.abs(this.pos.x) > l2.x - this.stats.size || Math.abs(this.pos.y) > l2.y - this.stats.size) {
-    //die
-    this.deathTimer ++;
-    this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
-    this.vel.mult(-0.2);
-    soundEffects.bounce.play();
-}
-else {
-    this.pos.add(this.vel);//and that's it
-}
-
-for(var i = 0; i < enemies.length; i ++) {
-    if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.stats.size + enemies[i].size) * (this.stats.size + enemies[i].size)) {
-        //collide
+    if(Math.abs(this.pos.x) > l2.x - weapons.arrow.stats.size || Math.abs(this.pos.y) > l2.y - weapons.arrow.stats.size) {
+        //die
         this.deathTimer ++;
         this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
         this.vel.mult(-0.2);
         soundEffects.bounce.play();
-        enemies[i].damage(1);
-        return;
     }
-}
+    else {
+        this.pos.add(this.vel);//and that's it
+    }
+
+    for(var i = 0; i < enemies.length; i ++) {
+        if(sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (weapons.arrow.stats.size + enemies[i].size) * (weapons.arrow.stats.size + enemies[i].size)) {
+            //collide
+            this.deathTimer ++;
+            this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
+            this.vel.mult(-0.2);
+            soundEffects.bounce.play();
+            enemies[i].damage(weapons.arrow.stats.damage);
+            return;
+        }
+    }
 }
