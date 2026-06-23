@@ -141,9 +141,7 @@ var game = function() {
 };
 
 var upgradeScreen = function() {
-    console.log("does this even run?");
     if(upgradeChoices.length === 0) {
-        console.log("ya suck");
         switchState("gamble");//no luck
     }
     
@@ -264,6 +262,7 @@ var upgradeScreen = function() {
         ctx.lineTo(canvas.width, canvas.height);
         ctx.fill();
         if(upgradeScreen.transitionTimer > 30) {
+            upgradeScreen.transitionTimer = 0;
             switchState("gamble");
         }
     }
