@@ -22,7 +22,7 @@ class Coin {
         this.rot += this.vel.x / 4;
 
         this.vel.mult(0.8);
-        let diff = Vect.sub(player.pos, this.pos);
+        let diff = Vect.sub(player? player.pos: new Vect(), this.pos);
         if(collect || (diff.sqrMag() < 100 && this.spawnTimer > 30)) {
             if(diff.sqrMag() < 16) {
                 this.dead = true;

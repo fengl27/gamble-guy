@@ -68,7 +68,20 @@ var possibleUpgrades = [
         branchThing: [
 
         ]//infinity annd beeeoyingd
-    }
+    },
+    {
+        name: 'Shoes',
+        symbol: [assets.upgradeIcons, 0, 0],
+        description: "Move 20% faster",
+        effect: function() {
+            playerStuff.stats.speed *= 1.2;
+        },
+        amount: 1,
+        criteria: () => true,
+        branchThing: [
+
+        ]//infinity annd beeeoyingd
+    },
     /*
     {
         name: '1 MORBILLION UBeRS GET',

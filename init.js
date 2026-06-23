@@ -86,6 +86,7 @@ var assets = {
     fencer: "fencer.png",
     swordless: "swordless.png",
     weapons: "weapons.png",
+    upgradeIcons: "upgrade-icons.png",
     
     death: "death.png",
 
@@ -102,7 +103,8 @@ var assets = {
 
     mouse: "mouse.png",
 
-    tutorialNpc: "tutorial-npc.png"
+    tutorialNpc: "tutorial-npc.png",
+
 };
 for(var i in assets) {
     let bob = new Image();

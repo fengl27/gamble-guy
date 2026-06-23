@@ -154,7 +154,7 @@ var upgradeScreen = function() {
     
     ctx.fillStyle = "rgb(70,70,70)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(assets.shopBackground, 0, 0, cam.scale*100*16/9, cam.scale*100);
+    ctx.drawImage(assets.shopBackground, 0, 0, canvas.width, canvas.height);
 
 
 
@@ -177,7 +177,7 @@ var upgradeScreen = function() {
         var pos = new Vect(x, thingOffsetY);
         var size = new Vect(thingWidth, thingHeight);
         //The rect part
-        var hovered = IsPointInAABB(
+        var hovered = playerStuff.roundsLeft && IsPointInAABB(
             mouse,
             pos,
             size
@@ -229,30 +229,31 @@ var upgradeScreen = function() {
         var size = new Vect(canvas.width - h100 * 4, h100 * 48);
         var upgrade = upgradeChoices[hoveredThing];
         if(tutorial){
-            tutorialText[currTutorialMessage].txt = upgrade.description;
-            return
+            tutorialText[currTutorialMessage].txt = upgrade.name + " \n \n " + upgrade.description;
         }
-        rect(ctx, pos.x, pos.y, size.x, size.y, true, true);
+        else {
+            rect(ctx, pos.x, pos.y, size.x, size.y, true, true);
 
-        //Struggle drawing text
-        ctx.fillStyle = "rgb(255, 255, 255)";
-        ctx.font = 10*h100 + "px pixelFont";
-        ctx.fillText(upgrade.name, pos.x + margin, pos.y + margin);
-        ctx.font = 4*h100 + "px pixelFontSmall";
+            //Struggle drawing text
+            ctx.fillStyle = "rgb(255, 255, 255)";
+            ctx.font = 10*h100 + "px pixelFont";
+            ctx.fillText(upgrade.name, pos.x + margin, pos.y + margin);
+            ctx.font = 4*h100 + "px pixelFontSmall";
 
-        //descrpitgion
-        var words = upgrade.description.split(" ");
-        words.push("\n");//so that it displays the last line
-        var currLine = "";
-        var lineIdx = 0;
-        for(var j = 0; j < words.length; j ++) {
-            if(words[j] === "\n" || ctx.measureText(currLine + words[j]).width > size.x - 2 * margin) {
-                ctx.fillText(currLine, pos.x + margin, pos.y + margin + 7 * h100 + 5 * h100 * lineIdx);
-                currLine = "";
-                lineIdx ++;
-            }
-            if(words[j] !== "\n") {
-                currLine += words[j] + " ";
+            //descrpitgion
+            var words = upgrade.description.split(" ");
+            words.push("\n");//so that it displays the last line
+            var currLine = "";
+            var lineIdx = 0;
+            for(var j = 0; j < words.length; j ++) {
+                if(words[j] === "\n" || ctx.measureText(currLine + words[j]).width > size.x - 2 * margin) {
+                    ctx.fillText(currLine, pos.x + margin, pos.y + margin + 7 * h100 + 5 * h100 * lineIdx);
+                    currLine = "";
+                    lineIdx ++;
+                }
+                if(words[j] !== "\n") {
+                    currLine += words[j] + " ";
+                }
             }
         }
     }
@@ -267,6 +268,43 @@ var upgradeScreen = function() {
     ctx.fillStyle = "white";
     ctx.fillText  ("Choose an upgrade!", canvas.width / 2, h100 * 2);
     
+    //money
+    ctx.fillStyle = playerStuff.roundsLeft === 0 && stateSwitchTimer % 20 < 10? "rgb(180, 0, 0)": "white";
+    ctx.font = 8*h100 + "px pixelFont";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "hanging";
+    ctx.drawImage(assets.coin, h100, h100, 6 * h100, 6 * h100);
+    ctx.strokeText(playerStuff.coins, h100 * 8, h100 * 2);
+    ctx.fillText(playerStuff.coins, h100 * 8, h100 * 2);
+
+    if(playerStuff.roundsLeft === 0) {
+        upgradeScreen.payTaxes = 120;
+        if(mouse.justPressed) {
+            playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
+            playerStuff.debt = 0;
+            playerStuff.roundsLeft = 3;
+            playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
+            for(var i = 0; i < 5; i ++) {
+                coins.push(new Coin(9999, 9999));
+            }
+        }
+        let b = upgradeScreen.taxButton;
+        b.p.set(mouse.x - b.s.x/2, mouse.y - b.s.y/2);
+    }
+    if(upgradeScreen.payTaxes) {
+
+        upgradeScreen.taxButton.p.y += (120 - upgradeScreen.payTaxes) * h100/10;
+        upgradeScreen.taxButton.go();
+        upgradeScreen.payTaxes --;
+
+        for(var i = 0; i < coins.length; i ++) {
+            coins[i].update(false);
+        }
+        if(upgradeScreen.payTaxes <= 0) {
+            coins = [];
+        }
+    }
+
     if(upgradeScreen.transitionTimer) {
         upgradeScreen.transitionTimer ++;
         let width = canvas.width - (canvas.width + canvas.height) * easings.easeInOutQuad(Math.min(1, upgradeScreen.transitionTimer/15));
@@ -283,6 +321,8 @@ var upgradeScreen = function() {
         }
     }
 };
+upgradeScreen.payTaxes = 0;
+upgradeScreen.taxButton = new Button(0, 0, h100 * 50, h100 * 10, "PAY RENT!", "red");
 upgradeScreen.transitionTimer = 0;
 var pauseScreen = function() {
     ctx.fillStyle = "rgba(48, 48, 48, 0.05)";
@@ -528,7 +568,7 @@ gamble.button = new Button(40 * w100 - 1.5 * h100, 80 * h100, 40 * w100, 10 * h1
 
 var currTutorialMessage = 0;
 var tutorialText = [
-    {txt: "Welcome to kai's slop machine game! (Press enter to continue)", time: 0},
+    {txt: "Welcome to LORD SAVE THE SLOP MACHINE! (Press enter to continue)", time: 0},
     {txt: "You can move around with WASD"},
     {txt: "Here, have a sword!", thing: () => {player.weapons = [];player.weapons.push(weapons.sword);}},
     {txt: "The sword spins...\nand KILLS PEOPLE!"},
@@ -591,7 +631,7 @@ var tutorialText = [
     {txt: "Wow, he dropped money that time!"},
     {txt: "Speaking of money, where'd all your other money go? Aren't you the king?"},
     {txt: "Ohh... right, gambling addiction. Okay, moving on-"},
-    {txt: "here is my shop",switchstateplease: true,thing:() =>{switchState("upgrade");player.weapons = []}, criteria: () => {return gameState === "gamble"}},
+    {txt: "Here is my collection! You can pick one weapon to start with. I'll give you more stuff the next time we meet.",switchstateplease: true,thing:() =>{switchState("upgrade");player.weapons = []}, criteria: () => {return gameState === "gamble"}},
     {txt: "It's time to fuel your gambling addiction!", switchstateplease: true, criteria: () => {return gameState === "gamble"}},
     {txt: "Click the lever to gamble! It costs 2 coins, though..."},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
@@ -654,13 +694,14 @@ var tutorialText = [
     }} 
 ];
 var drawTutorial = function() {
-    if(gameState !== "mainMenu" && !updateGame.transitionTimer) {
+    if((gameState !== "mainMenu" && !updateGame.transitionTimer && tutorial) || upgradeScreen.payTaxes) {
         ctx.strokeStyle = "black";
         ctx.lineWidth = h100;
         var t = gameState === "playing"? limit(stateSwitchTimer / 30, 0, 1): 1;
         var width = easings.easeInOutQuad(t) * (canvas.width / 2 - 4 * h100);
         var yPos = (easings.easeOutBack(t) - 1) * canvas.height;
-        yPos += h100 * 73 + Math.sin(limit(stateSwitchTimer - tutorialText[currTutorialMessage].time, 0, 5) / 5 * Math.PI) * h100 * 3;
+        var lastThing = tutorial? stateSwitchTimer - tutorialText[currTutorialMessage].time: stateSwitchTimer;
+        yPos += h100 * 73 + Math.sin(limit(lastThing, 0, 5) / 5 * Math.PI) * h100 * 3;
 
         if(stateSwitchTimer > 30) {
             t = gameState === "playing"? limit((stateSwitchTimer - 10)/60, 0, 1): 1;
@@ -672,7 +713,7 @@ var drawTutorial = function() {
             rect(
                 ctx, h100 * 10, gooberY, h100 * 30, h100 * 30, true, true
             );
-            ctx.drawImage(assets.tutorialNpc, (stateSwitchTimer - tutorialText[currTutorialMessage].time) < 15? 0: 53, 0, 53, 53,
+            ctx.drawImage(assets.tutorialNpc, lastThing < 15? 0: 53, 0, 53, 53,
                 h100 * 10, gooberY, h100 * 30, h100 * 30
             );
             ctx.restore();
@@ -687,7 +728,7 @@ var drawTutorial = function() {
             ctx.fillStyle = "black";
             var currLine = "";
             var lineIdx = 0;
-            var words = tutorialText[currTutorialMessage].txt.split(" ");
+            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? "So we meet again. \n Pay your rent and you can have another one of my things!": "Thanks bye~").split(" ");
 
             words.push("\n");//to make sure it draws the last line
             ctx.font = 5 * h100 + "px pixelFontSmall";
@@ -699,7 +740,9 @@ var drawTutorial = function() {
                     lineIdx ++;
                     currLine = "";
                 }
-                currLine += words[i] + " ";
+                if(words[i] !== "\n") {
+                    currLine += words[i] + " ";
+                }
             }
             if(justPressed['enter'] && (!tutorialText[currTutorialMessage].criteria || tutorialText[currTutorialMessage].criteria())) {
                 currTutorialMessage ++;

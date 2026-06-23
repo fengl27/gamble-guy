@@ -13,7 +13,11 @@ var playerStuff = {
     },
     coins: 6,
     requiredRent: 1,
-    roundsLeft: 3
+    roundsLeft: 3,
+    debt: 0,
+    stats: {
+        speed: 1
+    }
 }
 var defaultPlayerStuff = JSON.parse(JSON.stringify(playerStuff));
 if(tutorial) {
@@ -126,7 +130,7 @@ class Player {
         }
         else {
             this.vel.mult(0.5);
-            this.vel.add(Vect.mult(input, 0.3 * this.speedMult));
+            this.vel.add(Vect.mult(input, 0.3 * this.speedMult * playerStuff.stats.speed));
         }
         if(this.iframes>0){
             this.iframes--;

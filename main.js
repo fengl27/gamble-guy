@@ -12,7 +12,7 @@ var setupLevel = function() {
     }
     roundEnemies = [];
 };
-var setupUpgrade = function() {
+var setupUpgrade = function(depressing) {
     upgradeChoices = [];
     //Choose three different upgrades from currPossibleUpgrades as the upgrades.
     var tempThing = currPossibleUpgrades.slice();//make tempThing so that we don't actually delete stuff fromcurrpossibleupgrades because you only do that hwen they actually buy it
@@ -21,7 +21,7 @@ var setupUpgrade = function() {
             if(tempThing.length <= 0) {
                 break;
             }
-            var id = Math.floor(Math.random() * tempThing.length);
+            var id = depressing? 0: Math.floor(Math.random() * tempThing.length);
             if(!tempThing[id].criteria || tempThing[id].criteria()) {
                 upgradeChoices.push(tempThing[id]);
                 tempThing.splice(id, 1);
@@ -43,9 +43,9 @@ var switchState = function(target) {
             music.playing.play();
             break;
         case "upgrade":
-            setupUpgrade();
+            setupUpgrade(playerStuff.weapons.length === 0);//only give weapons when no weapons
             music.gambling.play();
-            return;
+            break;
         case "lose":
             console.log("ha ya' died");
             break;
@@ -60,9 +60,6 @@ var switchState = function(target) {
                     break;
                 }
                 else {
-                    playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
-                    playerStuff.roundsLeft = 3;
-                    playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
                     music.gambling.play();
                     switchState("upgrade");
                     return;
@@ -79,7 +76,7 @@ var switchState = function(target) {
     if(target !== "playing") {
         music.playing.pause();
     }
-    else if(target !== "gamble") {
+    else if(target !== "gamble" && target !== "upgrade") {
         music.gambling.pause();
     }
 };
@@ -245,9 +242,7 @@ var frame = function() {
                 }
                 break;
         }
-        if(tutorial) {
-            drawTutorial();
-        }
+        drawTutorial();
     }
 
     justPressed = [];
