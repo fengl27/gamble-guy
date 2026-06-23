@@ -628,7 +628,9 @@ var otherSounds = {
     buttonClick: "button-click.mp3",
 
     coinBounce: "coin-bounce.mp3",
-    coinPickup: "coin-pickup.mp3"
+    coinPickup: "coin-pickup.mp3",
+
+    buy: "buy.mp3"
 };
 var music = {
     playing: "song.mp3",

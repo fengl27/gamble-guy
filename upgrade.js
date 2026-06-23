@@ -5,7 +5,11 @@ var possibleUpgrades = [
     {
         name: 'Get sword!',
         symbol: [assets.weapons, 2, 0],//sword
+<<<<<<< HEAD
         description: "good short range weapon",
+=======
+        description: "The classic",
+>>>>>>> a280bb2fccd5cff4a354396ea39c8c2554689853
         effect: function() {
             playerStuff.weapons.push(weapons.sword);
         },
@@ -32,7 +36,11 @@ var possibleUpgrades = [
     {
         name: 'Get bow!',
         symbol: [assets.weapons, 1, 0],
+<<<<<<< HEAD
         description: "for people who don't like being close-up",
+=======
+        description: "For people who want to not die",
+>>>>>>> a280bb2fccd5cff4a354396ea39c8c2554689853
         effect: function() {
             playerStuff.weapons.push(weapons.bow);
         },
