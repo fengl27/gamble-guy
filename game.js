@@ -41,11 +41,15 @@ var displayGame = function() {
     Particle.runParticles();
     
     //actual stuff
+    for(var i = 0; i < coins.length; i ++) {
+        coins[i].display();
+    }
     player.display();
     enemies.sort((a, b) => a.pos.y-b.pos.y);
     for(var i = 0; i < enemies.length; i ++) {
         enemies[i].display();
     }
+
 
     //more walls (bottom wall)
     ctx.fillStyle = "rgb(66, 66, 66)";
@@ -66,6 +70,13 @@ var updateGame = function() {
     }
     */
 
+    for(var i = 0; i < coins.length; i ++) {
+        coins[i].update();
+        if(coins[i].dead) {
+            coins.splice(i, 1);
+            i --;
+        }
+    }
     player.update();
     for(var i = 0; i < enemies.length; i ++) {
         enemies[i].update();
@@ -247,8 +258,8 @@ var gamble = function() {
         gamble.button.go();
         if(gamble.button.pressed) {
             if(tutorial) {
-                tutorialText[43].funnyThing = currTutorialMessage;
-                currTutorialMessage = 34;
+                tutorialText[45].funnyThing = currTutorialMessage;
+                currTutorialMessage = 36;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
@@ -317,7 +328,7 @@ var tutorialText = [
         txt: "Try beating this guy up with the sword! (you can continue once you beat him up)",
         criteria: () => {return !enemies.length;},
         thing: () => {
-            player.iFrames = 20;
+            player.iframes = 20;
             enemies.push(new Enemy(0, 0, "dummy"));
         }
         
@@ -331,7 +342,7 @@ var tutorialText = [
         txt: "look, it's this guy again! (run into the enemy to reset if you need to look at previous instructions)",
         criteria: () => {return !enemies.length;},
         thing: () => {
-            player.iFrames = 20;
+            player.iframes = 20;
             enemies.push(new Enemy(0, 0, "dummy"));
         }
         
@@ -348,10 +359,10 @@ var tutorialText = [
         txt: "...it pulls you!!(don't forget to grab it)",
     },
     {
-        txt: "look, it's this guy again! (the dart exists, just press the button)",
+        txt: "look, it's this guy again! (the mace exists, just press the button)",
         criteria: () => {return !enemies.length;},
         thing: () => {
-            player.iFrames = 20;
+            player.iframes = 20;
             enemies.push(new Enemy(0, 0, "dummy"));
         }
         
@@ -366,7 +377,9 @@ var tutorialText = [
         }
         
     },
-    {txt: "Good job! Killing normal people would give you money. (that guy wasn't normal)"},
+    {txt: "Good job! Killing those guys got you enough cash to go gambling."},
+    {txt: "Speaking of cash, where'd all your other money go? Aren't you the king?"},
+    {txt: "Ohh... right, gambling addiction. Okay, moving on"},
     {txt: "Now it's time to go gambling!", thing: () => {
         switchState("gamble");
     }},
@@ -402,7 +415,12 @@ var tutorialText = [
 
 
     {txt: "Dude... \n you died to the guy that can't move"},
-    {txt: "Try again with the sword!", criteria: () => {return !enemies.length;}, thing: () => {player.iFrames = 20;player.weapons = [weapons.sword];enemies.push(new Enemy(0, 0, "dummy")); music.playing.unpause()}},
+    {txt: "Try again with the sword!", criteria: () => {return !enemies.length;}, thing: () => {
+        player.iframes = 20;
+        player.weapons = [weapons.sword];
+        enemies.push(new Enemy(0, 0, "dummy"));
+        music.playing.unpause();
+    }},
     {txt: "ERROR 213", thing: () => {
         currTutorialMessage = 7;
         tutorialText[currTutorialMessage].time = stateSwitchTimer;

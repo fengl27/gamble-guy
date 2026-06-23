@@ -78,11 +78,11 @@ const weapons = {
         update: function() {
             this.dir -= this.charge/18;
             let thrown = getInput(player.controls.Mace);
-            if(mouse.pressed&&!this.thrown&&!this.throwing && mouse.button === 2){
+            if(thrown&&!this.thrown&&!this.throwing){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
                 this.charge=Math.min(7,this.charge+(this.charge<3?0.1:((7-this.charge)/60+0.01)))
             }
-            if(!this.thrown&&thrown||mouse.button!==2){
+            if(!this.thrown&&thrown){
                 this.thrown = true;
                 mousePos = cam.toGlobal(mouse);
                 offset = Vect.sub(mousePos,player.pos);

@@ -10,7 +10,8 @@ var playerStuff = {
     },
     changeControl: function(control, newVal) {
         this.controls[control] = newVal;
-    }
+    },
+    coins: 0
 }
 var bob = pauseSettingsEl.querySelector("#pauseSettings-keybinds");
 for(let i in playerStuff.controls) {
@@ -32,7 +33,7 @@ class Player {
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
         this.stun = 0;
-        this.iFrames = 0;
+        this.iframes = 0;
         this.speedMult = 1;
         this.exploding = 0;
         this.explodeThing = null;
@@ -54,7 +55,7 @@ class Player {
                 pos.x - cam.scale * 4,
                 pos.y - cam.scale * 4,
                 cam.scale * 8,
-                cam.scale * 8, (this.exploding||this.iFrames%20>10)? NaN: 0
+                cam.scale * 8, (this.exploding||this.iframes%20>10)? NaN: 0
             );
         }
 
@@ -119,8 +120,8 @@ class Player {
             this.vel.mult(0.5);
             this.vel.add(Vect.mult(input, 0.3 * this.speedMult));
         }
-        if(this.iFrames>0){
-            this.iFrames--;
+        if(this.iframes>0){
+            this.iframes--;
         }
         this.pos.add(this.vel);
 
@@ -157,7 +158,7 @@ class Player {
         }
     }
     damage() {
-        if(this.iFrames){
+        if(this.iframes){
             return;
         }
         music.playing.pause();
@@ -167,7 +168,7 @@ class Player {
         }
         roundEnemies = []
         if(tutorial) {
-            currTutorialMessage = 31;
+            currTutorialMessage = 33;
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
         else {
