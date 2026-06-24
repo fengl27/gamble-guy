@@ -613,8 +613,8 @@ var gamble = function() {
         gamble.button.go();
         if(gamble.button.pressed) {
             if(tutorial) {
-                tutorialText[47].funnyThing = currTutorialMessage;
-                currTutorialMessage = 38;
+                tutorialText[52].funnyThing = currTutorialMessage;
+                currTutorialMessage = 43;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
@@ -717,7 +717,7 @@ var tutorialText = [
     {txt: "MWAH HAH HAH HAH!!"},
     {txt: "You'll get more weapons later on"},
     {
-        txt: "Try beating this guy up with the sword! (You can continue once you beat him up)",
+        txt: "Try beating this guy up with the sword!\n it spins automatically \n (You can continue once you beat him up)",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -731,7 +731,7 @@ var tutorialText = [
         txt: "Hold left click to start charging the bow!!"
     },
     {
-        txt: "Look, it's this guy again! (Run into the enemy to reset if you need to look at previous instructions.)",
+        txt: "Look, it's this guy again!\n Right click to start charging\n Release to release",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -742,7 +742,7 @@ var tutorialText = [
     {txt: "Here, have another funny weapon!", thing: () => {player.weapons = [];player.weapons.push(weapons.throwMace);}},
     {txt: "The mace exists...\nbut, it's hidden!"},
     {
-        txt: "Right click to start charging the mace!!",
+        txt: "Right click to start charging the mace, it aims towards your mouse (sorry trackpad people)",
     },
     {
         txt: "I almost forgot, if the mace reaches the end of the rope...",
@@ -751,20 +751,57 @@ var tutorialText = [
         txt: "...It pulls you! (Don't forget to grab it!)",
     },
     {
-        txt: "Look, it's this guy again! (The mace exists, just press the button!)",
+        txt: "Look, it's this guy again!\n Right click to start charging\n Release to release\n you have to pick it up again later",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
-            enemies.push(new Enemy(0, 0, "dummy"));
+            enemies.push(new Enemy(0, 0, "dummy")); 
         }
         
     },
     {
-        txt: "He's angry now...",
+        txt: "do you know what this game needs?"
+    },
+    {
+        txt: "you guessed it, parry slop"
+    },
+    {
+        txt: "you can summon your shield with the space bar"
+    },
+    {
+        txt: "it does however break if you don't parry in time"
+    },
+    {
+        txt:"try it now",
+        criteria: () => {return player.shields === 0||player.shieldCooldown!==0},
+        thing: () => {
+            player.shields = 1;
+            player.iframes = 20;
+            player.weapons = [];
+            enemies = [];
+            enemies.push(new Enemy(player.pos.x>0?50*16/9:-50*16/9, player.pos.x>0?50:-50, "archer"));
+            enemies[0].numCoins = 0;
+        }
+    },
+    {
+        txt:"oh, the other guy is back now",
         criteria: () => {return !enemies.length;},
         thing: () => {
-            player.weapons.push(weapons.sword);
-            player.weapons.push(weapons.bow);
+            player.iframes = 20;
+            for(var i = 0; i < enemies.length; i ++) {
+                enemies[i].dead = true;
+            }
+            player.weapons = [weapons.sword, weapons.bow, weapons.throwMace]
+            enemies.push(new Enemy(0, 0, "dummy"));
+        }
+    },
+    {
+        txt: "He looks angry",
+        criteria: () => {return !enemies.length;},
+        thing: () => {
+            enemies = [];
+            player.iframes = 20;
+            player.weapons = [weapons.sword, weapons.bow, weapons.throwMace]
             enemies.push(new Enemy(player.pos.x>0?50*16/9:-50*16/9, player.pos.x>0?50:-50, "sword"));
             enemies[0].numCoins = 6;
         }
@@ -810,9 +847,36 @@ var tutorialText = [
     {txt: "Dude... \n you died to the tutorial guy"},
     {txt: "Lets review again!", criteria: () => {return !enemies.length;}, thing: () => {
         player.iframes = 20;
-        player.weapons = [weapons.sword];
-        enemies.push(new Enemy(0, 0, "dummy"));
-        music.playing.unpause();
+        if(player.weapons.length === 3){
+            currTutorialMessage = 22;
+            player.weapons = [];
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            tutorialText[currTutorialMessage].thing();
+        }
+        else if(player.weapons.length===0){
+            currTutorialMessage = 21;
+            player.weapons = [];
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            tutorialText[currTutorialMessage].thing();
+        }
+        else if(player.weapons[0]===weapons.sword){
+            currTutorialMessage = 2;
+            player.weapons = [];
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            tutorialText[currTutorialMessage].thing();
+        }
+        else if(player.weapons[0]===weapons.bow){
+            currTutorialMessage = 7;
+            player.weapons = [];
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            tutorialText[currTutorialMessage].thing();
+        }
+        else if(player.weapons[0]===weapons.throwMace){
+            currTutorialMessage = 11;
+            player.weapons = [];
+            tutorialText[currTutorialMessage].time = stateSwitchTimer;
+            tutorialText[currTutorialMessage].thing();
+        }
     }},
     {txt: "ERROR 213", thing: () => {
         currTutorialMessage = 7;
@@ -900,7 +964,9 @@ var drawTutorial = function() {
         }
     }
 };
-
+for(var i = 0;i<tutorialText.length;i++){
+    console.log(`${i}+" "+${tutorialText[i].txt}`)
+}
 
 var optionsMenu = {
     isInOptions: false,

@@ -381,15 +381,41 @@ var possibleUpgrades = [
             {
                 name: 'Shield length',
                 symbol: [assets.shield, 0, 0],
-                description: "parry this you filthy casual",
+                description: "parry this ye filthy casual",
                 effect: function() {
-                    playerStuff.stats.shieldLength += 30;
-                    playerStuff.stats.parryLength += 5;
+                    playerStuff.stats.shieldLength += 15;
                 },
                 amount: 1,
                 criteria: () => true,
                 branchThing: [
+                    {
+                        name: 'Rise of the slop hero',
+                        symbol: [assets.shield, 0, 0],
+                        description: "I'm going to be honest and admit that I had gemni summerize the plot of this anime",
+                        effect: function() {
+                            playerStuff.stats.shieldIframes += 10;
+                        },
+                        amount: 1,
+                        criteria: () => true,
+                        branchThing: [
 
+                        ]//infinity annd beeeoyingd
+                    },
+                    {
+                        name: 'Parry assist',
+                        symbol: [assets.shield, 0, 0],
+                        description: "your actually going to have to try to be able to get rid of the shield now",
+                        effect: function() {
+                            playerStuff.stats.shieldLength -= 20;
+                            playerStuff.stats.parryLength += 10;
+                            playerStuff.stats.parryDamageRadius += 1; 
+                        },
+                        amount: 1,
+                        criteria: () => true,
+                        branchThing: [
+
+                        ]//infinity annd beeeoyingd
+                    },
                 ]//infinity annd beeeoyingd
             },
 
