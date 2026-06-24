@@ -116,7 +116,7 @@ var possibleUpgrades = [
                     branchThing: [
                         {
                             name: 'Spear',
-                            symbol: [assets.weapons, 1, 0],
+                            symbol: [assets.weapons, 3, 0],
                             description: "it's so big that we might as well just shoot a spear",
                             effect: function() {
                                 weapons.arrow.stats.size+=2;
@@ -129,7 +129,7 @@ var possibleUpgrades = [
                             branchThing: [
                                 {
                                     name: 'Bigger Spear',
-                                    symbol: [assets.weapons, 1, 0],
+                                    symbol: [assets.weapons, 3, 0],
                                     description: "let's say it together! \n who can't aim? \n I can't aim!!",
                                     effect: function() {
                                         weapons.arrow.stats.size+=2;
@@ -306,7 +306,7 @@ var possibleUpgrades = [
                 symbol: [assets.weapons, 4, 0],
                 description: "you suddenly realize you can pull on the chain",
                 effect: function() {
-                    weapons.throwMace.stats.pullStrength+=0.1
+                    weapons.throwMace.stats.pullStrength+=0.02
                 },
                 amount: 1,
                 criteria: () => true, //normally omit when no criteria
@@ -316,7 +316,7 @@ var possibleUpgrades = [
                         symbol: [assets.weapons, 4, 0],
                         description: "you suddenly realize you can pull harder on the chain",
                         effect: function() {
-                            weapons.throwMace.stats.pullStrength+=0.3
+                            weapons.throwMace.stats.pullStrength+=0.08
                         },
                         amount: 1,
                         criteria: () => true, //normally omit when no criteria
@@ -345,7 +345,7 @@ var possibleUpgrades = [
     },
     {
         name: 'Shield',
-        symbol: [assets.upgradeIcons, 0, 0],
+        symbol: [assets.shield, 0, 0],
         description: "it's like iframes, but on cooldown and only once \n Press space to activate the shield",
         effect: function() {
             playerStuff.stats.shields += 1;
@@ -355,7 +355,7 @@ var possibleUpgrades = [
         branchThing: [
             {
                 name: 'Shield length',
-                symbol: [assets.upgradeIcons, 0, 0],
+                symbol: [assets.shield, 0, 0],
                 description: "parry this you filthy casual",
                 effect: function() {
                     playerStuff.stats.shieldLength += 30;

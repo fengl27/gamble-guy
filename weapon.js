@@ -99,10 +99,9 @@ const weapons = {
                 this.charge = 0;
             }
             if(this.thrown && getInput(player.controls.Mace,false)){
-                mousePos = cam.toGlobal(mouse);
-                offset = Vect.sub(mousePos,player.pos);
-                offset = Vect.normalize(offset);
-                this.vel.add(Vect.mult(offset,this.stats.pullStrength*(1-this.weightPercentage)));
+                offset = Vect.sub(this.pos,player.pos);
+                offset.normalize();
+                this.vel.sub(Vect.mult(offset,this.stats.pullStrength*(1-this.stats.weightPercentage)));
             }
             let velMag = this.vel.mag();
             let sqrDistToPlayer = sqrDist(this.pos.x,this.pos.y,player.pos.x,player.pos.y);
