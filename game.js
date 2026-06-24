@@ -751,7 +751,7 @@ var tutorialText = [
     },
     {
         txt:"try it now",
-        criteria: () => {return player.shields === 0},
+        criteria: () => {return player.shields === 0||player.shieldCooldown!==0},
         thing: () => {
             player.shields = 1;
             player.iframes = 20;
