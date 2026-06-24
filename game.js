@@ -9,53 +9,52 @@ var displayGame = function() {
     if(updateGame.transitionTimer) {
         ctx.translate(easings.easeInQuart(limit((updateGame.transitionTimer - 30) / 20, 0, 1)) * canvas.width, 0);
     }
-    //brick/wood bg
-    var tl = cam.toScreen(Vect.mult(l2, -1));
-    var br = cam.toScreen(l2);
+    if(!player.exploding || player.exploding > 30) {
+        //brick/wood bg
+        var tl = cam.toScreen(Vect.mult(l2, -1));
+        var br = cam.toScreen(l2);
 
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(tl.x, tl.y, br.x-tl.x, br.y-tl.y);
-    ctx.clip();
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(tl.x, tl.y, br.x-tl.x, br.y-tl.y);
+        ctx.clip();
 
-    let grassSize = cam.scale * 20;
-    var xid = yid = 0;
-    for(var x = tl.x; xid < 10; x += grassSize) {
-        yid = 0;
-        for(var y = tl.y; yid < 8; y += grassSize) {
-            ctx.drawImage(assets[tutorial? getRand(xid + yid * 100) < 0.1? "sadWood": "wood": "bricks"], x, y, grassSize+1, grassSize+1);
-            
-            //ctx.fillStyle = `rgb(${255*getRand(xid+yid*100)}, 255, 255)`;
-            //ctx.fillRect(x,y,grassSize,grassSize);
-            yid ++;
+        let grassSize = cam.scale * 20;
+        var xid = yid = 0;
+        for(var x = tl.x; xid < 10; x += grassSize) {
+            yid = 0;
+            for(var y = tl.y; yid < 8; y += grassSize) {
+                ctx.drawImage(assets[tutorial? getRand(xid + yid * 100) < 0.1? "sadWood": "wood": "bricks"], x, y, grassSize+1, grassSize+1);
+                
+                //ctx.fillStyle = `rgb(${255*getRand(xid+yid*100)}, 255, 255)`;
+                //ctx.fillRect(x,y,grassSize,grassSize);
+                yid ++;
+            }
+            xid ++;
         }
-        xid ++;
-    }
 
-    //red danger stuff
-    for(var i = 0; i < enemies.length; i ++) {
-        if(enemies[i].type.drawDanger) {
-            enemies[i].type.drawDanger.call(enemies[i]);
+        //red danger stuff
+        for(var i = 0; i < enemies.length; i ++) {
+            if(enemies[i].type.drawDanger) {
+                enemies[i].type.drawDanger.call(enemies[i]);
+            }
         }
+        ctx.restore();
+
+        //walls
+
+        ctx.fillStyle = "rgb(66, 66, 66)";
+        ctx.fillRect(0, 0, tl.x, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, tl.y);
+        ctx.fillRect(br.x, 0, canvas.width, canvas.height);
+
+        let margin = 4 * cam.scale;
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.fillRect(0, 0, tl.x - margin, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, tl.y - margin);
+        ctx.fillRect(br.x + margin, 0, canvas.width, canvas.height);
+        Particle.runParticles();
     }
-
-    ctx.restore();
-
-    //walls
-
-
-
-    ctx.fillStyle = "rgb(66, 66, 66)";
-    ctx.fillRect(0, 0, tl.x, canvas.height);
-    ctx.fillRect(0, 0, canvas.width, tl.y);
-    ctx.fillRect(br.x, 0, canvas.width, canvas.height);
-
-    let margin = 4 * cam.scale;
-    ctx.fillStyle = "rgb(0, 0, 0)";
-    ctx.fillRect(0, 0, tl.x - margin, canvas.height);
-    ctx.fillRect(0, 0, canvas.width, tl.y - margin);
-    ctx.fillRect(br.x + margin, 0, canvas.width, canvas.height);
-    Particle.runParticles();
     
     //actual stuff
     for(var i = 0; i < coins.length; i ++) {
@@ -67,24 +66,26 @@ var displayGame = function() {
         enemies[i].display();
     }
 
+    if(!player.exploding || player.exploding > 30) {
+        let margin = 4 * cam.scale;
+        //more walls (bottom wall)
+        ctx.fillStyle = "rgb(66, 66, 66)";
+        ctx.fillRect(tl.x, br.y, settings.levelSize.x * cam.scale, canvas.height);
+        ctx.fillStyle = "rgb(0, 0, 0)";
+        ctx.fillRect(0, br.y + margin, canvas.width, canvas.height);
 
-    //more walls (bottom wall)
-    ctx.fillStyle = "rgb(66, 66, 66)";
-    ctx.fillRect(tl.x, br.y, settings.levelSize.x * cam.scale, canvas.height);
-    ctx.fillStyle = "rgb(0, 0, 0)";
-    ctx.fillRect(0, br.y + margin, canvas.width, canvas.height);
+        //ui
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = h100;
 
-    //ui
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = h100;
-
-    ctx.font = 8*h100 + "px pixelFont";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "hanging";
-    ctx.drawImage(assets.coin, h100, h100, 6 * h100, 6 * h100);
-    ctx.strokeText(playerStuff.coins, h100 * 8, h100 * 2);
-    ctx.fillText(playerStuff.coins, h100 * 8, h100 * 2);
+        ctx.font = 8*h100 + "px pixelFont";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "hanging";
+        ctx.drawImage(assets.coin, h100, h100, 6 * h100, 6 * h100);
+        ctx.strokeText(playerStuff.coins, h100 * 8, h100 * 2);
+        ctx.fillText(playerStuff.coins, h100 * 8, h100 * 2);
+    }
 
     //kablooey
     if(player.exploding > 150) {
@@ -330,7 +331,7 @@ var upgradeScreen = function() {
 
     if(playerStuff.roundsLeft === 0) {
         upgradeScreen.payTaxes = 120;
-        if(mouse.justPressed) {
+        if(mouse.justReleased) {
             playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
             playerStuff.debt = 0;
             playerStuff.roundsLeft = 3;

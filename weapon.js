@@ -69,6 +69,7 @@ const weapons = {
         vel: new Vect(),
         nodePos: new Vect(),
         stats: {
+            chargeSpeed: 1,
             size:2,
             playerSlow:0.3,
             damage:2,
@@ -86,7 +87,7 @@ const weapons = {
             let thrown = !getInput(player.controls.Mace, false)&&this.charge;
             if(getInput(player.controls.Mace, false)&&!this.thrown){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
-                this.charge=Math.min(this.stats.maxCharge,this.charge+(this.charge<3?0.1:((this.stats.maxCharge-this.charge)/60+0.01)))
+                this.charge=Math.min(this.stats.maxCharge,this.charge+this.stats.chargeSpeed*(this.charge<3?0.1:((this.stats.maxCharge-this.charge)/60+0.01)))
             }
             if(!this.thrown&&thrown){
                 this.thrown = true;

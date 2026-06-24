@@ -634,6 +634,9 @@ var otherSounds = {
     buy: "buy.mp3",
 
     bubble: "bubble.mp3",//for potion
+
+    shieldBreak: "shield-break.mp3",
+    shieldUse: "shield-use.mp3",
     
     parry: "parry.mp3"
 };

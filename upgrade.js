@@ -277,9 +277,10 @@ var possibleUpgrades = [
             {
                 name: 'Less mace weight',
                 symbol: [assets.weapons, 4, 0],
-                description: "carbon fiber + aluminum",
+                description: "Carbon fiber + aluminum! You'll be able to charge the mace faster but won't go as far.",
                 effect: function() {
-                    weapons.throwMace.stats.weightPercentage+=0.05;
+                    weapons.throwMace.stats.weightPercentage-=0.05;
+                    weapons.throwMace.stats.chargeSpeed *= 1.5;
                 },
                 amount: 1,
                 criteria: () => true, //normally omit when no criteria
@@ -287,10 +288,11 @@ var possibleUpgrades = [
                     {
                         name: 'Less mace weight',
                         symbol: [assets.weapons, 4, 0],
-                        description: "are you sure you want to use a pillow",
+                        description: "Are you sure you want to use a pillow?",
                         effect: function() {
                             weapons.throwMace.stats.weightPercentage-=0.1;
                             weapons.throwMace.stats.damage-=1;
+                            weapons.throwMace.stats.chargeSpeed *= 1.2;
                         },
                         amount: 1,
                         criteria: () => true, //normally omit when no criteria
@@ -346,7 +348,7 @@ var possibleUpgrades = [
     {
         name: 'Shield',
         symbol: [assets.shield, 0, 0],
-        description: "it's like iframes, but on cooldown and only once \n Press space to activate the shield",
+        description: "Press space to activate the shield. If you shield right before you get hit, the enemy will take damage and you keep your shield. However, if you shield and then get hit later, you lose the shield for the round. \n (Does anyone actually read this?)",
         effect: function() {
             playerStuff.stats.shields += 1;
         },

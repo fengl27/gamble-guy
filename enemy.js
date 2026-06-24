@@ -2377,20 +2377,21 @@ class Enemy {
             }
             else {
                 this.vel.mult(0.8);
-                let moveAmt = 0.15;
+                let moveAmt = 0.12;
                 if(this.driftTimer > 0) {
                     moveAmt *= 0.1;
                     this.vel.mult(0.95 / 0.8);
                 }
                 else if(dst < 10) {
+                    //decide to dash
                     this.dashTrail = [];
                     this.dashCharge ++;
 
                     //cool maths
-                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 17));
+                    var predictedPos = Vect.add(player.pos, Vect.mult(player.vel, 10));
                     this.dashDir.set(Vect.normalize(Vect.sub(predictedPos, this.pos)));
 
-                    this.vel.set(Vect.mult(this.dashDir, -1.5));
+                    this.vel.set(Vect.mult(this.dashDir, -1.25));
                 }
                 this.vel.add(Vect.mult(toPlayer, moveAmt));
                 this.pos.add(this.vel);
@@ -2411,10 +2412,10 @@ class Enemy {
             //timers
             if(this.dashCharge) {
                 this.dashCharge ++;
-                if(this.dashCharge > 15) {
+                if(this.dashCharge > 25) {
                     this.dashCharge = 0;
                     this.dashTimer ++;
-                    this.vel.set(Vect.mult(this.dashDir, 3));
+                    this.vel.set(Vect.mult(this.dashDir, 2.5));
 
                     soundEffects.smallDash.play();
                 }
@@ -2435,9 +2436,9 @@ class Enemy {
             }
         },
         init: function() {
-            this.numCoins = 3;
+            this.numCoins = 5;
 
-            this.health = 5;
+            this.health = 3;
 
             this.size = 1.5;
             this.walkAnimSpeed = 7;
@@ -2450,7 +2451,10 @@ class Enemy {
             this.dashTrail = [];
         },
         damage: function() {
-            this.vel.sub(Vect.mult(this.toPlayer, 5));
+            this.vel.sub(Vect.mult(this.toPlayer, 2));
+            this.dashTimer = 0;
+            this.dashCharge = 0;
+            this.driftTimer = 30;
         }
     }
     static sword = {
@@ -2974,6 +2978,11 @@ class Enemy {
         toPlayer.div(m);
         this.toPlayer.set(toPlayer);
         this.type.update.call(this, toPlayer, m);
+        
+        let vm = this.vel.sqrMag();
+        if(vm > 16) {
+            this.vel.mult(4 / Math.sqrt(vm));
+        }
 
         if(this.mass) {
             //there's not too many enemies so O(n^2) it is :)
