@@ -5,6 +5,7 @@ var playerStuff = {
         Down: "s",
         Left: "a",
         Right: "d",
+        Dash: "shift",
         Bow: "mouseLeft",
         Mace: "mouseRight",
         Shield: "space",
@@ -18,6 +19,7 @@ var playerStuff = {
     roundsLeft: 3,
     debt: 0,
     stats: {
+        canDash: false,
         speed: 1,
         shields: 0,
         shieldLength:30,
@@ -59,6 +61,9 @@ class Player {
         this.speedMult = 1;
         this.exploding = 0;
         this.explodeThing = null;
+        
+        this.dashTimer = 0;
+        this.dashReload = 0;
     }
 
     display() {
@@ -87,7 +92,7 @@ class Player {
                 pos.x - cam.scale * 4,
                 pos.y - cam.scale * 4,
                 cam.scale * 8,
-                cam.scale * 8, (this.exploding||this.iframes%20>10)? NaN: 0
+                cam.scale * 8, (this.exploding||this.iframes%20>10||this.dashTimer)? NaN: 0
             );
             if(this.shieldTimer && !this.exploding){
                 if(playerStuff.stats.shieldLength - this.shieldTimer < playerStuff.stats.parryLength) {
@@ -161,11 +166,24 @@ class Player {
                 //normalization but faster because we know all the posibilties
                 input.div(1.4142);
             }
+            if(getInput(this.controls.Dash, true) && playerStuff.stats.canDash && !this.dashReload) {
+                this.dashTimer ++;
+                this.vel.set(Vect.mult(input, 2));
+            }
         }
         else {
             this.walkAnim = 0;
         }
-        if(this.stun > 0) {
+        if(this.dashTimer) {
+            this.dashTimer ++;
+            this.vel.mult(0.95);
+            if(this.dashTimer > 20) {
+                this.vel.mult(0.2);
+                this.dashTimer = 0;
+                this.dashReload = 40;
+            }
+        }
+        else if(this.stun > 0) {
             this.stun --;
             this.vel.mult(0.9);
         }
@@ -205,6 +223,7 @@ class Player {
         if(this.shieldCooldown>0){
             this.shieldCooldown--;
         }
+        this.dashReload = Math.max(0, this.dashReload - 1);
 
 
         this.speedMult = 1;//aah
@@ -249,6 +268,7 @@ class Player {
             this.shieldCooldown = playerStuff.stats.shieldCooldown;
             return;
         }
+        coins = [];
         music.playing.pause();
         soundEffects.finalKill.play();
         for(var i = 0; i < enemies.length; i ++) {

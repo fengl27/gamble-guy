@@ -851,6 +851,7 @@ class Enemy {
             this.spawnDelay = Math.max(0, this.spawnDelay-1);
         },
         init: function() {
+            this.numCoins = 4;
             this.health = 5;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
@@ -1318,7 +1319,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
-            this.numCoins = 2;
+            this.numCoins = 3;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
@@ -2040,11 +2041,11 @@ class Enemy {
 
             if(this.dashCharge) {
                 let thing = new Vect(Math.round(this.dashDir.x), Math.round(this.dashDir.y));
-                let tilesheetPos = thing.x? thing.x + 2: thing.y === 1? 0: 2;
+                let tilesheetPos = getTilesheetPos(0, thing);
 
                 Enemy.drawImage(
-                    assets.smallDashing,
-                    tilesheetPos * Player.spriteSize, 0,
+                    assets[this.asset],
+                    tilesheetPos.x * Player.spriteSize, tilesheetPos.y * Player.spriteSize,
                     Player.spriteSize,
                     Player.spriteSize,
                     pos.x - cam.scale * 4,
@@ -2634,6 +2635,11 @@ class Enemy {
             
             //ctx.fillStyle = "red";
             //ctx.fillRect(pos.x - cam.scale * 2, pos.y - cam.scale * 2, cam.scale * 4, cam.scale * 4);
+
+            if(this.invincible && stateSwitchTimer % 24 < 12) {
+                ctx.filter = "brightness(180%)";
+            }
+
             Enemy.drawImage(
                 assets[this.spearing? "swordless": this.asset],
                 tilesheetPos.x * Player.spriteSize,
@@ -2645,6 +2651,8 @@ class Enemy {
                 cam.scale * 8,
                 cam.scale * 8, this.iframes
             );
+
+            ctx.filter = "none";
 
             if(this.spearing && !this.deathTimer) {
                 ctx.save();

@@ -503,7 +503,7 @@ var drawGamble = function(things, offset, thingSpacing, pos, size) {
     return closest;
 };
 
-const enemyTypes = ['rock', 'archer', 'sword', 'small']
+const enemyTypes = ['rock', 'archer', 'sword', 'small'];
 /*
 var enemyMerges = [
     ["boulder", "roller",     "deflector", "controller"],
@@ -560,6 +560,26 @@ var gamble = function() {
             [w100 * 30 + x * w100 * 20, h100 * 3],
             [w100 * 20 - h100 * 3, h100 * 60]
         ));
+    }
+    for(var x = 0; x < 3; x ++) {
+        if(gamble.gambleTimer > 230 && (gambling[1][results[1]] !== "plus" || x === 1)) {
+            let type = x === 1 && gambling[x][results[x]] === "plus"?
+                enemyMerges[enemyTypes.indexOf(gambling[0][results[0]])][enemyTypes.indexOf(gambling[2][results[2]])]:
+                gambling[x][results[x]];
+            let bob = new Enemy(0,0,type);
+            let dudeMoney = bob.numCoins;
+            ctx.drawImage(assets.coin, w100 * 30 + h100 + x * w100 * 20, h100 * 58, h100 * 4, h100 * 4);
+            ctx.fillStyle = "black";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "hanging";
+            ctx.font = 6*h100 + "px pixelFont";
+            ctx.fillText(dudeMoney, w100 * 30 + h100 * 5 + x * w100 * 20, h100 * 58);
+        }
+    }
+    let roundCash = 0;
+    for(var i = 0; i < roundEnemies.length; i ++) {
+        var cash = new Enemy(0,0,roundEnemies[i]).numCoins;
+        roundCash += cash;
     }
 
     
@@ -632,7 +652,8 @@ var gamble = function() {
     }
 
     //ui
-    ctx.fillStyle = playerStuff.coins >= (playerStuff.requiredRent+playerStuff.debt)? "rgb(75, 160, 18)": "rgb(180, 0, 0)";
+    ctx.fillStyle = playerStuff.coins >= (playerStuff.requiredRent+playerStuff.debt)? "rgb(75, 160, 18)":
+        playerStuff.coins + roundCash >= (playerStuff.requiredRent+playerStuff.debt)? "rgb(212, 212, 22)": "rgb(180, 0, 0)";
     ctx.strokeStyle = "black";
     ctx.lineWidth = h100;
 
@@ -640,8 +661,9 @@ var gamble = function() {
     ctx.textAlign = "left";
     ctx.textBaseline = "hanging";
     ctx.drawImage(assets.coin, h100, h100, 6 * h100, 6 * h100);
-    ctx.strokeText(playerStuff.coins + " coins", h100 * 8, h100 * 2);
-    ctx.fillText(playerStuff.coins   + " coins", h100 * 8, h100 * 2);
+    var txt = roundCash > 0? playerStuff.coins + " coins + " + roundCash: playerStuff.coins + " coins";
+    ctx.strokeText(txt, h100 * 8, h100 * 2);
+    ctx.fillText  (txt, h100 * 8, h100 * 2);
 
     ctx.fillStyle = "white";
     ctx.strokeText("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);

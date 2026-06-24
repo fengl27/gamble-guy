@@ -122,6 +122,14 @@ var mainMenu = {
                 ctx.clip();
             }
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            ctx.font = 20*h100 + "px pixelFont";
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2 * h100;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "hanging";
+            ctx.fillText("GOD SAVE THE", canvas.width/2, 5*h100);
+            ctx.fillText("SLOT MACHINE", canvas.width/2, 15*h100);
             for(var i = 0; i < this.buttons.length; i ++) {
                 this.buttons[i].b.go();
                 if(this.buttons[i].b.pressed) {
@@ -233,7 +241,7 @@ var frame = function() {
         drawTutorial();
     }
 
-    justPressed = [];
+    justPressed = {};
     mouse.justPressed = false;
     mouse.justReleased = false;
     stateSwitchTimer ++;
