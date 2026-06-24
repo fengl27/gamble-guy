@@ -94,16 +94,17 @@ var switchState = function(target) {
             gamble.offsetVels = [h100, -h100, h100];
             break;
     }
-    if(target !== "playing") {
+    if(target !== "playing" && !music.playing.audio.paused) {
         music.playing.pause();
     }
-    else if(target !== "gamble" && target !== "upgrade") {
+    else if(target !== "gamble" && target !== "upgrade" && !music.gambling.audio.paused) {
         music.gambling.pause();
     }
 };
 var mainMenu = {
     buttons: [//button constructor (x,y,w,h,txt)
-        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "start >:)"), thing: () => mainMenu.transitionTimer++}
+        {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "Start!!"), thing: () => mainMenu.transitionTimer++},
+        {b: new Button(canvas.width / 2 - h100 * 20, h100 * 37, h100 * 40, h100 * 10, "Tutorial"), thing: () => {mainMenu.transitionTimer++;tutorial=true;playerStuff.coins = 0;playerStuff.roundsLeft=4;}}
     ],
     transitionTimer: 0,
     go: function() {
@@ -130,6 +131,7 @@ var mainMenu = {
         if(this.transitionTimer) {
             this.transitionTimer ++;
             if(this.transitionTimer >= 30) {
+                this.transitionTimer = 0;
                 switchState(tutorial? "playing": "upgrade");
             }
         }
@@ -137,8 +139,7 @@ var mainMenu = {
     }
 };
 var loseButtons = {
-    equipButton: new Button(h100*25, h100 * 80, h100 * 50, h100 * 10, "try again!"),
-    menuButton: new Button(h100 *25, h100 * 80, h100 * 50, h100 * 10, "main menu")
+    menuButton: new Button(w100 *35, h100 * 80, w100 * 30, h100 * 10, "Main menu")
 };
 var lives = 3;
 //switchState("playing");
