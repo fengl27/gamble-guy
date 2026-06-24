@@ -2651,7 +2651,20 @@ class Enemy {
                 cam.scale * 8,
                 cam.scale * 8, this.iframes
             );
+            if(this.shieldFlash){
+                ctx.drawImage(
+                    assets.shield,
+                    0,
+                    0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+                );
 
+            }
             if(this.spearing && !this.deathTimer) {
                 ctx.save();
                 ctx.translate(pos.x, pos.y + cam.scale);
@@ -2759,6 +2772,9 @@ class Enemy {
                     player.damage();
                 }
             }
+            if(this.shieldFlash>0){
+                this.shieldFlash--;
+            }
         },
         init: function() {
             this.numCoins = 3;
@@ -2774,24 +2790,26 @@ class Enemy {
             this.spearDisplace = 0;
             this.spearSize = 10;
             this.spearReload = 0;
+            this.shieldFlash = 0;
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 3));
             if(!this.spearing){
                 this.health++;
                 this.iframes=0;
+                this.shieldFlash = 30;
                 return false; 
             }else{
                 this.vel.sub(Vect.mult(this.toPlayer, 7));
-                this.spearing = false;
-                this.spearWindup = 0;
-                this.spearTimer = 0;
-                this.spearDir = 0;
-                this.spearTargetDir = 0;
-                this.spearVel = 0;
-                this.spearDisplace = 0;
-                this.spearReload = 30;
             }
+            this.spearing = false;
+            this.spearWindup = 0;
+            this.spearTimer = 0;
+            this.spearDir = 0;
+            this.spearTargetDir = 0;
+            this.spearVel = 0;
+            this.spearDisplace = 0;
+            this.spearReload = 30;
         }
     }
 
