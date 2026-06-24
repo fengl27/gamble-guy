@@ -365,6 +365,32 @@ var possibleUpgrades = [
                 branchThing: [
                     
                 ]//infinity annd beeeoyingd
+            },
+            {
+                name: 'Better shoes',
+                symbol: [assets.upgradeIcons, 0, 0],
+                description: "Move 10% faster",
+                effect: function() {
+                    playerStuff.stats.speed *= 1.1;
+                },
+                amount: 1,
+                criteria: () => true,
+                branchThing: [
+                ]//infinity annd beeeoyingd
+            },
+            {
+                name: 'Well ventilated shorts',
+                symbol: [assets.upgradeIcons, 1, 0],
+                description: "these shorts are wonderfully comfortable and reduce chaffing",
+                effect: function() {
+                    weapons.stats.bow.playerSlow += 0.1;
+                    weapons.stats.throwMace.playerSlow += 0.1;
+                },
+                amount: 1,
+                criteria: () => true,
+                branchThing: [
+                    
+                ]//infinity annd beeeoyingd
             }
         ]//infinity annd beeeoyingd
     },
@@ -416,6 +442,33 @@ var possibleUpgrades = [
 
                         ]//infinity annd beeeoyingd
                     },
+                ]//infinity annd beeeoyingd
+            },
+            {
+                name: 'Second shield',
+                symbol: [assets.shield, 0, 0],
+                description: "I have no shield but I must block",
+                effect: function() {
+                    playerStuff.stats.shields += 1;
+                },
+                amount: 1,
+                criteria: () => true,
+                branchThing: [
+                    {
+                        name: 'Five shield',
+                        symbol: [assets.shield, 0, 0],
+                        description: "I'm revoking your parry privilages",
+                        effect: function() {
+                            playerStuff.stats.shields += 3;
+                            playerStuff.stats.parryLength -= 60;
+                        },
+                        amount: 1,
+                        criteria: () => true,
+                        branchThing: [
+
+                        ]//infinity annd beeeoyingd
+                    },
+
                 ]//infinity annd beeeoyingd
             },
 
