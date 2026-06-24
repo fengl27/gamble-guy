@@ -231,6 +231,7 @@ var justPressed = {};
 keys.handleKeyDown = function(e) {
     //console.log("pressed " + e.key.toLowerCase());
     var k = e.key.toLowerCase();
+
     if(!keys[k]) {
         keys[k] = true;
         justPressed[k] = true;

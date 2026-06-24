@@ -699,7 +699,7 @@ for(let i in music) {
             this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 2);
         },
         pause: function() {
-            window.setTimeout((audio) => {audio.pause();}, 1000, this.audio);
+            window.setTimeout((audio) => {audio.pause();}, 2000, this.audio);
             this.aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
         },
         unpause: function() {

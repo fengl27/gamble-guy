@@ -105,6 +105,17 @@ var possibleUpgrades = [
                 criteria: () => true, //normally omit when no criteria
                 branchThing: [
                 {
+                    name: "Lightweight bow",
+                    symbol: [assets.weapons, 1, 0],
+                    description: "Charge arrows faster!",
+                    effect: function() {
+                        weapons.arrow.stats.chargeMult*=1.4;
+                    },
+                    amount: 1,
+                    criteria: () => true, //normally omit when no criteria
+                    branchThing: []
+                },
+                {
                     name: 'Bigger arrow',
                     symbol: [assets.weapons, 1, 0],
                     description: "I still can't aim so I'm adding another upgrade to help me",
@@ -342,7 +353,19 @@ var possibleUpgrades = [
         amount: 1,
         criteria: () => true,
         branchThing: [
-
+            {
+                name: 'Dash shoes',
+                symbol: [assets.upgradeIcons, 0, 0],
+                description: "Your shoes are so good you turn into a white orb of light (even though they look the same as before).",
+                effect: function() {
+                    playerStuff.stats.canDash = true;
+                },
+                amount: 1,
+                criteria: () => true,
+                branchThing: [
+                    
+                ]//infinity annd beeeoyingd
+            }
         ]//infinity annd beeeoyingd
     },
     {
