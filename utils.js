@@ -248,11 +248,13 @@ function getInput(inputName, isJustPressed) {
     if(isJustPressed) {
         return inputName === "mouseLeft"? mouse.justPressed&&mouse.button===0:
             inputName === "mouseRight"? mouse.justPressed&&mouse.button===2:
+            inputName === "space"? !!justPressed[" "]:
             !!justPressed[inputName];
     }
     else {
         return inputName === "mouseLeft"? mouse.pressed&&mouse.button===0:
             inputName === "mouseRight"? mouse.pressed&&mouse.button===2:
+            inputName === "space"? !!keys[" "]:
             !!keys[inputName];
     }
 }

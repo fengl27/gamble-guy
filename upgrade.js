@@ -343,6 +343,33 @@ var possibleUpgrades = [
 
         ]//infinity annd beeeoyingd
     },
+    {
+        name: 'Shield',
+        symbol: [assets.upgradeIcons, 0, 0],
+        description: "it's like iFrames, but on cooldown and only once \n btw we made this after the tutorial so figure it out yourself",
+        effect: function() {
+            playerStuff.stats.shields += 1;
+        },
+        amount: 1,
+        criteria: () => true,
+        branchThing: [
+            {
+                name: 'Shield length',
+                symbol: [assets.upgradeIcons, 0, 0],
+                description: "parry this you filthy casual",
+                effect: function() {
+                    playerStuff.stats.shieldLength += 30;
+                    playerStuff.stats.parryLength += 5;
+                },
+                amount: 1,
+                criteria: () => true,
+                branchThing: [
+
+                ]//infinity annd beeeoyingd
+            },
+
+        ]//infinity annd beeeoyingd
+    },
     /*
     {
         name: '1 MORBILLION UBeRS GET',

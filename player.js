@@ -6,7 +6,8 @@ var playerStuff = {
         Left: "a",
         Right: "d",
         Bow: "mouseLeft",
-        Mace: "mouseRight"
+        Mace: "mouseRight",
+        Shield: "space",
     },
     changeControl: function(control, newVal) {
         this.controls[control] = newVal;
@@ -16,7 +17,13 @@ var playerStuff = {
     roundsLeft: 3,
     debt: 0,
     stats: {
-        speed: 1
+        speed: 1,
+        shields: 1,
+        shieldLength:60,
+        parryLength:70,
+        parryDamageRadius:3,
+        shieldIframes:60,
+        shieldCooldown: 0
     }
 }
 var defaultPlayerStuff = JSON.parse(JSON.stringify(playerStuff));
@@ -44,6 +51,10 @@ class Player {
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
         this.stun = 0;
+        this.shields = 1;
+        this.shieldTimer = 0;
+        this.brokenShieldTimer = 0;
+        this.shieldCooldown = 0;
         this.iframes = 0;
         this.speedMult = 1;
         this.exploding = 0;
@@ -78,6 +89,31 @@ class Player {
                 cam.scale * 8,
                 cam.scale * 8, (this.exploding||this.iframes%20>10)? NaN: 0
             );
+            if(this.shieldTimer){
+                Enemy.drawImage(
+                    assets.shield,
+                    0,0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8, (playerStuff.stats.shieldLength-this.shieldTimer<playerStuff.stats.parryLength)
+
+                )
+            }else if(this.brokenShieldTimer){
+                ctx.drawImage(
+                    assets.shield,
+                    0,0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
+                    cam.scale * 8
+
+                )
+            }
         }
 
         if(this.explodeThing && this.exploding < 130) {
@@ -135,6 +171,17 @@ class Player {
         if(this.iframes>0){
             this.iframes--;
         }
+        if(this.shieldTimer>0){
+            this.shieldTimer--;
+        }else if(getInput(player.controls.Shield,true)&&this.shields>=1&&this.shieldCooldown===0){
+            this.shieldTimer = playerStuff.stats.shieldLength
+        }
+        if(this.brokenShieldTimer>0){
+            this.brokenShieldTimer--;
+        }
+        if(this.shieldCooldown>0){
+            this.shieldCooldown--;
+        }
         this.pos.add(this.vel);
 
         this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
@@ -173,6 +220,26 @@ class Player {
         if(this.iframes){
             return;
         }
+
+        if(this.shieldTimer!==0){
+            if(playerStuff.stats.shieldLength-this.shieldTimer<playerStuff.stats.parryLength){
+                for(var i = 0; i < enemies.length; i ++) {
+                    if(sqrDist(enemies[i].pos.x,enemies[i].pos.y,this.pos.x,this.pos.y)<(playerStuff.stats.parryDamageRadius+enemies[i].size)*(playerStuff.stats.parryDamageRadius+enemies[i].size)){
+                        enemies[i].damage(1);
+                    }
+                }
+                this.shieldTimer = 0;
+                this.iframes+=playerStuff.stats.shieldIframes;
+                this.shieldCooldown = playerStuff.stats.shieldCooldown;
+                return;
+            }
+            this.shields--;
+            this.iframes+=playerStuff.stats.shieldIframes;
+            this.shieldTimer = 0;
+            this.brokenShieldTimer = playerStuff.stats.shieldCooldown;
+            this.shieldCooldown = playerStuff.stats.shieldCooldown;
+            return;
+        }
         music.playing.pause();
         soundEffects.finalKill.play();
         for(var i = 0; i < enemies.length; i ++) {
@@ -191,6 +258,8 @@ class Player {
         for(var i =0;i<playerStuff.length;i++){
             playerStuff[i].reset();
         }
+        player.shields = playerStuff.stats.shields;
+        player.shieldTimer = 0;
     }
 };
 var player;

@@ -101,6 +101,7 @@ var assets = {
 
     coin: "coin.png",
     chain: "chain.png",//for mace
+    shield: "shield.png",
 
     mouse: "mouse.png",
 
