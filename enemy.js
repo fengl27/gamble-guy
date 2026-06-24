@@ -2435,7 +2435,7 @@ class Enemy {
             }
         },
         init: function() {
-            this.numCoins = 3;
+            this.numCoins = 5;
 
             this.health = 5;
 
@@ -2450,7 +2450,10 @@ class Enemy {
             this.dashTrail = [];
         },
         damage: function() {
-            this.vel.sub(Vect.mult(this.toPlayer, 5));
+            this.vel.sub(Vect.mult(this.toPlayer, 2));
+            this.dashTimer = 0;
+            this.dashCharge = 0;
+            this.driftTimer = 30;
         }
     }
     static sword = {

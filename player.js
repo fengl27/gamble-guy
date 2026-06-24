@@ -18,7 +18,7 @@ var playerStuff = {
     debt: 0,
     stats: {
         speed: 1,
-        shields: 0,
+        shields: 1,
         shieldLength:60,
         parryLength:10,
         parryDamageRadius:3,
@@ -89,19 +89,10 @@ class Player {
                 cam.scale * 8,
                 cam.scale * 8, (this.exploding||this.iframes%20>10)? NaN: 0
             );
-            if(this.shieldTimer){
-                Enemy.drawImage(
-                    assets.shield,
-                    0,0,
-                    Player.spriteSize,
-                    Player.spriteSize,
-                    pos.x - cam.scale * 4,
-                    pos.y - cam.scale * 4,
-                    cam.scale * 8,
-                    cam.scale * 8, (playerStuff.stats.shieldLength-this.shieldTimer<playerStuff.stats.parryLength)
-
-                )
-            }else if(this.brokenShieldTimer){
+            if(this.shieldTimer && !this.exploding){
+                if(playerStuff.stats.shieldLength - this.shieldTimer < playerStuff.stats.parryLength) {
+                    ctx.filter = "brightness(250%)";
+                }
                 ctx.drawImage(
                     assets.shield,
                     0,0,
@@ -110,8 +101,21 @@ class Player {
                     pos.x - cam.scale * 4,
                     pos.y - cam.scale * 4,
                     cam.scale * 8,
+                    cam.scale * 8,
+                );
+                ctx.filter = "none";
+            }else if(this.brokenShieldTimer){
+                var t = 1 - this.brokenShieldTimer / playerStuff.stats.shieldCooldown;
+                ctx.filter = `opacity(${ctx.easeInOutQuad(t)*100}%)`;
+                ctx.drawImage(
+                    assets.shield,
+                    Player.spriteSize,0,
+                    Player.spriteSize,
+                    Player.spriteSize,
+                    pos.x - cam.scale * 4,
+                    pos.y - cam.scale * 4,
+                    cam.scale * 8,
                     cam.scale * 8
-
                 )
             }
         }
@@ -168,20 +172,6 @@ class Player {
             this.vel.mult(0.5);
             this.vel.add(Vect.mult(input, 0.3 * this.speedMult * playerStuff.stats.speed));
         }
-        if(this.iframes>0){
-            this.iframes--;
-        }
-        if(this.shieldTimer>0){
-            this.shieldTimer--;
-        }else if(getInput(player.controls.Shield,true)&&this.shields>=1&&this.shieldCooldown===0){
-            this.shieldTimer = playerStuff.stats.shieldLength
-        }
-        if(this.brokenShieldTimer>0){
-            this.brokenShieldTimer--;
-        }
-        if(this.shieldCooldown>0){
-            this.shieldCooldown--;
-        }
         this.pos.add(this.vel);
 
         this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
@@ -195,15 +185,25 @@ class Player {
             }
         }
 
+        if(this.iframes>0){
+            this.iframes--;//if rames
+        }
+        if(this.shieldTimer>0){
+            this.shieldTimer--;
+        }else if(getInput(player.controls.Shield,true)&&this.shields>=1&&this.shieldCooldown===0){
+            this.shieldTimer = playerStuff.stats.shieldLength;
+            soundEffects.shieldUse.play();
+        }
+        if(this.brokenShieldTimer>0){
+            this.brokenShieldTimer--;
+        }
+        if(this.shieldCooldown>0){
+            this.shieldCooldown--;
+        }
+
 
         this.speedMult = 1;//aah
 
-        //weepon spooping
-        /*
-        if(justPressed[this.controls.Switch] && this.weapons.length) {
-            this.selectedWeapon = (this.selectedWeapon + 1) % this.weapons.length;
-        }
-        */
         //weapon uupdating
         for(var i = 0; i < this.weapons.length; i ++) {
             this.weapons[i].update();
@@ -223,6 +223,7 @@ class Player {
 
         if(this.shieldTimer!==0){
             if(playerStuff.stats.shieldLength-this.shieldTimer<playerStuff.stats.parryLength){
+                //parry
                 for(var i = 0; i < enemies.length; i ++) {
                     if(sqrDist(enemies[i].pos.x,enemies[i].pos.y,this.pos.x,this.pos.y)<(playerStuff.stats.parryDamageRadius+enemies[i].size)*(playerStuff.stats.parryDamageRadius+enemies[i].size)){
                         enemies[i].damage(1);
@@ -233,6 +234,8 @@ class Player {
                 this.shieldCooldown = playerStuff.stats.shieldCooldown;
                 return;
             }
+            //sheld brek
+            soundEffects.shieldBreak.play();
             this.shields--;
             this.iframes+=playerStuff.stats.shieldIframes;
             this.shieldTimer = 0;
