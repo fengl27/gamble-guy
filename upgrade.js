@@ -346,7 +346,7 @@ var possibleUpgrades = [
     {
         name: 'Shield',
         symbol: [assets.upgradeIcons, 0, 0],
-        description: "it's like iFrames, but on cooldown and only once \n btw we made this after the tutorial so figure it out yourself",
+        description: "it's like iframes, but on cooldown and only once \n Press space to activate the shield",
         effect: function() {
             playerStuff.stats.shields += 1;
         },
