@@ -152,6 +152,9 @@ var upgradeScreen = function(lost) {
     if(upgradeChoices.length === 0) {
         switchState("gamble");//no luck
     }
+    if(!music.gambling.playing) {
+        music.gambling.play();
+    }
     
     ctx.fillStyle = "rgb(70,70,70)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -437,6 +440,12 @@ var drawLossScreen = function(stateSwitchTimer){
     loseButtons.menuButton.go();
     
     ctx.globalAlpha = 1;
+
+    if(loseButtons.menuButton.pressed) {//press button
+        upgradeScreen.loseTimer = 0;
+        upgradeScreen.payTaxes = 0;
+        switchState("mainMenu");
+    }
     
     Particle.runParticles();//do the particling
 }
