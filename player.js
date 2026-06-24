@@ -18,8 +18,8 @@ var playerStuff = {
     debt: 0,
     stats: {
         speed: 1,
-        shields: 1,
-        shieldLength:60,
+        shields: 0,
+        shieldLength:30,
         parryLength:10,
         parryDamageRadius:3,
         shieldIframes:60,
@@ -95,7 +95,7 @@ class Player {
                 }
                 ctx.drawImage(
                     assets.shield,
-                    Player.spriteSize,0,
+                    0,0,
                     Player.spriteSize,
                     Player.spriteSize,
                     pos.x - cam.scale * 4,
@@ -106,7 +106,7 @@ class Player {
                 ctx.filter = "none";
             }else if(this.brokenShieldTimer){
                 var t = 1 - this.brokenShieldTimer / playerStuff.stats.shieldCooldown;
-                ctx.filter = `opacity(${ctx.easeInOutQuad(t)*100}%)`;
+                ctx.filter = `opacity(${(1-easings.easeInOutQuad(t))*100}%)`;
                 ctx.drawImage(
                     assets.shield,
                     Player.spriteSize,0,
@@ -116,7 +116,8 @@ class Player {
                     pos.y - cam.scale * 4,
                     cam.scale * 8,
                     cam.scale * 8
-                )
+                );
+                ctx.filter = "none";
             }
         }
 
@@ -190,6 +191,10 @@ class Player {
         }
         if(this.shieldTimer>0){
             this.shieldTimer--;
+            if(this.shieldTimer <= 0) {
+                //nothing happened
+                this.shieldCooldown = playerStuff.stats.shieldCooldown / 2;
+            }
         }else if(getInput(player.controls.Shield,true)&&this.shields>=1&&this.shieldCooldown===0){
             this.shieldTimer = playerStuff.stats.shieldLength;
             soundEffects.shieldUse.play();
@@ -260,8 +265,8 @@ class Player {
         }
     }
     resetWeapons(){
-        for(var i =0;i<playerStuff.length;i++){
-            playerStuff[i].reset();
+        for(var i =0;i<playerStuff.weapons.length;i++){
+            playerStuff.weapons[i].reset();
         }
     }
 };

@@ -331,7 +331,7 @@ var upgradeScreen = function() {
 
     if(playerStuff.roundsLeft === 0) {
         upgradeScreen.payTaxes = 120;
-        if(mouse.justPressed) {
+        if(mouse.justReleased) {
             playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
             playerStuff.debt = 0;
             playerStuff.roundsLeft = 3;

@@ -58,6 +58,7 @@ var switchState = function(target) {
             break;
         case "playing":
             setupLevel();
+            player.resetWeapons();
             playerStuff.roundsLeft --;
             music.playing.play();
             break;
