@@ -2769,6 +2769,7 @@ class Enemy {
                     this.pos.y + Math.sin(this.spearDir) * (this.spearSize-this.spearDisplace)
                 );
                 
+                
                 if(sqrDist(p.x, p.y, player.pos.x, player.pos.y) < (player.size + 2) * (player.size + 2)) {
                     //die
                     player.damage();

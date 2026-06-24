@@ -169,7 +169,7 @@ var upgradeScreen = function() {
         ctx.fillRect(potionPos[0].x + potionPos[1].x * 0.2, potionPos[0].y + potionPos[1].y, potionPos[1].x * 0.6, h100 * 2);
 
         var frame = Math.floor(upgradeScreen.potionAnim / 5) % 8;
-        var hovered = upgradeScreen.canReroll && IsPointInAABB(mouse, potionPos[0], potionPos[1]);
+        var hovered = playerStuff.roundsLeft !== 0 && upgradeScreen.canReroll && IsPointInAABB(mouse, potionPos[0], potionPos[1]);
         if(hovered) {
 
             ctx.fillStyle = "white";
