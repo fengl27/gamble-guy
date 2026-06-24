@@ -280,6 +280,7 @@ var upgradeScreen = function() {
         var upgrade = upgradeChoices[hoveredThing];
         if(tutorial){
             tutorialText[currTutorialMessage].txt = upgrade.name + " \n \n " + upgrade.description;
+            tutorialText[currTutorialMessage].time = 0;
         }
         else {
             rect(ctx, pos.x, pos.y, size.x, size.y, true, true);
@@ -370,6 +371,10 @@ var upgradeScreen = function() {
         if(upgradeScreen.transitionTimer > 30) {
             upgradeScreen.transitionTimer = 0;
             upgradeScreen.canReroll = true;
+            if(tutorial) {
+                currTutorialMessage ++;
+                tutorialText[currTutorialMessage].time = 0;
+            }
             switchState("gamble");
         }
     }
@@ -385,7 +390,7 @@ var drawLossScreen = function(){
     ctx.strokeStyle = "rgb(141, 34, 17)";
     ctx.lineWidth = h100;
 
-    ctx.font = "5em cursive";
+    ctx.font = 15*h100 + "px pixelFont";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -401,7 +406,7 @@ var drawLossScreen = function(){
     ctx.restore();
 
     //other text just like appears idk
-    var t2 = limit(stateSwitchTimer / 60 - 4, 0, 1);//just realized it's supposed to be called clamp
+    var t2 = limit(stateSwitchTimer / 60 - 2, 0, 1);//just realized it's supposed to be called clamp
     var opacity = easings.easeInOutQuad(t2);
     ctx.globalAlpha = opacity;
     /*
@@ -423,7 +428,7 @@ upgradeScreen.payTaxes = 0;
 upgradeScreen.taxButton = new Button(0, 0, h100 * 50, h100 * 10, "PAY RENT!", "red");
 upgradeScreen.transitionTimer = 0;
 var pauseScreen = function() {
-    ctx.fillStyle = "rgba(48, 48, 48, 0.05)";
+    ctx.fillStyle = "rgba(48, 48, 48)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.font = 20 * h100 + "px pixelFont";
     ctx.textAlign = "center";
@@ -571,8 +576,8 @@ var gamble = function() {
         gamble.button.go();
         if(gamble.button.pressed) {
             if(tutorial) {
-                tutorialText[45].funnyThing = currTutorialMessage;
-                currTutorialMessage = 36;
+                tutorialText[47].funnyThing = currTutorialMessage;
+                currTutorialMessage = 38;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
@@ -730,7 +735,8 @@ var tutorialText = [
     {txt: "Speaking of money, where'd all your other money go? Aren't you the king?"},
     {txt: "Ohh... right, gambling addiction. Okay, moving on-"},
     {txt: "Here is my collection! You can pick one weapon to start with. I'll give you more stuff the next time we meet.",switchstateplease: true,thing:() =>{switchState("upgrade");player.weapons = []}, criteria: () => {return gameState === "gamble"}},
-    {txt: "It's time to fuel your gambling addiction!", switchstateplease: true, criteria: () => {return gameState === "gamble"}},
+    {txt: "It's time to fuel your gambling addiction!", criteria: () => {return gameState === "gamble"}},
+    {txt: "It's time to fuel your gambling addiction!", criteria: () => {return gameState === "gamble"}},
     {txt: "Click the lever to gamble! It costs 2 coins, though..."},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
     {txt: "If the center one lands on a + sign, the two other enemies will merge together!"},
@@ -786,7 +792,7 @@ var tutorialText = [
     {txt: ":("},
     {txt: "ERROR 212", thing: () => {
         //console.log(tutorialText[32].funnyThing);
-        currTutorialMessage = tutorialText[43].funnyThing > 15? 9: tutorialText[43].funnyThing;
+        currTutorialMessage = tutorialText[47].funnyThing > 15? 23: tutorialText[47].funnyThing;
         tutorialText[currTutorialMessage].time = stateSwitchTimer;
         tutorialText[currTutorialMessage].thing();
     }} 
@@ -816,6 +822,7 @@ var drawTutorial = function() {
             );
             ctx.restore();
         }
+        console.log("stuff ", tutorialText[currTutorialMessage].time);
         ctx.fillStyle = "rgb(200, 200, 200)";
 
         rect(ctx, h100 * 2, yPos, width, canvas.height / 4, true, true);

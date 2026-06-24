@@ -3027,6 +3027,7 @@ class Enemy {
     }
 
     damage(amt) {
+        if(this.health <= 0) return;
         this.health -= amt;
         this.iframes = 40;
         if(this.type.damage) {

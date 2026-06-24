@@ -35,8 +35,8 @@ thing       not yet
 
 
 
--transition to gamble screen                   :(
+-transition to gamble screen                   :(   yes
 -auto-select first weapon                           yee
 -fix lag                                            yee (it was because particles)
--death screen or something to indicate die     :(
+-death screen or something to indicate die     :(   yes
 -make music MUCH louder                             yee
