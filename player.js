@@ -132,7 +132,7 @@ class Player {
             ctx.translate(pos.x, pos.y);
             ctx.rotate(this.explodeThing.rot);
             ctx.scale(cam.scale, cam.scale);
-            ctx.drawImage(this.explodeThing.sprite, -80, -80, 160, 160);
+            ctx.drawImage(this.explodeThing.sprite, -120, -120, 240, 240);
             ctx.restore();
         }
     }

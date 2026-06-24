@@ -35,7 +35,7 @@ var possibleUpgrades = [
                         criteria: () => true, //normally omit when no criteria
                         branchThing: [
                             {
-                                name: 'tornado swipe',
+                                name: 'Tornado swipe',
                                 symbol: [assets.weapons, 2, 0],
                                 description: "The hands can't hit what the eyes can't see (we can still see you)",
                                 effect: function() {
@@ -48,6 +48,21 @@ var possibleUpgrades = [
                                     
                                 ]//infinity annd beeeoyingd
                             },
+                            {
+                                name: 'Plasma blade',
+                                symbol: [assets.weapons, 2, 0],
+                                description: "look, it's the doom guy from halo",
+                                effect: function() {
+                                    weapons.sword.stats.isLaser = true;
+                                    weapons.sword.stats.dirVel += 0.2;
+                                },
+                                amount: 1,
+                                criteria: () => true, //normally omit when no criteria
+                                branchThing: [
+                                    
+                                ]//infinity annd beeeoyingd
+
+                            }
                             
                         ]//infinity annd beeeoyingd
                     },
@@ -66,6 +81,7 @@ var possibleUpgrades = [
                                 symbol: [assets.weapons, 2, 0],
                                 description: "float like a brick, sting like a brick",
                                 effect: function() {
+                                    weapons.sword.stats.isGreatSword = true;
                                     weapons.sword.stats.size+=5;
                                     weapons.sword.stats.damage+=1;
                                     weapons.sword.stats.dirVel -= 0.1;
