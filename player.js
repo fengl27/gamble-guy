@@ -18,9 +18,9 @@ var playerStuff = {
     debt: 0,
     stats: {
         speed: 1,
-        shields: 1,
+        shields: 0,
         shieldLength:60,
-        parryLength:70,
+        parryLength:10,
         parryDamageRadius:3,
         shieldIframes:60,
         shieldCooldown: 0
@@ -51,7 +51,7 @@ class Player {
         this.dir = new Vect();
         this.size = 2.25;//kinda like a radius
         this.stun = 0;
-        this.shields = 1;
+        this.shields = 0;
         this.shieldTimer = 0;
         this.brokenShieldTimer = 0;
         this.shieldCooldown = 0;
