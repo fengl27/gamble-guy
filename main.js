@@ -32,6 +32,23 @@ var setupUpgrade = function(depressing, isReroll) {
         }
     }
 };
+var resetUpgrades = function() {
+    let thingy = function(upgrades) {//loops through literally everything
+        for(var i = 0; i < upgrades.length; i ++) {
+            upgrades[i].description = upgrades[i].description.split("\n").join(" \n ");//so that when i split by spaces it separates \n as its own word
+            if(upgrades[i].branchThing === "self") {
+                upgrades[i].branchThing = [upgrades[i]];
+            }
+            else {
+                thingy(upgrades[i].branchThing);
+            }
+        }
+    };
+    thingy(possibleUpgrades);
+    for(var i = 0; i < possibleUpgrades.length; i ++) {
+        currPossibleUpgrades.push(possibleUpgrades[i]);
+    }
+};
 var switchState = function(target) {
     gameState = target;
     stateSwitchTimer = 0;
@@ -50,6 +67,7 @@ var switchState = function(target) {
             break;
         case "lose":
             console.log("ha ya' died");
+            resetUpgrades();
             break;
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
@@ -197,47 +215,7 @@ var frame = function() {
             case "lose":
                 displayGame();
                 //darkness of doom
-                var t = limit(stateSwitchTimer / 45, 0, 1);
-                var opacity = easings.easeInOutQuad(t) / 2;
-                ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                //variable shenanigans
-                ctx.fillStyle = "rgb(206, 58, 36)";
-                ctx.strokeStyle = "rgb(141, 34, 17)";
-                ctx.lineWidth = h100;
-
-                ctx.font = "5em cursive";
-                ctx.textAlign = "center";
-                ctx.textBaseline = "middle";
-
-                //text falls out of sky
-                var t = Math.min(stateSwitchTimer / 120, 1);
-                var r = 0.2 * Math.sin(stateSwitchTimer/20);
-                var y = canvas.height / 3 + canvas.height * (easings.easeOutQuad(t)-1);
-                ctx.save();
-                ctx.translate(canvas.width / 2, y);
-                ctx.rotate(r);
-                ctx.strokeText("Haha you lose", 0,0);
-                ctx.fillText(  "Haha you lose", 0,0);
-                ctx.restore();
-
-                //other text just like appears idk
-                var t2 = limit(stateSwitchTimer / 60 - 4, 0, 1);//just realized it's supposed to be called clamp
-                var opacity = easings.easeInOutQuad(t2);
-                ctx.globalAlpha = opacity;
-                /*
-                ctx.fillStyle = `rgba(150, 150, 150, ${opacity})`;
-                ctx.strokeStyle = `rgba(100, 100, 100, ${opacity})`;
-                ctx.strokeText("press space to yee", canvas.width / 2, canvas.height * 7/8);
-                ctx.fillText(  "press space to yes", canvas.width / 2, canvas.height * 7/8);
-                */
-                
-                loseButtons.menuButton.go();
-                
-                ctx.globalAlpha = 1;
-                
-                Particle.runParticles();//do the particling
+                drawLossScreen();
 
                 if(/*justPressed[" "]*/loseButtons.menuButton.pressed) {//press button
                     switchState("mainMenu");

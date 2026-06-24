@@ -169,7 +169,7 @@ var upgradeScreen = function() {
         ctx.fillRect(potionPos[0].x + potionPos[1].x * 0.2, potionPos[0].y + potionPos[1].y, potionPos[1].x * 0.6, h100 * 2);
 
         var frame = Math.floor(upgradeScreen.potionAnim / 5) % 8;
-        var hovered = playerStuff.roundsLeft !== 0 && upgradeScreen.canReroll && IsPointInAABB(mouse, potionPos[0], potionPos[1]);
+        var hovered = playerStuff.roundsLeft !== 0 && playerStuff.weapons.length && upgradeScreen.canReroll && IsPointInAABB(mouse, potionPos[0], potionPos[1]);
         if(hovered) {
 
             ctx.fillStyle = "white";
@@ -373,6 +373,49 @@ var upgradeScreen = function() {
         }
     }
 };
+var drawLossScreen = function(){
+    var t = limit(stateSwitchTimer / 45, 0, 1);
+    var opacity = easings.easeInOutQuad(t) / 2;
+    ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    //variable shenanigans
+    ctx.fillStyle = "rgb(206, 58, 36)";
+    ctx.strokeStyle = "rgb(141, 34, 17)";
+    ctx.lineWidth = h100;
+
+    ctx.font = "5em cursive";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    //text falls out of sky
+    var t = Math.min(stateSwitchTimer / 120, 1);
+    var r = 0.2 * Math.sin(stateSwitchTimer/20);
+    var y = canvas.height / 3 + canvas.height * (easings.easeOutQuad(t)-1);
+    ctx.save();
+    ctx.translate(canvas.width / 2, y);
+    ctx.rotate(r);
+    ctx.strokeText("Haha you lose", 0,0);
+    ctx.fillText(  "Haha you lose", 0,0);
+    ctx.restore();
+
+    //other text just like appears idk
+    var t2 = limit(stateSwitchTimer / 60 - 4, 0, 1);//just realized it's supposed to be called clamp
+    var opacity = easings.easeInOutQuad(t2);
+    ctx.globalAlpha = opacity;
+    /*
+    ctx.fillStyle = `rgba(150, 150, 150, ${opacity})`;
+    ctx.strokeStyle = `rgba(100, 100, 100, ${opacity})`;
+    ctx.strokeText("press space to yee", canvas.width / 2, canvas.height * 7/8);
+    ctx.fillText(  "press space to yes", canvas.width / 2, canvas.height * 7/8);
+    */
+    
+    loseButtons.menuButton.go();
+    
+    ctx.globalAlpha = 1;
+    
+    Particle.runParticles();//do the particling
+}
 upgradeScreen.canReroll = true;
 upgradeScreen.potionAnim = 0;
 upgradeScreen.payTaxes = 0;
