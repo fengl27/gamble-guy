@@ -13,6 +13,7 @@ var playerStuff = {
         this.controls[control] = newVal;
     },
     coins: 6,
+    totalRentCycles: -2,
     requiredRent: 1,
     roundsLeft: 3,
     debt: 0,
@@ -37,7 +38,6 @@ for(let i in playerStuff.controls) {
     span.innerHTML = i + `:<br><input type = 'text' onchange = 'playerStuff.changeControl(this.name,this.value)' name = '${i}' value = '${playerStuff.controls[i]}'>`;
     bob.appendChild(span);
 }
-console.log(bob);
 class Player {
     static spriteSize = 18
     static walkAnimSpeed = 8 //5 frames per walk cycle
@@ -246,7 +246,6 @@ class Player {
             this.iframes+=playerStuff.stats.shieldIframes;
             this.shieldTimer = 0;
             this.brokenShieldTimer = playerStuff.stats.shieldCooldown;
-            console.log(this.brokenShieldTimer);
             this.shieldCooldown = playerStuff.stats.shieldCooldown;
             return;
         }

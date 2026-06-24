@@ -27,7 +27,6 @@ const weapons = {
                             continue;//don't or else it would be kinda op
                         }
                         if(enemies[i].damage(this.stats.damage) !== false) {
-                            console.log("damaged " + enemies[i].asset);
                             soundEffects.sword.play();
                         }
                     }
@@ -96,7 +95,6 @@ const weapons = {
                 offset = Vect.normalize(offset);
                 this.vel.set(Vect.mult(offset,this.charge));
                 this.pos.set(player.pos);
-                console.log(this.charge);
                 this.charge = 0;
             }
             if(this.thrown && getInput(player.controls.Mace,false)){
@@ -235,11 +233,8 @@ const weapons = {
                         }
                     }
 
-                    console.log(things[0].p);
-
                     if(this.charge>1){
                         ctx.fillStyle = "rgba(0, 255, 125, 0.15)";//real transparent red (not clickbait)
-                        console.log(1/lerp(0.5,0.05,1-weightPercentage));
                         ctx.fillRect(-cam.scale * 1.5, -cam.scale * 1.5, cam.scale * (things[0].p + 1.5), 3 * cam.scale);
                     }
                     ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)

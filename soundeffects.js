@@ -689,20 +689,23 @@ for(let i in music) {
         audio: new Audio("assets/sounds/" + music[i]),
         muffled: new Audio("assets/sounds/" + music[i]),
         isMuffled: false,
+        get playing() {
+            return !this.audio.paused && !this.audio.ended && this.audio.readyState > 2;
+        },
         play: function() {
             this.audio.currentTime = 0;
             this.audio.play();
             this.aGain.gain.setValueAtTime(0, audioCtx.currentTime);
-            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1);
+            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 2);
         },
         pause: function() {
-            //window.setTimeout((audio) => {audio.pause();}, 1000, this.audio);
-            this.aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+            window.setTimeout((audio) => {audio.pause();}, 1000, this.audio);
+            this.aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
         },
         unpause: function() {
             this.audio.currentTime --;
             this.audio.play();//don't reset
-            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1);
+            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 2);
         },
         switchMuffled: function() {
             if(this.isMuffled) {

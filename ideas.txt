@@ -40,3 +40,7 @@ thing       not yet
 -fix lag                                            yee (it was because particles)
 -death screen or something to indicate die     :(   yes
 -make music MUCH louder                             yee
+-fix cranium
+-make death screen explosion bigger
+-fix rent scaling
+-change death screen => funny

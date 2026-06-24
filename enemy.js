@@ -1154,29 +1154,7 @@ class Enemy {
                 this.pos=Vect.get(this.rockPos);
                 var framesTraveled = 0;
                 var simVel = Vect.get(this.vel);
-                /*
-                let limit = 50;
                 
-                while(--limit > 0 && framesTraveled<60){
-                    var limitors = [//walls
-                        [(Math.sign(simVel.x) * (l2.x-this.size)-this.pos.x)/simVel.x,0],
-                        [(Math.sign(simVel.y) * (l2.y-this.size)-this.pos.y)/simVel.y,1],
-                    ]
-                    limitors.sort((a,b)=>a[0]-b[0]);
-                    
-                    var mag = Math.min(Math.ceil(Math.abs(limitors[0][0])),60)
-                    this.pos.add(Vect.mult(simVel,mag));
-                    framesTraveled+=mag;
-                    //console.log(this.pos);
-                    if(limitors[0][1]===0){
-                        simVel.x*=-1;
-                        this.pos.x = Math.sign(this.pos.x) * (l2.x - this.size);
-                    }else{
-                        simVel.y*=-1;
-                        this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
-                    }
-                }
-                */
                 for(var i = 0; i < 30; i ++) {
                     this.pos.add(simVel);
                     if(Math.abs(this.pos.x) > l2.x - this.size) {
@@ -1188,10 +1166,7 @@ class Enemy {
                         this.pos.y = Math.sign(this.pos.y) * (l2.y - this.size);
                     }
                 }
-
-                if(limit <= 0) {
-                    //console.log("it bronk");
-                }
+                
                 this.deflectorDir=Vect.normalize(Vect.sub(player.pos, this.pos));
                 this.deflectorDisplayDir = Vect.normalize(
                             Vect.lerp(
@@ -2211,7 +2186,6 @@ class Enemy {
                 this.driftTimer --;
                 if(this.driftTimer === 30) {
                     //throw
-                    console.log("twop");
                     var dagger = new Enemy(this.pos.x, this.pos.y, "dagger");
                     dagger.vel.set(
                         Vect.mult(

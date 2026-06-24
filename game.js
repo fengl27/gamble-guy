@@ -148,7 +148,7 @@ var game = function() {
     displayGame();
 };
 
-var upgradeScreen = function() {
+var upgradeScreen = function(lost) {
     if(upgradeChoices.length === 0) {
         switchState("gamble");//no luck
     }
@@ -334,19 +334,26 @@ var upgradeScreen = function() {
         upgradeScreen.payTaxes = 120;
         if(mouse.justReleased) {
             playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
-            playerStuff.debt = 0;
-            playerStuff.roundsLeft = 3;
-            playerStuff.requiredRent = Math.min(50, Math.ceil(playerStuff.requiredRent * 1.5));
-            for(var i = 0; i < 5; i ++) {
-                coins.push(new Coin(9999, 9999));
+            if(!lost) {
+                playerStuff.debt = 0;
+                playerStuff.roundsLeft = 3;
+                playerStuff.requiredRent += playerStuff.requiredRent < 4? 1: 2;
+                for(var i = 0; i < 5; i ++) {
+                    coins.push(new Coin(9999, 9999));
+                }
+            }
+            else {
+                upgradeScreen.loseTimer ++;
             }
         }
-        let b = upgradeScreen.taxButton;
-        b.p.set(mouse.x - b.s.x/2, mouse.y - b.s.y/2);
+        if(!upgradeScreen.loseTimer) {
+            let b = upgradeScreen.taxButton;
+            b.p.set(mouse.x - b.s.x/2, mouse.y - b.s.y/2);
+        }
     }
     if(upgradeScreen.payTaxes) {
 
-        upgradeScreen.taxButton.p.y += (120 - upgradeScreen.payTaxes) * h100/10;
+        upgradeScreen.taxButton.p.y += (120 - upgradeScreen.payTaxes + upgradeScreen.loseTimer) * h100/10;
         upgradeScreen.taxButton.go();
         upgradeScreen.payTaxes --;
 
@@ -378,8 +385,16 @@ var upgradeScreen = function() {
             switchState("gamble");
         }
     }
+
+    if(upgradeScreen.loseTimer) {
+        upgradeScreen.loseTimer ++;
+        if(upgradeScreen.loseTimer > 60) {
+            drawLossScreen(upgradeScreen.loseTimer - 60);
+        }
+    }
 };
-var drawLossScreen = function(){
+upgradeScreen.loseTimer = 0;
+var drawLossScreen = function(stateSwitchTimer){
     var t = limit(stateSwitchTimer / 45, 0, 1);
     var opacity = easings.easeInOutQuad(t) / 2;
     ctx.fillStyle = `rgba(0, 0, 0, ${opacity})`;
@@ -415,6 +430,9 @@ var drawLossScreen = function(){
     ctx.strokeText("press space to yee", canvas.width / 2, canvas.height * 7/8);
     ctx.fillText(  "press space to yes", canvas.width / 2, canvas.height * 7/8);
     */
+    ctx.fillStyle = "white";
+    ctx.font = 5 * h100 + "px pixelFontSmall";
+    ctx.fillText("You lived through " + playerStuff.totalRentCycles + " rent cycle(s).", canvas.width / 2, canvas.height / 2);
     
     loseButtons.menuButton.go();
     
@@ -555,7 +573,6 @@ var gamble = function() {
     );
 
     if(gamble.gambleTimer === 250) {
-        console.log("letS go GAMbliNG")
         let cool = false;
         if(gambling[1][results[1]] === "plus") {
             let mergedEnemy = enemyMerges[enemyTypes.indexOf(gambling[0][results[0]])][enemyTypes.indexOf(gambling[2][results[2]])];
@@ -629,7 +646,7 @@ var gamble = function() {
     ctx.fillStyle = "white";
     ctx.strokeText("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);
     ctx.fillText  ("- " + playerStuff.requiredRent + " rent", h100 * 3, h100 * 7);
-    if(playerStuff.debt>1){
+    if(playerStuff.debt>=1){
         ctx.fillStyle = "white";
         ctx.strokeText("- " + playerStuff.debt + " debt", h100 * 3, h100 * 12);
         ctx.fillText  ("- " + playerStuff.debt + " debt", h100 * 3, h100 * 12);
@@ -798,7 +815,7 @@ var tutorialText = [
     }} 
 ];
 var drawTutorial = function() {
-    if((gameState !== "mainMenu" && !updateGame.transitionTimer && tutorial) || upgradeScreen.payTaxes) {
+    if((gameState !== "mainMenu" && !updateGame.transitionTimer && tutorial) || (upgradeScreen.payTaxes && upgradeScreen.loseTimer < 120)) {
         ctx.strokeStyle = "black";
         ctx.lineWidth = h100;
         var t = gameState === "playing"? limit(stateSwitchTimer / 30, 0, 1): 1;
@@ -822,7 +839,6 @@ var drawTutorial = function() {
             );
             ctx.restore();
         }
-        console.log("stuff ", tutorialText[currTutorialMessage].time);
         ctx.fillStyle = "rgb(200, 200, 200)";
 
         rect(ctx, h100 * 2, yPos, width, canvas.height / 4, true, true);
@@ -833,7 +849,7 @@ var drawTutorial = function() {
             ctx.fillStyle = "black";
             var currLine = "";
             var lineIdx = 0;
-            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? "So we meet again. \n Pay your rent and you can have another one of my things!": "Thanks bye~").split(" ");
+            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? playerStuff.coins < 0? "You don't have your rent? Shame. Get out!": "So we meet again. \n Pay your rent and you can have another one of my things!": "Thanks bye~").split(" ");
 
             words.push("\n");//to make sure it draws the last line
             ctx.font = 5 * h100 + "px pixelFontSmall";
