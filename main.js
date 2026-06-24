@@ -55,6 +55,9 @@ var switchState = function(target) {
     switch(target) {
         case "mainMenu":
             playerStuff = JSON.parse(JSON.stringify(defaultPlayerStuff));
+            
+            possibleUpgrades = [];
+            resetUpgrades();
             break;
         case "playing":
             setupLevel();
@@ -69,10 +72,6 @@ var switchState = function(target) {
             break;
         case "lose":
             music.gambling.play();
-            
-            possibleUpgrades = [];
-            resetUpgrades();
-            
             break;
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";

@@ -14,7 +14,7 @@ var playerStuff = {
         this.controls[control] = newVal;
     },
     coins: 6,
-    totalRentCycles: -2,
+    totalRentCycles: -1,
     requiredRent: 1,
     roundsLeft: 3,
     debt: 0,
