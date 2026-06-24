@@ -276,7 +276,7 @@ class Player {
         }
         roundEnemies = []
         if(tutorial) {
-            currTutorialMessage = 40;
+            currTutorialMessage = 41;
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
         else {

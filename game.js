@@ -442,13 +442,26 @@ var drawLossScreen = function(stateSwitchTimer){
     ctx.globalAlpha = 1;
 
     if(loseButtons.menuButton.pressed) {//press button
-        upgradeScreen.loseTimer = 0;
-        upgradeScreen.payTaxes = 0;
-        switchState("mainMenu");
+        drawLossScreen.transitionTimer ++;
     }
     
     Particle.runParticles();//do the particling
+
+    
+    if(drawLossScreen.transitionTimer) {
+        drawLossScreen.transitionTimer ++;
+        var w = (1 - easings.easeInOutQuad(limit(drawLossScreen.transitionTimer / 15, 0, 1))) * canvas.width / 2;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, w, canvas.height);
+        ctx.fillRect(canvas.width - w, 0, w, canvas.height);
+        if(drawLossScreen.transitionTimer > 30) {
+            upgradeScreen.loseTimer = 0;
+            upgradeScreen.payTaxes = 0;
+            switchState("mainMenu");
+        }
+    }
 }
+drawLossScreen.transitionTimer = 0;
 upgradeScreen.canReroll = true;
 upgradeScreen.potionAnim = 0;
 upgradeScreen.payTaxes = 0;
@@ -726,7 +739,7 @@ var tutorialText = [
     {txt: "MWAH HAH HAH HAH!!"},
     {txt: "You'll get more weapons later on"},
     {
-        txt: "Try beating this guy up with the sword!\n it spins automatically \n (You can continue once you beat him up)",
+        txt: "Try beating this guy up with the sword! \n It'll spin automatically.",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -734,13 +747,13 @@ var tutorialText = [
         }
         
     },
-    {txt: "Here, have the aformentioned other weapons!", thing: () => {player.weapons = [];player.weapons.push(weapons.bow);}},
+    {txt: "Here, have a different weapon-The Bow.", thing: () => {player.weapons = [];player.weapons.push(weapons.bow);}},
     {txt: "The bow spins...\nbut, like in the opposite direction!"},
     {
         txt: "Hold left click to start charging the bow!!"
     },
     {
-        txt: "Look, it's this guy again!\n Right click to start charging\n Release to release",
+        txt: "Look, it's this guy again!\n Right click to start charging. \n Release to release.",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -751,7 +764,7 @@ var tutorialText = [
     {txt: "Here, have another funny weapon!", thing: () => {player.weapons = [];player.weapons.push(weapons.throwMace);}},
     {txt: "The mace exists...\nbut, it's hidden!"},
     {
-        txt: "Right click to start charging the mace, it aims towards your mouse (sorry trackpad people)",
+        txt: "Right click to start charging the mace, it aims towards your mouse (sorry trackpad people).",
     },
     {
         txt: "I almost forgot, if the mace reaches the end of the rope...",
@@ -760,28 +773,28 @@ var tutorialText = [
         txt: "...It pulls you! (Don't forget to grab it!)",
     },
     {
-        txt: "Look, it's this guy again!\n Right click to start charging\n Release to release\n you have to pick it up again later",
+        txt: "This guy's back again (for the third time)! \n Right click to charge the mace, you'll have to pick it up later.",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
-            enemies.push(new Enemy(0, 0, "dummy")); 
+            enemies.push(new Enemy(0, 0, "dummy"));
         }
         
     },
     {
-        txt: "do you know what this game needs?"
+        txt: "Do you know what this game needs?"
     },
     {
-        txt: "you guessed it, parry slop"
+        txt: "You guessed it, parry slop."
     },
     {
-        txt: "you can summon your shield with the space bar"
+        txt: "You can summon your shield with the space bar (assuming you have a shield, you're just borrowing mine for now.)"
     },
     {
-        txt: "it does however break if you don't parry in time"
+        txt: "However, it breaks if you use it too early."
     },
     {
-        txt:"try it now",
+        txt:"Try it now! Parry when the arrow is about to hit you.",
         criteria: () => {return player.shields === 0||player.shieldCooldown!==0},
         thing: () => {
             player.shields = 1;
@@ -793,7 +806,7 @@ var tutorialText = [
         }
     },
     {
-        txt:"oh, the other guy is back now",
+        txt:"Oh, the other guy is back now.",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -805,7 +818,7 @@ var tutorialText = [
         }
     },
     {
-        txt: "He looks angry",
+        txt: "He looks angry.",
         criteria: () => {return !enemies.length;},
         thing: () => {
             enemies = [];
@@ -819,9 +832,9 @@ var tutorialText = [
     {txt: "Wow, he dropped money that time!"},
     {txt: "Speaking of money, where'd all your other money go? Aren't you the king?"},
     {txt: "Ohh... right, gambling addiction. Okay, moving on-"},
-    {txt: "Here is my collection! You can pick one weapon to start with. I'll give you more stuff the next time we meet.",switchstateplease: true,thing:() =>{switchState("upgrade");player.weapons = []}, criteria: () => {return gameState === "gamble"}},
-    {txt: "It's time to fuel your gambling addiction!", criteria: () => {return gameState === "gamble"}},
-    {txt: "It's time to fuel your gambling addiction!", criteria: () => {return gameState === "gamble"}},
+    {txt: "Here is my collection! You can pick one weapon to start with. I'll give you more stuff the next time we meet.",thing:() =>{switchState("upgrade");tutorialText[currTutorialMessage].time = 0; player.weapons = []}, criteria: () => {return gameState === "gamble"}},
+    {txt: "It's time to fuel your gambling addiction!"},
+    {txt: "It's time to fuel your gambling addiction!"},
     {txt: "Click the lever to gamble! It costs 2 coins, though..."},
     {txt: "The enemies the slot machine lands on are the enemies in the next round."},
     {txt: "If the center one lands on a + sign, the two other enemies will merge together!"},
@@ -856,36 +869,27 @@ var tutorialText = [
     {txt: "Dude... \n you died to the tutorial guy"},
     {txt: "Lets review again!", criteria: () => {return !enemies.length;}, thing: () => {
         player.iframes = 20;
+        window.setTimeout(() => {
+            music.playing.unpause();
+        }, 2000);
         if(player.weapons.length === 3){
             currTutorialMessage = 22;
-            player.weapons = [];
-            tutorialText[currTutorialMessage].time = stateSwitchTimer;
-            tutorialText[currTutorialMessage].thing();
         }
         else if(player.weapons.length===0){
             currTutorialMessage = 21;
-            player.weapons = [];
-            tutorialText[currTutorialMessage].time = stateSwitchTimer;
-            tutorialText[currTutorialMessage].thing();
         }
         else if(player.weapons[0]===weapons.sword){
             currTutorialMessage = 2;
-            player.weapons = [];
-            tutorialText[currTutorialMessage].time = stateSwitchTimer;
-            tutorialText[currTutorialMessage].thing();
         }
         else if(player.weapons[0]===weapons.bow){
             currTutorialMessage = 7;
-            player.weapons = [];
-            tutorialText[currTutorialMessage].time = stateSwitchTimer;
-            tutorialText[currTutorialMessage].thing();
         }
         else if(player.weapons[0]===weapons.throwMace){
             currTutorialMessage = 11;
-            player.weapons = [];
-            tutorialText[currTutorialMessage].time = stateSwitchTimer;
-            tutorialText[currTutorialMessage].thing();
         }
+        player.weapons = [];
+        tutorialText[currTutorialMessage].time = stateSwitchTimer;
+        tutorialText[currTutorialMessage].thing();
     }},
     {txt: "ERROR 213", thing: () => {
         currTutorialMessage = 7;
@@ -910,19 +914,30 @@ var tutorialText = [
     }} 
 ];
 var drawTutorial = function() {
-    if((gameState !== "mainMenu" && !updateGame.transitionTimer && tutorial) || (upgradeScreen.payTaxes && upgradeScreen.loseTimer < 120)) {
+    if(drawTutorial.disappearAnim < 120 || ((gameState !== "mainMenu" && !updateGame.transitionTimer && tutorial) || (upgradeScreen.payTaxes && upgradeScreen.loseTimer < 120))) {
+        if(tutorial || (upgradeScreen.payTaxes && !upgradeScreen.loseTimer)) {
+            drawTutorial.disappearAnim = 0;
+        }
+        else {
+            drawTutorial.disappearAnim ++;
+        }
+
         ctx.strokeStyle = "black";
         ctx.lineWidth = h100;
         var t = gameState === "playing"? limit(stateSwitchTimer / 30, 0, 1): 1;
         var width = easings.easeInOutQuad(t) * (canvas.width / 2 - 4 * h100);
+        width *= (1 - easings.easeInOutQuad(limit(drawTutorial.disappearAnim / 30-3, 0, 1)));//disappear anim
         var yPos = (easings.easeOutBack(t) - 1) * canvas.height;
         var lastThing = tutorial? stateSwitchTimer - tutorialText[currTutorialMessage].time: stateSwitchTimer;
+        lastThing = isNaN(lastThing)? 200: lastThing;
         yPos += h100 * 73 + Math.sin(limit(lastThing, 0, 5) / 5 * Math.PI) * h100 * 3;
 
-        if(stateSwitchTimer > 30) {
+        if(stateSwitchTimer > 30 || gameState !== "playing") {
             t = gameState === "playing"? limit((stateSwitchTimer - 10)/60, 0, 1): 1;
             var gooberY = h100 * 46 + (1-easings.easeInOutQuad(t)) * h100 * 54;
+            gooberY += easings.easeInQuart(limit(drawTutorial.disappearAnim / 30 - 2, 0, 1)) * h100 * 54;//disappear
             ctx.save();
+            ctx.beginPath();
             ctx.rect(h100 * 5, h100 * 41, h100 * 40, h100 * 40);
             ctx.clip();
             ctx.fillStyle = "rgb(243, 243, 178)";
@@ -938,20 +953,23 @@ var drawTutorial = function() {
 
         rect(ctx, h100 * 2, yPos, width, canvas.height / 4, true, true);
 
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(h100 * 2, yPos, width, canvas.height / 4);
+        ctx.clip();
         
-        
-        if(stateSwitchTimer > 30) {
+        if(stateSwitchTimer > 30 || gameState !== "playing") {
             ctx.fillStyle = "black";
             var currLine = "";
             var lineIdx = 0;
-            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? playerStuff.coins < 0? "You don't have your rent? Shame. Get out!": "So we meet again. \n Pay your rent and you can have another one of my things!": "Thanks bye~").split(" ");
+            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? playerStuff.coins < 0? "You don't have your rent? Shame. Get out!": "So we meet again. \n Pay your rent and you can have another one of my things!": upgradeScreen.payTaxes? "Thanks bye~": "I'LL BE BACK.").split(" ");
 
             words.push("\n");//to make sure it draws the last line
             ctx.font = 5 * h100 + "px pixelFontSmall";
             ctx.textAlign = "left";
             ctx.textBaseline = "hanging";
             for(var i = 0; i < words.length; i ++) {
-                if(words[i] === "\n" || ctx.measureText(currLine + words[i]).width > width-4*h100) {
+                if(words[i] === "\n" || ctx.measureText(currLine + words[i]).width > canvas.width/2-8*h100) {
                     ctx.fillText(currLine, h100 * 4, yPos + h100 * 2 + h100 * 5 * lineIdx);
                     lineIdx ++;
                     currLine = "";
@@ -960,7 +978,7 @@ var drawTutorial = function() {
                     currLine += words[i] + " ";
                 }
             }
-            if(justPressed['enter'] && (!tutorialText[currTutorialMessage].criteria || tutorialText[currTutorialMessage].criteria())) {
+            if(tutorialText[currTutorialMessage].criteria? tutorialText[currTutorialMessage].criteria(): justPressed["enter"]) {
                 currTutorialMessage ++;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
                 try {
@@ -971,11 +989,16 @@ var drawTutorial = function() {
                 }
             }
         }
+
+        ctx.restore();
     }
 };
+drawTutorial.disappearAnim = 120;
+/*
 for(var i = 0;i<tutorialText.length;i++){
-    console.log(`${i}+" "+${tutorialText[i].txt}`)
+    console.log(`${i}: ${tutorialText[i].txt}`)
 }
+    */
 
 var optionsMenu = {
     isInOptions: false,
