@@ -23,7 +23,7 @@ var playerStuff = {
         parryLength:10,
         parryDamageRadius:3,
         shieldIframes:60,
-        shieldCooldown: 0
+        shieldCooldown: 60
     }
 }
 var defaultPlayerStuff = JSON.parse(JSON.stringify(playerStuff));
@@ -95,7 +95,7 @@ class Player {
                 }
                 ctx.drawImage(
                     assets.shield,
-                    0,0,
+                    Player.spriteSize,0,
                     Player.spriteSize,
                     Player.spriteSize,
                     pos.x - cam.scale * 4,
@@ -232,6 +232,7 @@ class Player {
                 this.shieldTimer = 0;
                 this.iframes+=playerStuff.stats.shieldIframes;
                 this.shieldCooldown = playerStuff.stats.shieldCooldown;
+                soundEffects.parry.play();
                 return;
             }
             //sheld brek
@@ -240,6 +241,7 @@ class Player {
             this.iframes+=playerStuff.stats.shieldIframes;
             this.shieldTimer = 0;
             this.brokenShieldTimer = playerStuff.stats.shieldCooldown;
+            console.log(this.brokenShieldTimer);
             this.shieldCooldown = playerStuff.stats.shieldCooldown;
             return;
         }
