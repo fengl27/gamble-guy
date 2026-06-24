@@ -63,12 +63,16 @@ var switchState = function(target) {
             music.playing.play();
             break;
         case "upgrade":
+            playerStuff.totalRentCycles ++;
             setupUpgrade(playerStuff.weapons.length === 0);//only give weapons when no weapons
             music.gambling.play();
             break;
         case "lose":
-            console.log("ha ya' died");
+            music.gambling.play();
+            
+            possibleUpgrades = [];
             resetUpgrades();
+            
             break;
         case "equip":
             equipScreen.button.txt = "to Lv. " + (currLevel + 1) + "!";
@@ -86,10 +90,10 @@ var switchState = function(target) {
                     return;
                 }
             }
-
-            if(music.gambling.audio.paused) {
+            if(!music.gambling.playing) {
                 music.gambling.play();
             }
+
             gamble.gambleTimer = 0;
             gamble.offsetVels = [h100, -h100, h100];
             break;
@@ -97,7 +101,7 @@ var switchState = function(target) {
     if(target !== "playing" && !music.playing.audio.paused) {
         music.playing.pause();
     }
-    else if(target !== "gamble" && target !== "upgrade" && !music.gambling.audio.paused) {
+    else if(target !== "gamble" && target !== "upgrade" && target !== "lose" && !music.gambling.audio.paused) {
         music.gambling.pause();
     }
 };
@@ -217,9 +221,11 @@ var frame = function() {
             case "lose":
                 displayGame();
                 //darkness of doom
-                drawLossScreen();
+                
+                upgradeScreen(true);
+                //drawLossScreen();
 
-                if(/*justPressed[" "]*/loseButtons.menuButton.pressed) {//press button
+                if(/*justPressed[" "]*/loseButtons.menuButton.pressed && playerStuff.coins < 0) {//press button
                     switchState("mainMenu");
                 }
                 break;
