@@ -634,14 +634,11 @@ var otherSounds = {
     buy: "buy.mp3",
 
     bubble: "bubble.mp3",//for potion
-<<<<<<< HEAD
 
     shieldBreak: "shield-break.mp3",
     shieldUse: "shield-use.mp3",
-=======
     
     parry: "parry.mp3"
->>>>>>> 21e879b76e6565df4c7ec123058bcd15985acf2c
 };
 var music = {
     playing: "song.mp3",
