@@ -46,11 +46,11 @@ var possibleUpgrades = [
                                 criteria: () => true, //normally omit when no criteria
                                 branchThing: [
                                     
-                                ]//infinity annd beeeoyingd
+                                ]//infinity annd beeeoying
                             },
                             {
                                 name: 'Plasma blade',
-                                symbol: [assets.weapons, 2, 0],
+                                symbol: [assets.weapons, 5, 0],
                                 description: "look, it's the doom guy from halo",
                                 effect: function() {
                                     weapons.sword.stats.isLaser = true;
@@ -78,7 +78,7 @@ var possibleUpgrades = [
                         branchThing: [
                             {
                                 name: 'Great sword',
-                                symbol: [assets.weapons, 2, 0],
+                                symbol: [assets.weapons, 6, 0],
                                 description: "float like a brick, sting like a brick",
                                 effect: function() {
                                     weapons.sword.stats.isGreatSword = true;
@@ -285,11 +285,12 @@ var possibleUpgrades = [
                 branchThing: [
                     {
                         name: 'The power of thor',
-                        symbol: [assets.weapons, 4, 0],
+                        symbol: [assets.weapons, 8, 0],
                         description: "pros: it's heavy, cons: your not worthy",
                         effect: function() {
                             weapons.throwMace.stats.weightPercentage-=0.2;
                             weapons.throwMace.stats.damage+=1;
+                            weapons.throwMace.stats.isHammer = true;
                         },
                         amount: 1,
                         criteria: () => true, //normally omit when no criteria
@@ -314,12 +315,13 @@ var possibleUpgrades = [
                 branchThing: [
                     {
                         name: 'Less mace weight',
-                        symbol: [assets.weapons, 4, 0],
+                        symbol: [assets.weapons, 9, 0],
                         description: "Are you sure you want to use a pillow?",
                         effect: function() {
                             weapons.throwMace.stats.weightPercentage-=0.1;
                             weapons.throwMace.stats.damage-=1;
                             weapons.throwMace.stats.chargeSpeed *= 1.2;
+                            weapons.throwMace.stats.isPillow = true;
                         },
                         amount: 1,
                         criteria: () => true, //normally omit when no criteria

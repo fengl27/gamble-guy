@@ -6,7 +6,9 @@ const weapons = {
         stats:{
             size:10,
             dirVel:0.15,
-            damage:1
+            damage:1,
+            isLaser:false,
+            isGreatSword:false,
         },
         upgrades:[],
         update: function() {
@@ -42,8 +44,8 @@ const weapons = {
 
             var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
-
-            let args = [assets.weapons, Player.spriteSize * 2, 0, Player.spriteSize, Player.spriteSize,
+            let spriteId = this.stats.isGreatSword?(this.stats.isLaser?7:6):(this.stats.isLaser?5:2)
+            let args = [assets.weapons, Player.spriteSize * spriteId, 0, Player.spriteSize, Player.spriteSize,
                     -this.stats.size / 2 * cam.scale, -cam.scale * 3 - this.stats.size * cam.scale,
                     this.stats.size * cam.scale, this.stats.size * cam.scale
             ];
@@ -75,6 +77,8 @@ const weapons = {
             maxCharge:7,
             weightPercentage:0.1,
             pullStrength:0,
+            isPillow:false,
+            isHammer:false,
         },
         thrown: false,
         charge: 0,
@@ -186,8 +190,9 @@ const weapons = {
             var toMouse = Vect.sub(mouse,playerPos  );
             var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
+            let spriteId = this.stats.isHammer?(this.stats.isPillow?10:8):(this.stats.isPillow?9:4)
 
-            let args = [assets.weapons, Player.spriteSize * 4, 0, Player.spriteSize, Player.spriteSize,
+            let args = [assets.weapons, Player.spriteSize * spriteId, 0, Player.spriteSize, Player.spriteSize,
                     -this.stats.size * cam.scale*1.5+pos.x, -this.stats.size*1.5 * cam.scale+pos.y,
                     this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
             ];
@@ -201,11 +206,15 @@ const weapons = {
                 }
                 ctx.restore();
                 //mac
+
+                let spriteId = this.stats.isHammer?(this.stats.isPillow?10:8):(this.stats.isPillow?9:4)
+
                 ctx.save();
                 ctx.translate(playerPos.x, playerPos.y);
                 ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
+                
                 ctx.drawImage(
-                    assets.weapons, Player.spriteSize * 4, 0, Player.spriteSize, Player.spriteSize,
+                    assets.weapons, Player.spriteSize * spriteId, 0, Player.spriteSize, Player.spriteSize,
                     -this.stats.size * cam.scale*1.5, -cam.scale * 6.5 - this.charge * cam.scale,
                     this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
                 );
