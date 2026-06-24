@@ -60,6 +60,9 @@ var switchState = function(target) {
             resetUpgrades();
             break;
         case "playing":
+            if(tutorial) {
+                currTutorialMessage = 0;
+            }
             setupLevel();
             player.resetWeapons();
             playerStuff.roundsLeft --;
@@ -230,11 +233,6 @@ var frame = function() {
                 //darkness of doom
                 
                 upgradeScreen(true);
-                //drawLossScreen();
-
-                if(/*justPressed[" "]*/loseButtons.menuButton.pressed && playerStuff.coins < 0) {//press button
-                    switchState("mainMenu");
-                }
                 break;
         }
         drawTutorial();
