@@ -71,6 +71,7 @@ var assets = {
 
     arrow: "arrow.png",
     rock: "rock.png",
+    rockSmooth: "smooth-rock.png",
     rockDamaged: "rock-damaged.png",
     small: "small.png",
     smallDashing: "small-dashing.png",

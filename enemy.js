@@ -300,6 +300,12 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 10));
+            if(tutorial){
+                currTutorialMessage = 21;
+                player.weapons = [];
+                tutorialText[currTutorialMessage].time = stateSwitchTimer;
+                tutorialText[currTutorialMessage].thing();
+            }
         }
     }
     static crossbow = {
@@ -1047,7 +1053,7 @@ class Enemy {
                 //yes tilesheets for rocks :)
                 var tilesheetPos = Math.floor(this.walkAnim / this.walkAnimSpeed) % 4;
                 Enemy.drawImage(
-                    assets.rock,
+                    assets.rockSmooth,
                     tilesheetPos * Player.spriteSize, 0,
                     Player.spriteSize, Player.spriteSize,
                     pos.x - cam.scale * 4,
