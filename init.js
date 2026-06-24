@@ -107,6 +107,8 @@ var assets = {
 
     tutorialNpc: "tutorial-npc.png",
 
+    potion: "potion.png",
+    potionDrain: "potion-drain.png"
 };
 for(var i in assets) {
     let bob = new Image();

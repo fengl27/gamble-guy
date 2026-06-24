@@ -69,7 +69,17 @@
             }
             #pauseSettings-keybinds {
                 display: grid;
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-areas:
+                "header header header"
+                ". . ."
+                ". . ."
+                ". . .";
+                grid-template-columns: repeat(3, 1fr);/*same as 1fr 1fr 1fr*/
+            }
+            #pauseSettings-keybinds-heading {
+                grid-area: header;
+                font-size: 0.8em;
+                font-family: pixelFont;
             }
             input[type='range'] {
                 -webkit-appearance: none;
@@ -149,6 +159,10 @@
                 <label id = "sfxVolLabel">100</label>%
             </div>
             <div id = "pauseSettings-keybinds" class = "pauseSettings-screen">
+                <div id = "pauseSettings-keybinds-heading">
+                    arrowup, arrowleft, etc. for arrow keys<br>
+                    mouseLeft, mouseRight for mouse keybinds
+                </div>
             </div>
         </div>
     </body>

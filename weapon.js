@@ -180,6 +180,7 @@ const weapons = {
 
         },
         display: function() {
+            let weightPercentage = limit(this.stats.weightPercentage, 0, 1);
             //basically copied from enemy.js
             var pos = cam.toScreen(this.pos);
             var nodePos = cam.toScreen(this.nodePos);
