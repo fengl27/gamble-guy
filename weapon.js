@@ -81,8 +81,8 @@ const weapons = {
             size:3,
             playerSlow:0.3,
             damage:2,
-            maxCharge:7,
-            weightPercentage:0.1,
+            maxCharge:6,
+            weightPercentage:0.2,
             pullStrength:0,
             isPillow:false,
             isHammer:false,
@@ -97,7 +97,8 @@ const weapons = {
             let thrown = !getInput(player.controls.Mace, false)&&this.charge;
             if(getInput(player.controls.Mace, false)&&!this.thrown){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
-                this.charge=Math.min(this.stats.maxCharge,this.charge+this.stats.chargeSpeed*(this.charge<3?0.1:((this.stats.maxCharge-this.charge)/60+0.01)))
+                this.charge=Math.min(this.stats.maxCharge,this.charge+this.stats.chargeSpeed*(this.charge<3?0.1:((this.stats.maxCharge-this.charge)/60+0.01)));
+                cam.targetScale += this.charge * h100 / this.stats.maxCharge / 6;
             }
             if(!this.thrown&&thrown){
                 this.thrown = true;
@@ -107,6 +108,7 @@ const weapons = {
                 this.vel.set(Vect.mult(offset,this.charge));
                 this.pos.set(player.pos);
                 this.charge = 0;
+                screenshake.shake(5, this.vel.x, this.vel.y);
             }
             if(this.thrown && getInput(player.controls.Mace,false)){
                 //pull the mace closer
@@ -123,12 +125,14 @@ const weapons = {
             if(Math.abs(this.pos.x) > l2.x - this.stats.size) {
                 //horizontal collision
                 this.vel.x *= -1;
+                screenshake.shake(5, this.vel.x, this.vel.y);
                 this.pos.x = Math.sign(this.pos.x) * (l2.x - this.stats.size);
                 soundEffects.bounce.play();
             }
             if(Math.abs(this.pos.y) > l2.y - this.stats.size) {
                 //walls but vertical my not beloved </3
                 this.vel.y *= -1;
+                screenshake.shake(5, this.vel.x, this.vel.y);
                 this.pos.y = Math.sign(this.pos.y) * (l2.y - this.stats.size);
                 soundEffects.bounce.play();
             }
@@ -178,6 +182,7 @@ const weapons = {
                             continue;//don't or else it would be kinda op
                         }
                         if(velMag>1.1){
+                            screenshake.shake(15, this.vel.x, this.vel.y);
                             enemies[i].damage(this.stats.damage);
                             soundEffects.sword.play();
 
@@ -297,10 +302,11 @@ const weapons = {
             this.thrown = false;
         }
     },
-    arrow: function(p, v) {
+    arrow: function(p, v, isMaxCharge) {
         this.deathTimer = 0;
         this.pos = p;
         this.vel = v;
+        this.isMaxCharge = isMaxCharge;
     },
     bow: {
         dir: Math.random() * Math.PI * 2,
@@ -314,6 +320,9 @@ const weapons = {
             sizeMult: 10,
             dirAccel:0.08,
             chargeMult: 1,
+            chargeMax:40,
+            maxChargeDmg:0,
+            zoomAmount:0.25,
             playerSlow:0.5,
             mouseAiming: false
         },
@@ -348,9 +357,9 @@ const weapons = {
             else if(this.chargeTimer) {
                 if(getInput(player.controls.Bow, false)) {
                     player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
-                    this.chargeTimer = Math.min(this.chargeTimer + this.stats.chargeMult, 40);
-                    this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/40) * 4;
-                    cam.targetScale += this.chargeTimer / 40 * h100 / 4;
+                    this.chargeTimer = Math.min(this.chargeTimer + this.stats.chargeMult, this.stats.chargeMax);
+                    this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/this.stats.chargeMax) * 4;
+                    cam.targetScale += this.chargeTimer / this.stats.chargeMax * h100 * this.stats.zoomAmount;
                 }
                 else {
                     //water bucket RELEASE
@@ -366,9 +375,10 @@ const weapons = {
                                 )
                             ),
                             new Vect(
-                                Math.cos(this.dir) * this.chargeTimer / 40 * 3,
-                                Math.sin(this.dir) * this.chargeTimer / 40 * 3
-                            )
+                                Math.cos(this.dir) * this.chargeTimer / this.stats.chargeMax * 3,
+                                Math.sin(this.dir) * this.chargeTimer / this.stats.chargeMax * 3
+                            ),
+                            this.chargeTimer === this.chargeMax
                         ));
                     }
                     this.chargeTimer = 0;
@@ -383,13 +393,13 @@ const weapons = {
             ctx.rotate(this.dir);///it points right so im relieved of pain
             
             ctx.translate((this.playerDst + this.stats.sizeMult / 2 + this.pullbackAmt) * cam.scale, 0);
-            var vibrationAmt = this.chargeTimer / 40 * cam.scale/4;
+            var vibrationAmt = this.chargeTimer / this.stats.chargeMax * cam.scale/4;
             if(this.chargeTimer>10){
                 ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
                 ctx.fillRect(cam.scale * 2, -cam.scale * 1.5, 150*cam.scale, 3 * cam.scale);
             }
             ctx.translate(lerp(-vibrationAmt, vibrationAmt, Math.random()), lerp(-vibrationAmt, vibrationAmt, Math.random()));
-            ctx.scale(1 + easings.easeOutQuad(this.chargeTimer / 40) / 3, 1);
+            ctx.scale(1 + easings.easeOutQuad(this.chargeTimer / this.stats.chargeMax) / 3, 1);
 
             ctx.globalAlpha = 1;
 
@@ -482,7 +492,7 @@ weapons.arrow.prototype.update = function() {
             this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
             this.vel.mult(-0.2);
             soundEffects.bounce.play();
-            enemies[i].damage(weapons.arrow.stats.damage);
+            enemies[i].damage(weapons.arrow.stats.damage + this.isMaxCharge?weapons.bow.stats.maxChargeDmg:0);
             return;
         }
     }

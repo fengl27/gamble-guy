@@ -1230,8 +1230,10 @@ class Enemy {
             this.rockPos = Vect.get(this.pos);
             this.deflectorDir = new Vect();
             this.deflectorDisplayDir = new Vect();
-            let theta = Math.random() * Math.PI * 2;
-            this.vel.set(Math.cos(theta), Math.sin(theta));
+            //let theta = Math.random() * Math.PI * 2;
+            let rotatedVel = new Vect(this.toPlayer.y,-this.toPlayer.x);
+            this.vel.set(Vect.mult(rotatedVel,4))
+            //this.vel.set(Math.cos(theta), Math.sin(theta));
             this.walkAnimSpeed = 10;
         },
         damage: function() {
@@ -1329,8 +1331,8 @@ class Enemy {
         init: function() {
             this.numCoins = 3;
             this.size = 2;
-            let theta = Math.random() * Math.PI * 2;
-            this.vel.set(Math.cos(theta), Math.sin(theta));
+            let rotatedVel = new Vect(this.toPlayer.y,-this.toPlayer.x);
+            this.vel.set(Vect.mult(rotatedVel,4));
             this.walkAnimSpeed = 5;
             this.health = 3;
         },
@@ -2936,7 +2938,8 @@ class Enemy {
         };
         this.weapons = [];
         this.walkAnim = 0;
-        this.toPlayer = new Vect(1,0);
+        this.toPlayer = Vect.normalize(Vect.mult(this.pos,-1));
+        console.log(this.toPlayer);
         this.walkAnimSpeed = 20;
         this.asset = type || "archer";
         this.type = Enemy[type || "archer"];
