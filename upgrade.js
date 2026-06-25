@@ -210,11 +210,12 @@ var possibleUpgrades = [
                 criteria: () => true, //normally omit when no criteria
                 branchThing: [
                     {
-                        name: 'Faster Arrow',
+                        name: 'Faster Aiming',
                         symbol: [assets.weapons, 1, 0],
                         description: "I Feel the Need, the Need for Speed",
                         effect: function() {
-                            weapons.bow.stats.chargeMax += 10;
+                            weapons.bow.stats.chargeMax += 5;
+                            weapons.bow.stats.aimSpeed += 0.1;
                         },
                         amount: 1,
                         criteria: () => true, //normally omit when no criteria
@@ -225,8 +226,10 @@ var possibleUpgrades = [
                                 description: "Aim small, miss small (increased damage on max charge)",
                                 effect: function() {
                                     weapons.bow.stats.maxChargeDmg += 1;
-                                    weapons.bow.stats.chargeMax += 20;
+                                    weapons.bow.stats.chargeMax += 30;
                                     weapons.bow.stats.zoomAmount -= 0.5;
+                                    weapons.bow.stats.chargeMin += 10;
+                                    weapons.bow.stats.aimChargeSpeedReduction *= 0.15;
                                 },
                                 amount: 1,
                                 criteria: () => true, //normally omit when no criteria

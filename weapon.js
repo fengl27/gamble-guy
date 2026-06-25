@@ -321,11 +321,12 @@ const weapons = {
             dirAccel:0.08,
             chargeMult: 1,
             chargeMax:40,
+            chargeMin:10,
             maxChargeDmg:0,
             zoomAmount:0.25,
             playerSlow:0.5,
             aimSpeed:0.3,
-            aimChargeSpeedReduction:0.3,
+            aimChargeSpeedReduction:1/6,
             mouseAiming: false
         },
         upgrades:[],
@@ -365,7 +366,7 @@ const weapons = {
                 }
                 else {
                     //water bucket RELEASE
-                    if(this.chargeTimer > 10) {
+                    if(this.chargeTimer > this.stats.chargeMin) {
                         soundEffects.arrowLaunch.play();
                         this.pullbackVel = 0.6;
                         player.projectiles.push(new weapons.arrow(
@@ -396,7 +397,7 @@ const weapons = {
             
             ctx.translate((this.playerDst + this.stats.sizeMult / 2 + this.pullbackAmt) * cam.scale, 0);
             var vibrationAmt = this.chargeTimer / this.stats.chargeMax * cam.scale/4;
-            if(this.chargeTimer>10){
+            if(this.chargeTimer> this.stats.chargeMin){
                 ctx.fillStyle = "rgba(255, 0, 0, 0.15)";//real transparent red (not clickbait)
                 ctx.fillRect(cam.scale * 2, -cam.scale * 1.5, 150*cam.scale, 3 * cam.scale);
             }
@@ -409,7 +410,12 @@ const weapons = {
                     -cam.scale * this.stats.sizeMult/2, -cam.scale * this.stats.sizeMult/2,
                     this.stats.sizeMult * cam.scale, this.stats.sizeMult * cam.scale
             ];
+            
+            if(this.chargeTimer===this.stats.chargeMax) {
+                ctx.filter = "brightness(150%)";
+            }
             ctx.drawImage(...args);
+            ctx.filter = "none";
 
             ctx.restore();
             /*
