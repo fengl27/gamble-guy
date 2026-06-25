@@ -185,10 +185,10 @@ var frame = function() {
     //pause screen stuff
     if(justPressed["p"]) {
         paused = !paused;
-        if(gameState === "playing") {
+        if(music.playing.playing) {
             music.playing.switchMuffled();
         }
-        else if(gameState === "gamble") {
+        else if(music.gambling.playing) {
             music.gambling.switchMuffled();
         }
         if(!paused) {
