@@ -324,6 +324,8 @@ const weapons = {
             maxChargeDmg:0,
             zoomAmount:0.25,
             playerSlow:0.5,
+            aimSpeed:0.3,
+            aimChargeSpeedReduction:0.3,
             mouseAiming: false
         },
         upgrades:[],
@@ -338,7 +340,7 @@ const weapons = {
                 */
                 let aimVect = new Vect(Math.cos(this.dir),Math.sin(this.dir));
                 let toMouse = Vect.normalize(Vect.sub(cam.toGlobal(mouse),player.pos));
-                let aimAmount = this.chargeTimer? 0.05: 0.3;
+                let aimAmount = this.stats.aimSpeed*(this.chargeTimer? this.stats.aimChargeSpeedReduction: 1);
                 this.dir = Math.atan2(toMouse.y * aimAmount + aimVect.y, toMouse.x * aimAmount + aimVect.x);
                 this.dirVel = 0;
             }else{
