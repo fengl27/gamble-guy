@@ -125,7 +125,8 @@ var updateGame = function() {
     var targetPos = player.exploding && !tutorial? player.pos: Vect.mult(player.pos, 0.2);
     var diff = Vect.sub(targetPos, cam.pos);
     cam.pos.add(Vect.mult(diff, 0.15));
-    cam.scale += ((player.exploding && player.exploding < 30? h100*5: h100) - cam.scale) / 20;
+    cam.scale += (cam.targetScale - cam.scale) / 20;
+    cam.targetScale = (player.exploding && player.exploding < 30? h100*5: h100);//e
     
     if(updateGame.transitionTimer > 50) {
         updateGame.transitionTimer = 0;

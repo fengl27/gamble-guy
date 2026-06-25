@@ -69,7 +69,7 @@ const weapons = {
         nodePos: new Vect(),
         stats: {
             chargeSpeed: 1,
-            size:2,
+            size:3,
             playerSlow:0.3,
             damage:2,
             maxCharge:7,
@@ -187,7 +187,7 @@ const weapons = {
             var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
 
-            let args = [assets.weapons, Player.spriteSize * 4, 0, Player.spriteSize, Player.spriteSize,
+            let args = [assets.weapons, Player.spriteSize * 11, 0, Player.spriteSize, Player.spriteSize,
                     -this.stats.size * cam.scale*1.5+pos.x, -this.stats.size*1.5 * cam.scale+pos.y,
                     this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
             ];
@@ -205,7 +205,7 @@ const weapons = {
                 ctx.translate(playerPos.x, playerPos.y);
                 ctx.rotate(this.dir + Math.PI / 2);///it points up so im in pain
                 ctx.drawImage(
-                    assets.weapons, Player.spriteSize * 4, 0, Player.spriteSize, Player.spriteSize,
+                    assets.weapons, Player.spriteSize * 11, 0, Player.spriteSize, Player.spriteSize,
                     -this.stats.size * cam.scale*1.5, -cam.scale * 6.5 - this.charge * cam.scale,
                     this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
                 );
@@ -326,6 +326,7 @@ const weapons = {
                     player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
                     this.chargeTimer = Math.min(this.chargeTimer + this.stats.chargeMult, 40);
                     this.pullbackAmt = -easings.easeInOutQuad(this.chargeTimer/40) * 4;
+                    cam.targetScale += this.chargeTimer / 40 * h100 / 4;
                 }
                 else {
                     //water bucket RELEASE

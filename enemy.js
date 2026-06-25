@@ -850,6 +850,7 @@ class Enemy {
             }
             if(this.spawnDelay===0&&this.spawning === true){
                 let bob = new Enemy(this.spawnPos.x, this.spawnPos.y, "golemite");
+                bob.spawnAnim = 9;
                 enemies.push(bob);
                 this.spawning = false;
             }
@@ -964,6 +965,7 @@ class Enemy {
                     if(this.health <= 0) {
                         var bob = new Enemy(this.pos.x, this.pos.y, "archer");
                         bob.iframes = 60;
+                        bob.spawnAnim = 9;
                         enemies.push(bob);
                     }
                     this.dead = true;
@@ -1990,11 +1992,13 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 3));
-            if(this.health <= 0) {
+            if(this.health <= 0) {//this is kai's fault not mine ok?
                 let bob = new Enemy(this.pos.x, this.pos.y, "small");
                 let joe = new Enemy(this.pos.x, this.pos.y, "small");
                 bob.iframes = 60;
                 joe.iframes = 60;
+                bob.spawnAnim = 9;
+                joe.spawnAnim = 9;
                 enemies.push(bob);
                 enemies.push(joe);
                 player.vel.add(Vect.mult(this.toPlayer, 2));

@@ -3,6 +3,7 @@
 var cam = {
     pos: new Vect(0,0),
     scale: h100 / 3,//each 1 global u is equal to x screen px
+    targetScale: h100 / 3,
     toScreen: function(global) {
         return new Vect(
             canvas.width / 2 + (global.x - this.pos.x) * this.scale,
