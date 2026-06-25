@@ -41,6 +41,7 @@ const l2 = Vect.div(settings.levelSize, 2);
 var gameState = "mainMenu";
 var paused = false;
 var tutorial = false;//aee
+var firstTime = true;
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
 /*

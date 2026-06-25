@@ -109,15 +109,24 @@ var updateGame = function() {
         }
     }
     player.update();
+
+    let doActualEnemiesExist = false;
+
     for(var i = 0; i < enemies.length; i ++) {
         enemies[i].update();
         if(enemies[i].dead) {
             enemies.splice(i, 1);
             i --;
         }
+        else if(enemies[i].numCoins > 0) doActualEnemiesExist = true;
     }
 
-    if(enemies.length === 0 && !player.exploding && (!tutorial || tutorialText[currTutorialMessage].switchstateplease)) {
+    if(!doActualEnemiesExist && !player.exploding && (!tutorial || tutorialText[currTutorialMessage].switchstateplease)) {
+        if(!updateGame.transitionTimer) {//KILL everyone
+            for(var i = 0; i < enemies.length; i ++) {
+                enemies[i].damage(enemies[i].health);
+            }
+        }
         updateGame.transitionTimer ++;
     }
 
@@ -451,7 +460,7 @@ var drawLossScreen = function(stateSwitchTimer){
     
     if(drawLossScreen.transitionTimer) {
         drawLossScreen.transitionTimer ++;
-        var w = (1 - easings.easeInOutQuad(limit(drawLossScreen.transitionTimer / 15, 0, 1))) * canvas.width / 2;
+        var w = easings.easeInOutQuad(limit(drawLossScreen.transitionTimer / 15, 0, 1)) * canvas.width / 2;
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, w, canvas.height);
         ctx.fillRect(canvas.width - w, 0, w, canvas.height);

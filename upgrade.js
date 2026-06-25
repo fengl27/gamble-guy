@@ -15,7 +15,7 @@ var possibleUpgrades = [
             {
                 name: 'Bigger sword',
                 symbol: [assets.weapons, 2, 0],
-                description: "you can out-range the knight guy now",
+                description: "you can outrange the knight guy now",
                 effect: function() {
                     weapons.sword.stats.size+=1;
                     
@@ -35,26 +35,14 @@ var possibleUpgrades = [
                         criteria: () => true, //normally omit when no criteria
                         branchThing: [
                             {
-                                name: 'Tornado swipe',
-                                symbol: [assets.weapons, 2, 0],
-                                description: "The hands can't hit what the eyes can't see (we can still see you)",
-                                effect: function() {
-                                    weapons.sword.stats.size-=3;
-                                    weapons.sword.stats.dirVel += 0.1;
-                                },
-                                amount: 1,
-                                criteria: () => true, //normally omit when no criteria
-                                branchThing: [
-                                    
-                                ]//infinity annd beeeoying
-                            },
-                            {
                                 name: 'Plasma blade',
                                 symbol: [assets.weapons, 5, 0],
-                                description: "look, it's the doom guy from halo",
+                                description: "LOOK, IT'S THE doom GUY FROM halo \n \n speedy small speed speed walk fast sword go brrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",
                                 effect: function() {
                                     weapons.sword.stats.isLaser = true;
-                                    weapons.sword.stats.dirVel += 0.2;
+                                    weapons.sword.stats.dirVel += 0.25;
+                                    weapons.sword.stats.size-=2;
+                                    playerStuff.stats.speed *= 1.2;
                                 },
                                 amount: 1,
                                 criteria: () => true, //normally omit when no criteria
@@ -79,12 +67,12 @@ var possibleUpgrades = [
                             {
                                 name: 'Great sword',
                                 symbol: [assets.weapons, 6, 0],
-                                description: "float like a brick, sting like a brick",
+                                description: "float like a brick, sting like a brick \n \n wow, this great sword sure is great (and inconveniently large)\n(+1 damage, -speed, +5 size, +cool looking sword)",
                                 effect: function() {
                                     weapons.sword.stats.isGreatSword = true;
-                                    weapons.sword.stats.size+=5;
+                                    weapons.sword.stats.size+=3;
                                     weapons.sword.stats.damage+=1;
-                                    weapons.sword.stats.dirVel -= 0.1;
+                                    weapons.sword.stats.dirVel -= 0.13;
                                 },
                                 amount: 1,
                                 criteria: () => true, //normally omit when no criteria
@@ -112,7 +100,7 @@ var possibleUpgrades = [
             {
                 name: 'Arrow size',
                 symbol: [assets.weapons, 1, 0],
-                description: "I can't aim so I'm adding an upgrade to help me",
+                description: "I can't aim so I'm adding an upgrade to help me (+20% size)",
                 effect: function() {
                     weapons.arrow.stats.size+=1;
                     
@@ -121,20 +109,9 @@ var possibleUpgrades = [
                 criteria: () => true, //normally omit when no criteria
                 branchThing: [
                 {
-                    name: "Lightweight bow",
-                    symbol: [assets.weapons, 1, 0],
-                    description: "Charge arrows faster!",
-                    effect: function() {
-                        weapons.arrow.stats.chargeMult*=1.4;
-                    },
-                    amount: 1,
-                    criteria: () => true, //normally omit when no criteria
-                    branchThing: []
-                },
-                {
                     name: 'Bigger arrow',
                     symbol: [assets.weapons, 1, 0],
-                    description: "I still can't aim so I'm adding another upgrade to help me",
+                    description: "I still can't aim so I'm adding another upgrade to help me (+16.666666666666666666667% size)",
                     effect: function() {
                         weapons.arrow.stats.size+=1;
                     },
@@ -144,10 +121,10 @@ var possibleUpgrades = [
                         {
                             name: 'Spear',
                             symbol: [assets.weapons, 3, 0],
-                            description: "it's so big that we might as well just shoot a spear",
+                            description: "The arrow's so big that we might as well just shoot a spear (+28.57142857142857142857142857142857142857142857142857142857% size, +spear, -slowness while charging, -slower charge) \n \n ultimate math nerds will realize the size increase is x9/7",
                             effect: function() {
                                 weapons.arrow.stats.size+=2;
-                                weapons.arrow.isSpear = true;
+                                weapons.arrow.stats.isSpear = true;
                                 weapons.bow.stats.playerSlow -= 0.1;
                                 weapons.bow.stats.chargeMult -= 0.2;
                             },
@@ -157,7 +134,7 @@ var possibleUpgrades = [
                                 {
                                     name: 'Bigger Spear',
                                     symbol: [assets.weapons, 3, 0],
-                                    description: "let's say it together! \n who can't aim? \n I can't aim!!",
+                                    description: "let's say it together! \n who can't aim? \n I can't aim!! (+25% size, +1 damage, -slowness while charging, -slower charge)",
                                     effect: function() {
                                         weapons.arrow.stats.size+=2;
                                         weapons.arrow.stats.damage+=1;
@@ -179,7 +156,7 @@ var possibleUpgrades = [
                 {
                     name: 'Faster Bow',
                     symbol: [assets.weapons, 1, 0],
-                    description: "better pull",
+                    description: "Better pull (20% faster charge + faster spin speed)",
                     effect: function() {
                         weapons.bow.stats.chargeMult += 0.2;
                         weapons.bow.stats.dirAccel += 0.02;
@@ -188,9 +165,9 @@ var possibleUpgrades = [
                     criteria: () => true, //normally omit when no criteria
                     branchThing: [
                         {
-                            name: 'Faster Bow',
+                            name: 'Even Faster Bow TM',
                             symbol: [assets.weapons, 1, 0],
-                            description: "even better pull",
+                            description: "Even better pull (17% faster charge + even faster spin speed)",
                             effect: function() {
                                 weapons.bow.stats.chargeMult += 0.2;
                                 weapons.bow.stats.dirAccel += 0.02;
@@ -199,9 +176,9 @@ var possibleUpgrades = [
                             criteria: () => true, //normally omit when no criteria
                             branchThing: [
                                 {
-                                    name: 'light bow',
+                                    name: 'Lightest bow',
                                     symbol: [assets.weapons, 1, 0],
-                                    description: "newton's third law",
+                                    description: "Newton's third law make bow go NYYYYYYYYYYYYYYYYYYYRROOOOOOOOM",
                                     effect: function() {
                                         weapons.bow.stats.chargeMult += 0.2;
                                         weapons.bow.stats.dirAccel += 0.08;
@@ -221,10 +198,10 @@ var possibleUpgrades = [
                 {
                     name: 'Mouse aiming',
                     symbol: [assets.weapons, 1, 0],
-                    description: "were nerfing the charge rate",
+                    description: "We're nerfing the charge rate, though (by 30%) (this upgrade was way too good)",
                     effect: function() {
                         weapons.bow.stats.mouseAiming = true;
-                        weapons.bow.stats.chargeMult -= 0.04
+                        weapons.bow.stats.chargeMult -= 0.30;
                     },
                     amount: 1,
                     criteria: () => true, //normally omit when no criteria
@@ -399,10 +376,10 @@ var possibleUpgrades = [
             {
                 name: 'Well ventilated shorts',
                 symbol: [assets.upgradeIcons, 1, 0],
-                description: "these shorts are wonderfully comfortable and reduce chaffing",
+                description: "these shorts are wonderfully comfortable and reduce chafing (move faster while charging weapons)",
                 effect: function() {
-                    weapons.stats.bow.playerSlow += 0.1;
-                    weapons.stats.throwMace.playerSlow += 0.1;
+                    weapons.bow.stats.playerSlow += 0.1;
+                    weapons.throwMace.stats.playerSlow += 0.1;
                 },
                 amount: 1,
                 criteria: () => true,

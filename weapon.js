@@ -12,7 +12,7 @@ const weapons = {
         },
         upgrades:[],
         update: function() {
-            var movement = (!getInput(player.controls.Bow) && !getInput(player.controls.Mace))? this.stats.dirVel: 0;
+            var movement = (!getInput(player.controls.Bow) && !getInput(player.controls.Mace))? this.stats.dirVel: 0.02;
             this.dirVel += (movement - this.dirVel) / 10;
             this.dir += this.dirVel;
 
@@ -23,7 +23,7 @@ const weapons = {
             for(var j = 0; j < cPoss.length; j ++) {
                 let cPos = cPoss[j];
                 for(var i = 0; i < enemies.length; i ++) {
-                    if(!enemies[i].iframes && !enemies[i].invincible && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (3 + enemies[i].size)*((3 + enemies[i].size))) {
+                    if(!enemies[i].iframes && !enemies[i].invincible && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.stats.size/3 + enemies[i].size)*((this.stats.size/3 + enemies[i].size))) {
                         //collide (they die)
                         if(enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
@@ -53,13 +53,20 @@ const weapons = {
 
             ctx.restore();
             /*
-            ctx.fillStyle = "red";
-            if(this.swordTimer < 15) {
+            let cPoss = [
+                new Vect(player.pos.x + Math.cos(this.dir) * this.stats.size, player.pos.y + Math.sin(this.dir) * this.stats.size),
+                new Vect(player.pos.x + Math.cos(this.dir) * this.stats.size / 2, player.pos.y + Math.sin(this.dir) * this.stats.size / 2),
+            ];
+            
+            ctx.fillStyle = "rgba(0, 255, 0, 0.5)";
+            for(var i = 0; i < cPoss.length; i ++) {
+                var bob = cam.toScreen(cPoss[i]);
                 ctx.beginPath();
-                ctx.arc(pos.x + Math.cos(this.swordDir) * this.stats.size * cam.scale, pos.y + Math.sin(this.swordDir) * this.stats.size * cam.scale, cam.scale * 3, 0, Math.PI * 2);
+                ctx.arc(bob.x, bob.y, this.stats.size/3*cam.scale, 0, Math.PI * 2);
                 ctx.fill();
             }
-            */
+                */
+            
         },
         reset: function(){
             this.dir = Math.random() * Math.PI * 2
@@ -102,6 +109,7 @@ const weapons = {
                 this.charge = 0;
             }
             if(this.thrown && getInput(player.controls.Mace,false)){
+                //pull the mace closer
                 offset = Vect.sub(this.pos,player.pos);
                 offset.normalize();
                 this.vel.sub(Vect.mult(offset,this.stats.pullStrength*(1-this.stats.weightPercentage)));
@@ -119,11 +127,13 @@ const weapons = {
                 soundEffects.bounce.play();
             }
             if(Math.abs(this.pos.y) > l2.y - this.stats.size) {
+                //walls but vertical my not beloved </3
                 this.vel.y *= -1;
                 this.pos.y = Math.sign(this.pos.y) * (l2.y - this.stats.size);
                 soundEffects.bounce.play();
             }
             if(sqrDistToPlayer>400&&this.thrown){
+                //pull the player
                 var dst = Math.sqrt(sqrDistToPlayer);
                 let wantedMag = 20 - dst;
                 let force = Vect.mult(Vect.sub(this.pos,player.pos),wantedMag / dst);
@@ -132,8 +142,8 @@ const weapons = {
             }
             
             if(this.thrown){
-                if(sqrDistToPlayer>400){
-                    this.nodePos = Vect.lerp(this.pos,player.pos,0.5);
+                if(sqrDistToPlayer>400 || (getInput(player.controls.Mace,false)&&this.stats.pullStrength)){
+                    this.nodePos.add(Vect.div(Vect.sub(Vect.lerp(this.pos,player.pos,0.5), this.nodePos), 3));
                 }else{
                     for(var i = 0; i < 5; i ++) {
                         var dst = dist(this.nodePos.x,this.nodePos.y,player.pos.x,player.pos.y);
@@ -190,7 +200,7 @@ const weapons = {
             var toMouse = Vect.sub(mouse,playerPos  );
             var opacity = limit(this.swordTimer - 20, 0, 20) / 20;
             ctx.globalAlpha = 1-easings.easeOutQuad(opacity);
-            let spriteId = this.stats.isHammer?(this.stats.isPillow?10:8):(this.stats.isPillow?9:11)
+            let spriteId = this.stats.isHammer?(this.stats.isPillow?10:8):(this.stats.isPillow?9:4);
 
             let args = [assets.weapons, Player.spriteSize * spriteId, 0, Player.spriteSize, Player.spriteSize,
                     -this.stats.size * cam.scale*1.5+pos.x, -this.stats.size*1.5 * cam.scale+pos.y,
@@ -206,8 +216,6 @@ const weapons = {
                 }
                 ctx.restore();
                 //mac
-
-                let spriteId = this.stats.isHammer?(this.stats.isPillow?10:8):(this.stats.isPillow?9:4)
 
                 ctx.save();
                 ctx.translate(playerPos.x, playerPos.y);
@@ -311,12 +319,19 @@ const weapons = {
         },
         upgrades:[],
         update: function() {
-            if(this.mouseAiming){
-                let aimVect = new Vect(cos(this.dir),sin(this.dir));
-                let rotatedAimVect = new Vect(sin(this.dir),-cos(this.dir));
-                let toMouse = Vect.sub(toScreen(mouse),player.pos.x)
+            if(this.stats.mouseAiming){
+                /*
+                let aimVect = new Vect(Math.cos(this.dir),Math.sin(this.dir));
+                let rotatedAimVect = new Vect(Math.sin(this.dir),-Math.cos(this.dir));
+                let toMouse = Vect.sub(toScreen(mouse),player.pos.x);
                 let mouseClockwise = Vect.dot(rotatedAimVect,toMouse)>0;
                 this.dirVel += ((this.chargeTimer? 0: (mouseClockwise?1:-1)*this.stats.dirAccel) - this.dirVel) / 5;
+                */
+                let aimVect = new Vect(Math.cos(this.dir),Math.sin(this.dir));
+                let toMouse = Vect.normalize(Vect.sub(cam.toGlobal(mouse),player.pos));
+                let aimAmount = this.chargeTimer? 0.05: 0.3;
+                this.dir = Math.atan2(toMouse.y * aimAmount + aimVect.y, toMouse.x * aimAmount + aimVect.x);
+                this.dirVel = 0;
             }else{
                 this.dirVel += ((this.chargeTimer? 0: -this.stats.dirAccel) - this.dirVel) / 5;
             }
@@ -413,12 +428,30 @@ weapons.arrow.prototype.display = function() {
     var pos = cam.toScreen(this.pos);
     ctx.save();
     ctx.translate(pos.x, pos.y);
-    ctx.rotate(Math.atan2(this.vel.y, this.vel.x) + Math.sign(this.deathTimer) * Math.PI);
+    ctx.rotate(Math.atan2(this.vel.y, this.vel.x) + Math.sign(this.deathTimer) * Math.PI + Math.PI/2*weapons.arrow.stats.isSpear);
+    ctx.scale(weapons.arrow.stats.size / 5, weapons.arrow.stats.size / 5);
 
     let opacity = 1 - this.deathTimer / 10;
     ctx.globalAlpha = opacity;
-    ctx.drawImage(this.isSpear?assets.spear:assets.arrow, -cam.scale * 5, -cam.scale * 3, cam.scale * 6, cam.scale * 6);
+    if(weapons.arrow.stats.isSpear) {
+        ctx.drawImage(
+            assets.weapons,
+            Player.spriteSize * 3 + 0.05, 0,
+            Player.spriteSize * 0.9, Player.spriteSize,
+            -cam.scale * 3, -cam.scale * 3,
+            cam.scale * 6, cam.scale * 6
+        );
+    }
+    else {
+        ctx.drawImage(weapons.arrow.stats.isSpear?assets.spear:assets.arrow, -cam.scale * 5, -cam.scale * 3, cam.scale * 6, cam.scale * 6);
+    }
     ctx.restore();
+    /*
+    ctx.fillStyle = "rgba(255, 0, 0, 0.1)";
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, cam.scale * weapons.arrow.stats.size, 0, Math.PI * 2);
+    ctx.fill();
+    */
 };
 weapons.arrow.prototype.update = function() {
     if(this.deathTimer > 0) {
@@ -430,7 +463,8 @@ weapons.arrow.prototype.update = function() {
         }
         return;
     }
-    if(Math.abs(this.pos.x) > l2.x - weapons.arrow.stats.size || Math.abs(this.pos.y) > l2.y - weapons.arrow.stats.size) {
+    
+    if(Math.abs(this.pos.x) > l2.x - 1 || Math.abs(this.pos.y) > l2.y - 1) {//small hitbox for only walls
         //die
         this.deathTimer ++;
         this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));

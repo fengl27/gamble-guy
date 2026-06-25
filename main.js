@@ -33,18 +33,7 @@ var setupUpgrade = function(depressing, isReroll) {
     }
 };
 var resetUpgrades = function() {
-    let thingy = function(upgrades) {//loops through literally everything
-        for(var i = 0; i < upgrades.length; i ++) {
-            upgrades[i].description = upgrades[i].description.split("\n").join(" \n ");//so that when i split by spaces it separates \n as its own word
-            if(upgrades[i].branchThing === "self") {
-                upgrades[i].branchThing = [upgrades[i]];
-            }
-            else {
-                thingy(upgrades[i].branchThing);
-            }
-        }
-    };
-    thingy(possibleUpgrades);
+    currPossibleUpgrades = [];
     for(var i = 0; i < possibleUpgrades.length; i ++) {
         currPossibleUpgrades.push(possibleUpgrades[i]);
     }
@@ -54,9 +43,8 @@ var switchState = function(target) {
     stateSwitchTimer = 0;
     switch(target) {
         case "mainMenu":
+            //you've deaded so we reset ya stuff
             playerStuff = JSON.parse(JSON.stringify(defaultPlayerStuff));
-            
-            possibleUpgrades = [];
             resetUpgrades();
             break;
         case "playing":
@@ -141,11 +129,19 @@ var mainMenu = {
             optionsMenu.runOptionsButton();
             ctx.restore();
         }
+        if(stateSwitchTimer < 30 && !firstTime) {
+            ctx.fillStyle = "black";
+            let t = 1-easings.easeInOutQuad(Math.max(0, stateSwitchTimer/15-1));
+            ctx.beginPath();
+            ctx.arc(0, canvas.height / 2, Math.sqrt(canvas.width*canvas.width+canvas.height*canvas.height/4)*t, 0, Math.PI*2);
+            ctx.fill();
+        }
 
         if(this.transitionTimer) {
             this.transitionTimer ++;
             if(this.transitionTimer >= 30) {
                 this.transitionTimer = 0;
+                firstTime = false;
                 switchState(tutorial? "playing": "upgrade");
             }
         }

@@ -2218,7 +2218,7 @@ class Enemy {
         },
         init: function() {
             this.numCoins = 5;
-            this.size = -0.5;
+            this.size = 0;
             this.walkAnimSpeed = 7;
 
             this.dashCharge = 0;
