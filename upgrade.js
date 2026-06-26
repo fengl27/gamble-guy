@@ -159,9 +159,9 @@ var possibleUpgrades = [
             {
                 name: 'Faster Bow',
                 symbol: [assets.weapons, 1, 0],
-                description: "Better pull (20% faster charge + faster spin speed)",
+                description: "Better pull (10% faster charge + faster spin speed)",
                 effect: function() {
-                    weapons.bow.stats.chargeMult += 0.2;
+                    weapons.bow.stats.chargeMult += 0.1;
                     weapons.bow.stats.dirAccel += 0.02;
                 },
                 amount: 1,
@@ -170,9 +170,9 @@ var possibleUpgrades = [
                     {
                         name: 'Even Faster Bow TM',
                         symbol: [assets.weapons, 1, 0],
-                        description: "Even better pull (17% faster charge + even faster spin speed)",
+                        description: "Even better pull (14% faster charge + even faster spin speed)",
                         effect: function() {
-                            weapons.bow.stats.chargeMult += 0.2;
+                            weapons.bow.stats.chargeMult += 0.15;
                             weapons.bow.stats.dirAccel += 0.02;
                         },
                         amount: 1,
@@ -183,8 +183,8 @@ var possibleUpgrades = [
                                 symbol: [assets.weapons, 1, 0],
                                 description: "Newton's third law make bow go NYYYYYYYYYYYYYYYYYYYRROOOOOOOOM",
                                 effect: function() {
-                                    weapons.bow.stats.chargeMult += 0.2;
-                                    weapons.bow.stats.dirAccel += 0.08;
+                                    weapons.bow.stats.chargeMult += 0.15;
+                                    weapons.bow.stats.dirAccel += 0.02;
                                 },
                                 amount: 1,
                                 criteria: () => true, //normally omit when no criteria
