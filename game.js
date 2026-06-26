@@ -650,8 +650,8 @@ var gamble = function() {
         gamble.button.go();
         if(gamble.button.pressed) {
             if(tutorial) {
-                tutorialText[52].funnyThing = currTutorialMessage;
-                currTutorialMessage = 43;
+                tutorialText[53].funnyThing = currTutorialMessage;
+                currTutorialMessage = 45;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
@@ -768,7 +768,7 @@ var tutorialText = [
         txt: "Hold left click to start charging the bow!!"
     },
     {
-        txt: "Look, it's this guy again!\n Right click to start charging. \n Release to release.",
+        txt: "Look, it's this guy again! \n Left click to start charging. \n Release to release.",
         criteria: () => {return !enemies.length;},
         thing: () => {
             player.iframes = 20;
@@ -856,6 +856,7 @@ var tutorialText = [
     {txt: "You can gamble as many times as you want (as long as you have enough money)."},
     {txt: "This will make the rounds harder, but you will get more $$$$$$$$"},
     {txt: "Just make sure to get enough money to pay your rent!"},
+    {txt: "By the way, press P to pause. There's an enemy dictionary and options menu from there!"},
     {txt: "Now, go out and gamble your life away! (literally)", thing: () => {
         if(Math.random() < 0.01) {
             currTutorialMessage += 2;
@@ -923,7 +924,7 @@ var tutorialText = [
     {txt: ":("},
     {txt: "ERROR 212", thing: () => {
         //console.log(tutorialText[32].funnyThing);
-        currTutorialMessage = tutorialText[47].funnyThing > 15? 23: tutorialText[47].funnyThing;
+        currTutorialMessage = /*tutorialText[53].funnyThing > ? 35: tutorialText[53].funnyThing*/35;
         tutorialText[currTutorialMessage].time = stateSwitchTimer;
         tutorialText[currTutorialMessage].thing();
     }} 

@@ -500,7 +500,7 @@ weapons.arrow.prototype.update = function() {
             this.pos.sub(Vect.mult(this.vel, 3 / this.vel.mag()));
             this.vel.mult(-0.2);
             soundEffects.bounce.play();
-            enemies[i].damage(weapons.arrow.stats.damage + this.isMaxCharge?weapons.bow.stats.maxChargeDmg:0);
+            enemies[i].damage(weapons.arrow.stats.damage + (this.isMaxCharge?weapons.bow.stats.maxChargeDmg:0));
             return;
         }
     }
