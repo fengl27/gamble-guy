@@ -1338,11 +1338,12 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 3));
-            if(this.health <= 0)
+            if(this.health <= 0) {
                 let bob = new Enemy(this.pos.x, this.pos.y, "small");
                 bob.iframes = 60;
                 bob.spawnAnim = 9;
                 enemies.push(bob);
+            }
         }
     }
     static small = {
