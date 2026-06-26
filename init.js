@@ -118,7 +118,7 @@ var assets = {
 
 const enemyDictLength = 11;
 for(var i = 0; i < enemyDictLength; i ++) {
-    assets["enemyDict-" + i] = "enemy-dict/pg" + i + ".jpg";
+    assets["enemyDict-" + i] = "enemy-dict/pg" + i + ".png";
 }
 
 for(var i in assets) {
