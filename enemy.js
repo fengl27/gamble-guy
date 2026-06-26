@@ -549,6 +549,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
+            this.numCoins = 2;
             this.mass = 2;
             this.health = 3;
             this.size = 2;
@@ -858,7 +859,7 @@ class Enemy {
             this.spawnDelay = Math.max(0, this.spawnDelay-1);
         },
         init: function() {
-            this.numCoins = 4;
+            this.numCoins = 5;
             this.health = 5;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
@@ -1012,7 +1013,7 @@ class Enemy {
             this.walkAnim ++;
         },
         init: function() {
-            this.numCoins = 2;
+            this.numCoins = 4;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));
@@ -1337,6 +1338,11 @@ class Enemy {
         },
         damage: function() {
             this.vel.sub(Vect.mult(this.toPlayer, 3));
+            if(this.health <= 0)
+                let bob = new Enemy(this.pos.x, this.pos.y, "small");
+                bob.iframes = 60;
+                bob.spawnAnim = 9;
+                enemies.push(bob);
         }
     }
     static small = {
@@ -2218,7 +2224,7 @@ class Enemy {
             }
         },
         init: function() {
-            this.numCoins = 5;
+            this.numCoins = 6;
             this.size = 0;
             this.walkAnimSpeed = 7;
 
@@ -2790,8 +2796,8 @@ class Enemy {
             }
         },
         init: function() {
-            this.numCoins = 3;
-            this.health = 3;
+            this.numCoins = 5;
+            this.health = 4;
             this.size = 2.25;
             this.walkAnimSpeed = 10;
             this.spearing = false;
