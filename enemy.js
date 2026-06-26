@@ -1013,7 +1013,6 @@ class Enemy {
         },
         init: function() {
             this.numCoins = 2;
-            this.health = 2;
             this.size = 2;
             let theta = Math.random() * Math.PI * 2;
             this.vel.set(Math.cos(theta), Math.sin(theta));

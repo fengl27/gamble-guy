@@ -193,6 +193,7 @@ var frame = function() {
         }
         if(!paused) {
             optionsMenu.isInOptions = false;
+            enemyDict = false;
             optionsMenu.run();
         }
     }

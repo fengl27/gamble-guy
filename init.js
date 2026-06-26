@@ -112,11 +112,11 @@ var assets = {
 
     potion: "potion.png",
     potionDrain: "potion-drain.png",
-    
+
     enemyDictBook: "enemy-dict/book-thing.png"
 };
 
-const enemyDictLength = 2;
+const enemyDictLength = 11;
 for(var i = 0; i < enemyDictLength; i ++) {
     assets["enemyDict-" + i] = "enemy-dict/pg" + i + ".png";
 }

@@ -1082,7 +1082,23 @@ var optionsMenu = {
 
 
 var drawEnemyDict = function() {
+    ctx.save();
+    /*
+    ctx.fillStyle = "rgb(255,250,230)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    */
+    ctx.translate(w100*5,w100*5*9/16);
+    ctx.scale(0.9, 0.9);
     ctx.fillStyle = drawEnemyDict.funnyGradient;
+
+    function tempDrawImg(img,x, y, w, h) {
+        ctx.save();
+        ctx.fillStyle = "rgb(255,250,230)";
+        ctx.fillRect(x,y-canvas.height/2,w,h+canvas.height);
+        ctx.restore();
+        ctx.drawImage(img,x, y, w, h);
+    }
+
     if(drawEnemyDict.pageAnim) {
         var page1 = assets["enemyDict-"+drawEnemyDict.currPage];
         var page2 = assets["enemyDict-"+(drawEnemyDict.currPage + 1)];
@@ -1090,24 +1106,24 @@ var drawEnemyDict = function() {
         //draw page 1 left half
         ctx.save();
         ctx.beginPath();
-        ctx.rect(0, 0, canvas.width / 2, canvas.height);
+        ctx.rect(0, -canvas.height/2, canvas.width / 2, canvas.height*2);
         ctx.clip();
-        ctx.drawImage(page1, 0, 0, canvas.width, canvas.height);
+        tempDrawImg(page1, 0, 0, canvas.width, canvas.height);
         ctx.restore();
 
         //draw page 2 right half
         ctx.save();
         ctx.beginPath();
-        ctx.rect(canvas.width / 2, 0, canvas.width / 2, canvas.height);
+        ctx.rect(canvas.width / 2, -canvas.height/2, canvas.width / 2, canvas.height*2);
         ctx.clip();
-        ctx.drawImage(page2, 0, 0, canvas.width, canvas.height);
+        tempDrawImg(page2, 0, 0, canvas.width, canvas.height);
         ctx.restore();
         
         //shadow
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, -canvas.height/2, canvas.width, canvas.height*2);
 
         //draw moving page
-        var moveAmt = easings.easeInOutQuad(drawEnemyDict.pageAnim / 15);
+        var moveAmt = easings.easeInOutQuad(drawEnemyDict.pageAnim / 10);
         if(drawEnemyDict.flipDir === -1) moveAmt = 1-moveAmt;
         if(moveAmt < 0.5) {
             //draw right side of page 1 on right side but scaled horizontally
@@ -1115,11 +1131,13 @@ var drawEnemyDict = function() {
             ctx.translate(canvas.width / 2, 0);
             ctx.scale((0.5-moveAmt) * 2, 1);
             ctx.beginPath();
-            ctx.rect(0, 0, canvas.width / 2, canvas.height);
+            ctx.rect(0, -canvas.height/2, canvas.width / 2, canvas.height*2);
             ctx.clip();
-            ctx.drawImage(page1, -canvas.width / 2, 0, canvas.width, canvas.height);
+            
+            tempDrawImg(page1, -canvas.width / 2, 0, canvas.width, canvas.height);
             ctx.translate(-canvas.width/2, 0);
-            ctx.fillRect(canvas.width/2, 0, canvas.width/2, canvas.height);
+
+            ctx.fillRect(canvas.width/2, -canvas.height/2, canvas.width/2, canvas.height*2);
             ctx.restore();
         }
         else {
@@ -1128,18 +1146,18 @@ var drawEnemyDict = function() {
             ctx.translate(canvas.width / 2, 0);
             ctx.scale((moveAmt-0.5) * 2, 1);
             ctx.beginPath();
-            ctx.rect(-canvas.width/2, 0, canvas.width / 2, canvas.height);
+            ctx.rect(-canvas.width/2, -canvas.height/2, canvas.width / 2, canvas.height*2);
             ctx.clip();
-            ctx.drawImage(page2, -canvas.width / 2, 0, canvas.width, canvas.height);
+            tempDrawImg(page2, -canvas.width / 2, 0, canvas.width, canvas.height);
             
             ctx.translate(-canvas.width/2, 0);
-            ctx.fillRect(0, 0, canvas.width/2, canvas.height);
+            ctx.fillRect(0, -canvas.height/2, canvas.width/2, canvas.height*2);
             ctx.restore();
         }
 
         //add to timer
         drawEnemyDict.pageAnim ++;
-        if(drawEnemyDict.pageAnim >= 15) {
+        if(drawEnemyDict.pageAnim >= 10) {
             drawEnemyDict.pageAnim = 0;//finish anim
             if(drawEnemyDict.flipDir === 1) {//if ya goin' right
                 drawEnemyDict.currPage ++;
@@ -1147,22 +1165,37 @@ var drawEnemyDict = function() {
         }
     }
     else {
-        ctx.drawImage(assets["enemyDict-"+drawEnemyDict.currPage], 0, 0, canvas.width, canvas.height);
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        tempDrawImg(assets["enemyDict-"+drawEnemyDict.currPage], 0, 0, canvas.width, canvas.height);
+
+        ctx.fillRect(0, -canvas.height/2, canvas.width, canvas.height*2);
 
         //detect flipping
-        if(getInput(playerStuff.controls.Right) && drawEnemyDict.currPage < enemyDictLength - 1) {
+        if((getInput(playerStuff.controls.Right) || mouse.justPressed && mouse.x > canvas.width * 2/3) && drawEnemyDict.currPage < enemyDictLength - 1) {
             drawEnemyDict.pageAnim = 1;
             drawEnemyDict.flipDir = 1;
         }
-        else if(getInput(playerStuff.controls.Left) && drawEnemyDict.currPage > 0) {
+        else if((getInput(playerStuff.controls.Left) || mouse.justPressed && mouse.x < canvas.width/3) && drawEnemyDict.currPage > 0) {
             drawEnemyDict.pageAnim = 1;
             drawEnemyDict.currPage --;
             drawEnemyDict.flipDir = -1;
         }
     }
 
+    ctx.restore();
+    
+    if(stateSwitchTimer % 30 < 15) {
+        ctx.font = 4*h100+"px pixelFontSmall";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "grey";
+        ctx.fillText("Press esc. to leave", w100 * 8, h100 * 93);
+    }
+
     ctx.drawImage(assets.enemyDictBook, 0, 0, canvas.width, canvas.height);
+
+    if(getInput("escape", true)) {
+        enemyDict = false;
+    }
 };
 drawEnemyDict.currPage = 0;
 drawEnemyDict.pageAnim = 0;
