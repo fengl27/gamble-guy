@@ -57,7 +57,7 @@ class Player {
         this.shieldTimer = 0;
         this.brokenShieldTimer = 0;
         this.shieldCooldown = 0;
-        this.iframes = 0;
+        this.iframes = 60;
         this.speedMult = 1;
         this.exploding = 0;
         this.explodeThing = null;

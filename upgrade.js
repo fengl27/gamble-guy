@@ -5,7 +5,7 @@ var possibleUpgrades = [
     {
         name: 'Get sword!',
         symbol: [assets.weapons, 2, 0],//sword
-        description: "The classic",
+        description: "The classic (medium)",
         effect: function() {
             playerStuff.weapons.push(weapons.sword);
         },
@@ -90,7 +90,7 @@ var possibleUpgrades = [
     {
         name: 'Get bow!',
         symbol: [assets.weapons, 1, 0],
-        description: "For people who want to not die",
+        description: "For people who want to not die (medium)",
         effect: function() {
             playerStuff.weapons.push(weapons.bow);
         },
@@ -153,62 +153,94 @@ var possibleUpgrades = [
                         
                     ]//infinity annd beeeoyingd
                 },
-                {
-                    name: 'Faster Bow',
-                    symbol: [assets.weapons, 1, 0],
-                    description: "Better pull (20% faster charge + faster spin speed)",
-                    effect: function() {
-                        weapons.bow.stats.chargeMult += 0.2;
-                        weapons.bow.stats.dirAccel += 0.02;
-                    },
-                    amount: 1,
-                    criteria: () => true, //normally omit when no criteria
-                    branchThing: [
-                        {
-                            name: 'Even Faster Bow TM',
-                            symbol: [assets.weapons, 1, 0],
-                            description: "Even better pull (17% faster charge + even faster spin speed)",
-                            effect: function() {
-                                weapons.bow.stats.chargeMult += 0.2;
-                                weapons.bow.stats.dirAccel += 0.02;
-                            },
-                            amount: 1,
-                            criteria: () => true, //normally omit when no criteria
-                            branchThing: [
-                                {
-                                    name: 'Lightest bow',
-                                    symbol: [assets.weapons, 1, 0],
-                                    description: "Newton's third law make bow go NYYYYYYYYYYYYYYYYYYYRROOOOOOOOM",
-                                    effect: function() {
-                                        weapons.bow.stats.chargeMult += 0.2;
-                                        weapons.bow.stats.dirAccel += 0.08;
-                                    },
-                                    amount: 1,
-                                    criteria: () => true, //normally omit when no criteria
-                                    branchThing: [
-                                        
-                                    ]//infinity annd beeeoyingd
-                                },
-                                
-                            ]//infinity annd beeeoyingd
+                
+                ]//infinity annd beeeoyingd
+            },
+            {
+                name: 'Faster Bow',
+                symbol: [assets.weapons, 1, 0],
+                description: "Better pull (20% faster charge + faster spin speed)",
+                effect: function() {
+                    weapons.bow.stats.chargeMult += 0.2;
+                    weapons.bow.stats.dirAccel += 0.02;
+                },
+                amount: 1,
+                criteria: () => true, //normally omit when no criteria
+                branchThing: [
+                    {
+                        name: 'Even Faster Bow TM',
+                        symbol: [assets.weapons, 1, 0],
+                        description: "Even better pull (17% faster charge + even faster spin speed)",
+                        effect: function() {
+                            weapons.bow.stats.chargeMult += 0.2;
+                            weapons.bow.stats.dirAccel += 0.02;
                         },
-                        
-                    ]//infinity annd beeeoyingd
-                },
-                {
-                    name: 'Mouse aiming',
-                    symbol: [assets.weapons, 1, 0],
-                    description: "We're nerfing the charge rate, though (by 30%) (this upgrade was way too good)",
-                    effect: function() {
-                        weapons.bow.stats.mouseAiming = true;
-                        weapons.bow.stats.chargeMult -= 0.30;
+                        amount: 1,
+                        criteria: () => true, //normally omit when no criteria
+                        branchThing: [
+                            {
+                                name: 'Lightest bow',
+                                symbol: [assets.weapons, 1, 0],
+                                description: "Newton's third law make bow go NYYYYYYYYYYYYYYYYYYYRROOOOOOOOM",
+                                effect: function() {
+                                    weapons.bow.stats.chargeMult += 0.2;
+                                    weapons.bow.stats.dirAccel += 0.08;
+                                },
+                                amount: 1,
+                                criteria: () => true, //normally omit when no criteria
+                                branchThing: [
+                                    
+                                ]//infinity annd beeeoyingd
+                            },
+                            
+                        ]//infinity annd beeeoyingd
                     },
-                    amount: 1,
-                    criteria: () => true, //normally omit when no criteria
-                    branchThing: [
-                        
-                    ]//infinity annd beeeoyingd
+                    
+                ]//infinity annd beeeoyingd
+            },
+            {
+                name: 'Mouse aiming',
+                symbol: [assets.weapons, 1, 0],
+                description: "We're nerfing the charge rate, though (by 30%) (this upgrade was way too good)",
+                effect: function() {
+                    weapons.bow.stats.mouseAiming = true;
+                    weapons.bow.stats.chargeMult -= 0.30;
                 },
+                amount: 1,
+                criteria: () => true, //normally omit when no criteria
+                branchThing: [
+                    {
+                        name: 'Faster Aiming',
+                        symbol: [assets.weapons, 1, 0],
+                        description: "I Feel the Need, the Need for Speed",
+                        effect: function() {
+                            weapons.bow.stats.chargeMax += 5;
+                            weapons.bow.stats.aimSpeed += 0.1;
+                        },
+                        amount: 1,
+                        criteria: () => true, //normally omit when no criteria
+                        branchThing: [
+                            {
+                                name: 'Sniper',
+                                symbol: [assets.weapons, 1, 0],
+                                description: "Aim small, miss small (increased damage on max charge)",
+                                effect: function() {
+                                    weapons.bow.stats.maxChargeDmg += 1;
+                                    weapons.bow.stats.chargeMax += 30;
+                                    weapons.bow.stats.zoomAmount -= 0.5;
+                                    weapons.bow.stats.chargeMin += 10;
+                                    weapons.bow.stats.aimChargeSpeedReduction *= 0.15;
+                                },
+                                amount: 1,
+                                criteria: () => true, //normally omit when no criteria
+                                branchThing: [
+                                    
+                                ]//infinity annd beeeoyingd
+                            },
+                            
+                        ]//infinity annd beeeoyingd
+                    },
+                    
                 ]//infinity annd beeeoyingd
             },
         ]//infinity annd beeeoyingd
@@ -216,7 +248,7 @@ var possibleUpgrades = [
     {
         name: 'Get mace!',
         symbol: [assets.weapons, 4, 0],
-        description: "mobility players and midranger's dream",
+        description: "mobility players and midranger's dream (hard)",
         effect: function() {
             playerStuff.weapons.push(weapons.throwMace);
         },
