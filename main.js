@@ -98,7 +98,8 @@ var switchState = function(target) {
 var mainMenu = {
     buttons: [//button constructor (x,y,w,h,txt)
         {b: new Button(canvas.width/2-h100*20, h100 * 50, h100 * 40, h100 * 10, "Start!!"), thing: () => mainMenu.transitionTimer++},
-        {b: new Button(canvas.width / 2 - h100 * 20, h100 * 37, h100 * 40, h100 * 10, "Tutorial"), thing: () => {mainMenu.transitionTimer++;tutorial=true;playerStuff.coins = 0;playerStuff.roundsLeft=4;}}
+        {b: new Button(canvas.width / 2 - h100 * 20, h100 * 37, h100 * 40, h100 * 10, "Tutorial"), thing: () => {mainMenu.transitionTimer++;tutorial=true;playerStuff.coins = 0;playerStuff.roundsLeft=4;}},
+        {b: new Button(canvas.width / 2 - h100 * 20, h100 * 76, h100 * 40, h100 * 10, "Dictionary"), thing: () => {enemyDict = true;}}
     ],
     transitionTimer: 0,
     go: function() {
