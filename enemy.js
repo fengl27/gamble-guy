@@ -2805,10 +2805,10 @@ class Enemy {
             this.spearReload = 0;
             this.shieldFlash = 0;
         },
-        damage: function() {
+        damage: function(damag) {
             this.vel.sub(Vect.mult(this.toPlayer, 3));
             if(!this.spearing){
-                this.health++;
+                this.health+=damag;
                 this.iframes=0;
                 this.shieldFlash = 30;
                 return false; 
