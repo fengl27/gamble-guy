@@ -2939,7 +2939,6 @@ class Enemy {
         this.weapons = [];
         this.walkAnim = 0;
         this.toPlayer = Vect.normalize(Vect.mult(this.pos,-1));
-        console.log(this.toPlayer);
         this.walkAnimSpeed = 20;
         this.asset = type || "archer";
         this.type = Enemy[type || "archer"];
