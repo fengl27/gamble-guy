@@ -196,6 +196,8 @@ class Player {
         this.pos.x = limit(this.pos.x, -l2.x + this.size, l2.x - this.size);
         this.pos.y = limit(this.pos.y, -l2.y - this.size, l2.y - this.size);
 
+        if(this.exploding) return;
+
         for(var i = 0; i < enemies.length; i ++) {
             if(enemies[i].collisions && !enemies[i].iframes && sqrDist(this.pos.x, this.pos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.size + enemies[i].size) * (this.size + enemies[i].size)) {
                 //collision

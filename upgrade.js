@@ -5,7 +5,7 @@ var possibleUpgrades = [
     {
         name: 'Get sword!',
         symbol: [assets.weapons, 2, 0],//sword
-        description: "The classic (medium)",
+        description: "The classic",
         effect: function() {
             playerStuff.weapons.push(weapons.sword);
         },
@@ -90,7 +90,7 @@ var possibleUpgrades = [
     {
         name: 'Get bow!',
         symbol: [assets.weapons, 1, 0],
-        description: "For people who want to not die (medium)",
+        description: "For people who want to not die",
         effect: function() {
             playerStuff.weapons.push(weapons.bow);
         },
@@ -248,7 +248,7 @@ var possibleUpgrades = [
     {
         name: 'Get Mace!',
         symbol: [assets.weapons, 4, 0],
-        description: "mobility players and midranger's dream (hard)",
+        description: "mobility players and midranger's dream",
         effect: function() {
             playerStuff.weapons.push(weapons.throwMace);
         },

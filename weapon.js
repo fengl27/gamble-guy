@@ -93,7 +93,7 @@ const weapons = {
         upgrades:[],
         update: function() {
             let weightPercentage = limit(this.stats.weightPercentage, 0, 1);
-            this.dir -= this.charge/18;
+            this.dir -= this.charge/12;
             let thrown = !getInput(player.controls.Mace, false)&&this.charge;
             if(getInput(player.controls.Mace, false)&&!this.thrown){
                 player.speedMult = Math.min(player.speedMult,this.stats.playerSlow);
@@ -105,7 +105,7 @@ const weapons = {
                 mousePos = cam.toGlobal(mouse);
                 offset = Vect.sub(mousePos,player.pos);
                 offset = Vect.normalize(offset);
-                this.vel.set(Vect.mult(offset,this.charge));
+                this.vel.set(Vect.mult(offset,this.charge+1));
                 this.pos.set(player.pos);
                 this.charge = 0;
                 screenshake.shake(5, this.vel.x, this.vel.y);
@@ -122,18 +122,18 @@ const weapons = {
                 this.thrown = false;
             }
             
-            if(Math.abs(this.pos.x) > l2.x - this.stats.size) {
+            if(Math.abs(this.pos.x) > l2.x - 1.5) {
                 //horizontal collision
                 this.vel.x *= -1;
                 screenshake.shake(5, this.vel.x, this.vel.y);
-                this.pos.x = Math.sign(this.pos.x) * (l2.x - this.stats.size);
+                this.pos.x = Math.sign(this.pos.x) * (l2.x - 1.5)           ;
                 soundEffects.bounce.play();
             }
-            if(Math.abs(this.pos.y) > l2.y - this.stats.size) {
+            if(Math.abs(this.pos.y) > l2.y - 1.5) {
                 //walls but vertical my not beloved </3
                 this.vel.y *= -1;
                 screenshake.shake(5, this.vel.x, this.vel.y);
-                this.pos.y = Math.sign(this.pos.y) * (l2.y - this.stats.size);
+                this.pos.y = Math.sign(this.pos.y) * (l2.y - 1.5);
                 soundEffects.bounce.play();
             }
             if(sqrDistToPlayer>400&&this.thrown){
@@ -170,27 +170,35 @@ const weapons = {
             if(this.charge===0){
                 cPoss.push(this.pos);
             }else{
-                new Vect(player.pos.x + Math.cos(this.dir) * this.charge, player.pos.y + Math.sin(this.dir) * this.charge)
+                let radius = (this.charge+this.stats.size)*2/3;
+                cPoss.push(new Vect(player.pos.x + Math.cos(this.dir)*radius, player.pos.y + Math.sin(this.dir)*radius));
             }
             
             for(var j = 0; j < cPoss.length; j ++) {
                 let cPos = cPoss[j];
+
                 for(var i = 0; i < enemies.length; i ++) {
-                    if((!enemies[i].iframes||velMag<1.1) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.stats.size + enemies[i].size)*(this.stats.size + enemies[i].size)) {
+                    if((!enemies[i].iframes||velMag<1.1) && sqrDist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y) < (this.stats.size/2 + enemies[i].size)*(this.stats.size/2 + enemies[i].size)) {
                         //collide (they die)
                         if((enemies[i].type === Enemy.arrow && !this.thrown) || enemies[i].type === Enemy.dagger) {
                             continue;//don't or else it would be kinda op
                         }
-                        if(velMag>1.1){
+                        if(velMag>1.1||this.charge>1){
                             screenshake.shake(15, this.vel.x, this.vel.y);
-                            enemies[i].damage(this.stats.damage);
+                            enemies[i].damage(this.stats.damage-(this.charge>1?1:0));
                             soundEffects.sword.play();
 
                         }
-                        var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
-                        let wantedMag = (this.stats.size+enemies[i].size) - dst;
-                        enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
-                        enemies[i].vel.add(Vect.mult(this.vel, 6));
+                        if(this.charge === 0){
+                            var toPlayer = Vect.normalize(Vect.sub(this.pos, player.pos));
+                            if(Vect.dot(toPlayer, Vect.normalize(enemies[i].vel)) > -0.5) {
+                                var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
+                                let wantedMag = (this.stats.size+enemies[i].size) - dst;
+
+                                enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
+                                enemies[i].vel.add(Vect.mult(this.vel, 6));
+                            }
+                        }
                     }
                 }
             }
@@ -212,15 +220,7 @@ const weapons = {
                     this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
             ];
             if(!this.thrown && this.charge!==0){
-                //chan
-                ctx.save();
-                ctx.translate(playerPos.x, playerPos.y);
-                ctx.rotate(this.dir);
-                for(var x = 0; x < cam.scale * 3.5 + this.charge * cam.scale; x += cam.scale * 4) {
-                    ctx.drawImage(assets.chain, x, -cam.scale * 2, cam.scale * 4, cam.scale * 4);
-                }
-                ctx.restore();
-                //mac
+                //big mac
 
                 ctx.save();
                 ctx.translate(playerPos.x, playerPos.y);
@@ -228,7 +228,7 @@ const weapons = {
                 
                 ctx.drawImage(
                     assets.weapons, Player.spriteSize * spriteId, 0, Player.spriteSize, Player.spriteSize,
-                    -this.stats.size * cam.scale*1.5, -cam.scale * 6.5 - this.charge * cam.scale,
+                    -this.stats.size * cam.scale*1.5, -cam.scale * 1.5 - this.charge * cam.scale*2/3 -this.stats.size*cam.scale*4/3,
                     this.stats.size * cam.scale*3, this.stats.size * cam.scale*3
                 );
                 ctx.restore();
@@ -239,7 +239,7 @@ const weapons = {
 
                     let things = [
                         {p: 0, v: 0},
-                        {p: 0, v: this.charge}
+                        {p: 0, v: this.charge+1}
                     ];
 
                     for(var i = 0; i < 60; i ++) {
@@ -264,7 +264,15 @@ const weapons = {
 
                     ctx.restore();
                 }
-            }
+                
+                /*
+                ctx.fillStyle = "red";
+                let cPos = cam.toScreen(new Vect(player.pos.x + Math.cos(this.dir) * (this.charge+this.stats.size), player.pos.y + Math.sin(this.dir) * (this.charge+this.stats.size)));
+                ctx.beginPath();
+                ctx.arc(cPos.x, cPos.y, this.stats.size * cam.scale, 0, Math.PI * 2);
+                ctx.fill();
+                */
+            }//
             else if(this.thrown) {
                 //chain of doom
                 ctx.beginPath();
