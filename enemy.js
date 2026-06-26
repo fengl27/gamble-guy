@@ -1331,7 +1331,7 @@ class Enemy {
             this.numCoins = 3;
             this.size = 2;
             let rotatedVel = new Vect(this.toPlayer.y,-this.toPlayer.x);
-            this.vel.set(Vect.mult(rotatedVel,4));
+            this.vel.set(Vect.mult(rotatedVel,2));
             this.walkAnimSpeed = 5;
             this.health = 3;
         },
