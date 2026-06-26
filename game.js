@@ -162,9 +162,6 @@ var upgradeScreen = function(lost) {
     if(upgradeChoices.length === 0) {
         switchState("gamble");//no luck
     }
-    if(!music.gambling.playing) {
-        music.gambling.play();
-    }
     
     ctx.fillStyle = "rgb(70,70,70)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -486,6 +483,9 @@ var pauseScreen = function() {
     ctx.fillStyle = "white";
     ctx.fillText("PAUSED!!!!!!!!!!!!!!!", canvas.width/2, canvas.height / 4);
 
+    ctx.font = 5 * h100 + "px pixelFont";
+    ctx.fillText("Press P to unpause", canvas.width / 2, canvas.height * 0.38);
+
     optionsMenu.runOptionsButton();
     pauseScreen.enemyDictButton.go();
     if(pauseScreen.enemyDictButton.pressed) {
@@ -541,14 +541,8 @@ var drawGamble = function(things, offset, thingSpacing, pos, size) {
 };
 
 const enemyTypes = ['rock', 'archer', 'sword', 'small'];
-/*
-var enemyMerges = [
-    ["boulder", "roller",     "deflector", "controller"],
-    [false,     "crossbow", "spear",     "rogue"     ],
-    [false,     false,      "fencer",    "barbarian" ]
-];
-*/
-var enemyMerges = [
+
+var enemyMerges = [//this is the gooberiest way to merge stuff but idk
     ["boulder",    "roller",   "deflector", "controller"],
     ["roller",     "crossbow", "spear",     "rogue"     ],
     ["deflector",  "spear",    "fencer",    "barbarian" ],
@@ -1010,16 +1004,18 @@ var drawTutorial = function() {
     }
 };
 drawTutorial.disappearAnim = 120;
-/*
-for(var i = 0;i<tutorialText.length;i++){
-    console.log(`${i}: ${tutorialText[i].txt}`)
-}
-    */
 
 var optionsMenu = {
     isInOptions: false,
     currScreen: "main",
     run: function() {
+        for(var i = 0; i < pauseSettingsEl.children.length; i ++) {
+            var shouldShow = this.isInOptions && pauseSettingsEl.children[i].id === "pauseSettings-" + this.currScreen;
+            if(shouldShow !== (pauseSettingsEl.children[i].style.visibility === "visible")) {
+                pauseSettingsEl.children[i].style.visibility = shouldShow? "visible": "hidden";
+            }
+        }
+        if(!this.isInOptions) return;
         ctx.fillStyle = "rgb(95, 95, 95)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.font = 20 * h100 + "px pixelFont";
@@ -1041,20 +1037,15 @@ var optionsMenu = {
         if(this.leaveOptionsButton.pressed) {
             if(this.currScreen === "main") {
                 this.isInOptions = false;
+                //hide all the stuff
+                for(var i = 0; i < pauseSettingsEl.children.length; i ++) {
+                    pauseSettingsEl.children[i].style.visibility = "hidden";
+                }
             }
             else {
                 this.currScreen = "main";
             }
         }
-
-        for(var i = 0; i < pauseSettingsEl.children.length; i ++) {
-            var shouldShow = this.isInOptions && pauseSettingsEl.children[i].id === "pauseSettings-" + this.currScreen;
-            if(shouldShow !== (pauseSettingsEl.children[i].style.visibility === "visible")) {
-                pauseSettingsEl.children[i].style.visibility = shouldShow? "visible": "hidden";
-            }
-        }
-
-        
     },
     optionsButton: new Button(
         canvas.width/2-h100*20, h100 * 63,
@@ -1083,6 +1074,7 @@ var optionsMenu = {
 
 var drawEnemyDict = function() {
     ctx.save();
+    ctx.imageSmoothingEnabled = true;//for now
     /*
     ctx.fillStyle = "rgb(255,250,230)";
     ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -1123,7 +1115,7 @@ var drawEnemyDict = function() {
         ctx.fillRect(0, -canvas.height/2, canvas.width, canvas.height*2);
 
         //draw moving page
-        var moveAmt = easings.easeInOutQuad(drawEnemyDict.pageAnim / 10);
+        var moveAmt = easings.easeInOutQuad(drawEnemyDict.pageAnim / 13);
         if(drawEnemyDict.flipDir === -1) moveAmt = 1-moveAmt;
         if(moveAmt < 0.5) {
             //draw right side of page 1 on right side but scaled horizontally
@@ -1155,9 +1147,16 @@ var drawEnemyDict = function() {
             ctx.restore();
         }
 
+        ctx.lineWidth = h100;
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo((0.5-moveAmt)*canvas.width+canvas.width/2, 0);
+        ctx.lineTo((0.5-moveAmt)*canvas.width+canvas.width/2, canvas.height);
+        ctx.stroke();
+
         //add to timer
         drawEnemyDict.pageAnim ++;
-        if(drawEnemyDict.pageAnim >= 10) {
+        if(drawEnemyDict.pageAnim >= 13) {
             drawEnemyDict.pageAnim = 0;//finish anim
             if(drawEnemyDict.flipDir === 1) {//if ya goin' right
                 drawEnemyDict.currPage ++;
@@ -1183,7 +1182,7 @@ var drawEnemyDict = function() {
 
     ctx.restore();
     
-    if(stateSwitchTimer % 30 < 15) {
+    if(stateSwitchTimer % 60 < 30) {
         ctx.font = 4*h100+"px pixelFontSmall";
         ctx.textAlign = "left";
         ctx.textBaseline = "alphabetic";

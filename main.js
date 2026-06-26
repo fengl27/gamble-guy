@@ -59,7 +59,9 @@ var switchState = function(target) {
         case "upgrade":
             playerStuff.totalRentCycles ++;
             setupUpgrade(playerStuff.weapons.length === 0);//only give weapons when no weapons
-            music.gambling.play();
+            if(!music.gambling.playing) {
+                music.gambling.play();
+            }
             break;
         case "lose":
             music.gambling.play();
@@ -189,6 +191,7 @@ var frame = function() {
             music.playing.switchMuffled();
         }
         else if(music.gambling.playing) {
+            //console.log("hi");
             music.gambling.switchMuffled();
         }
         if(!paused) {
