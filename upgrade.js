@@ -246,7 +246,7 @@ var possibleUpgrades = [
         ]//infinity annd beeeoyingd
     },
     {
-        name: 'Get mace!',
+        name: 'Get Mace!',
         symbol: [assets.weapons, 4, 0],
         description: "mobility players and midranger's dream (hard)",
         effect: function() {
@@ -256,7 +256,7 @@ var possibleUpgrades = [
         criteria: () => true,
         branchThing: [
             {
-                name: 'Mace size',
+                name: 'Larger Mace',
                 symbol: [assets.weapons, 4, 0],
                 description: "run into enemies less (I guess easier aiming too)",
                 effect: function() {

@@ -644,7 +644,8 @@ var music = {
     playing: "song.mp3",
     gambling: "gambleSong.mp3",
     gaster: "gaster-blaster.mp3",
-    mainMenu: "main-menu.mp3"
+    mainMenu: "main-menu.mp3",
+    tutorial: "tutorial.mp3"
 };
 
 var toCringeAudio = function(sfx) {
@@ -698,19 +699,19 @@ for(let i in music) {
                 this.audio.currentTime = 0;
                 this.audio.play();
                 this.aGain.gain.setValueAtTime(0, audioCtx.currentTime);
-                this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 2);
+                this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1);
                 //console.log("playing music");
             }
         },
         pause: function() {
             window.setTimeout((audio) => {audio.pause();}, 2000, this.audio);
-            this.aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 2);
+            this.aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
             //console.log("plausing music");
         },
         unpause: function() {
             this.audio.currentTime --;
             this.audio.play();//don't reset
-            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 2);
+            this.aGain.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 1);
             //console.log("unpausinging music");
         },
         switchMuffled: function() {

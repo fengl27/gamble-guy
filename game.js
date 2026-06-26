@@ -598,7 +598,7 @@ var gamble = function() {
                 enemyMerges[enemyTypes.indexOf(gambling[0][results[0]])][enemyTypes.indexOf(gambling[2][results[2]])]:
                 gambling[x][results[x]];
             let bob = new Enemy(0,0,type);
-            let dudeMoney = bob.numCoins;
+            let dudeMoney = type === "stack"? 3: bob.numCoins;
             ctx.drawImage(assets.coin, w100 * 30 + h100 + x * w100 * 20, h100 * 58, h100 * 4, h100 * 4);
             ctx.fillStyle = "black";
             ctx.textAlign = "left";
@@ -610,7 +610,12 @@ var gamble = function() {
     let roundCash = 0;
     for(var i = 0; i < roundEnemies.length; i ++) {
         var cash = new Enemy(0,0,roundEnemies[i]).numCoins;
-        roundCash += cash;
+        if(roundEnemies[i] === "stack") {
+            roundCash += 3;
+        }
+        else {
+            roundCash += cash;
+        }
     }
 
     
@@ -644,8 +649,12 @@ var gamble = function() {
         gamble.button.go();
         if(gamble.button.pressed) {
             if(tutorial) {
+                currTutorialMessage = 0;
+                while(tutorialText[currTutorialMessage].txt !== "finish the tutorial ya' doopid") {
+                    currTutorialMessage ++;
+                }
+
                 tutorialText[53].funnyThing = currTutorialMessage;
-                currTutorialMessage = 45;
                 tutorialText[currTutorialMessage].time = stateSwitchTimer;
             }
             else {
@@ -797,17 +806,15 @@ var tutorialText = [
         txt: "You guessed it, parry slop."
     },
     {
-        txt: "You can summon your shield with the space bar (assuming you have a shield, you're just borrowing mine for now.)"
+        txt: "You can summon your shield with the space bar (assuming you have a shield, you're just borrowing my 999 shields for now.)"
     },
     {
         txt: "However, it breaks if you use it too early."
     },
     {
-        txt:"Try it now! Parry when the arrow is about to hit you.",
-        criteria: () => {return player.shields === 0||player.shieldCooldown!==0},
+        txt:"Try it now! Parry when the arrow is about to hit you. Continue once you're ready!",
         thing: () => {
-            player.shields = 1;
-            player.iframes = 20;
+            player.shields = 999;
             player.weapons = [];
             enemies = [];
             enemies.push(new Enemy(player.pos.x>0?50*16/9:-50*16/9, player.pos.x>0?50:-50, "archer"));
@@ -852,7 +859,7 @@ var tutorialText = [
     {txt: "Just make sure to get enough money to pay your rent!"},
     {txt: "By the way, press P to pause. There's an enemy dictionary and options menu from there!"},
     {txt: "Now, go out and gamble your life away! (literally)", thing: () => {
-        if(Math.random() < 0.01) {
+        if(Math.random() < 0.9) {
             currTutorialMessage += 2;
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
@@ -865,12 +872,15 @@ var tutorialText = [
 
     {txt: "There's a 1% chance of this text appearing"},
     {txt: "A Bb F Bb A Bb F Bb A Bb F Bb A Bb F Bb G# A", thing: () => {
-        music.gambling.pause();
-        music.gaster.play();
+        //music.gambling.pause();
+        //music.gaster.play();
+        music.gambling.audio.pause();
+        music.gaster.audio.play();
     }},
     {txt: "ERROR 403", thing: () => {
-        music.gambling.unpause();
-        music.gaster.pause();
+        music.gambling.audio.play();
+        //music.gaster.pause();
+        music.gaster.audio.pause();//dead pause
         tutorial = false;
     }},
 
@@ -879,9 +889,6 @@ var tutorialText = [
     {txt: "Dude... \n you died to the tutorial guy"},
     {txt: "Lets review again!", criteria: () => {return !enemies.length;}, thing: () => {
         player.iframes = 20;
-        window.setTimeout(() => {
-            music.playing.unpause();
-        }, 2000);
         if(player.weapons.length === 3){
             currTutorialMessage = 22;
         }
@@ -1167,7 +1174,18 @@ var drawEnemyDict = function() {
         tempDrawImg(assets["enemyDict-"+drawEnemyDict.currPage], 0, 0, canvas.width, canvas.height);
 
         ctx.fillRect(0, -canvas.height/2, canvas.width, canvas.height*2);
+    }
 
+    ctx.restore();
+
+    ctx.drawImage(assets.enemyDictBook, 0, 0, canvas.width, canvas.height);
+
+    drawEnemyDict.leaveButton.go();
+    if(drawEnemyDict.leaveButton.pressed) {
+        drawEnemyDict.pageAnim = 0;
+        enemyDict = false;
+    }
+    else if(!drawEnemyDict.pageAnim) {
         //detect flipping
         if((getInput(playerStuff.controls.Right) || mouse.justPressed && mouse.x > canvas.width * 2/3) && drawEnemyDict.currPage < enemyDictLength - 1) {
             drawEnemyDict.pageAnim = 1;
@@ -1179,23 +1197,8 @@ var drawEnemyDict = function() {
             drawEnemyDict.flipDir = -1;
         }
     }
-
-    ctx.restore();
-    
-    if(stateSwitchTimer % 60 < 30) {
-        ctx.font = 4*h100+"px pixelFontSmall";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "alphabetic";
-        ctx.fillStyle = "grey";
-        ctx.fillText("Press esc. to leave", w100 * 8, h100 * 93);
-    }
-
-    ctx.drawImage(assets.enemyDictBook, 0, 0, canvas.width, canvas.height);
-
-    if(getInput("escape", true)) {
-        enemyDict = false;
-    }
 };
+drawEnemyDict.leaveButton = new Button(w100 * 5, h100 * 87, h100 * 20, h100 * 7, "Leave", "rgb(186, 186, 1)");
 drawEnemyDict.currPage = 0;
 drawEnemyDict.pageAnim = 0;
 drawEnemyDict.flipDir = 0;

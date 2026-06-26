@@ -241,9 +241,6 @@ class Player {
         }
     }
     damage() {
-        if(this.iframes){
-            return;
-        }
 
         if(this.shieldTimer!==0){
             if(playerStuff.stats.shieldLength-this.shieldTimer<playerStuff.stats.parryLength){
@@ -268,6 +265,11 @@ class Player {
             this.shieldCooldown = playerStuff.stats.shieldCooldown;
             return;
         }
+
+
+        if(this.iframes){
+            return;
+        }
         coins = [];
         music.playing.pause();
         soundEffects.finalKill.play();
@@ -276,7 +278,10 @@ class Player {
         }
         roundEnemies = []
         if(tutorial) {
-            currTutorialMessage = 41;
+            currTutorialMessage = 0;
+            while(tutorialText[currTutorialMessage].txt !== "Dude... \n you died to the tutorial guy") {
+                currTutorialMessage ++;
+            }
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
         else {

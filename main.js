@@ -55,7 +55,12 @@ var switchState = function(target) {
             setupLevel();
             player.resetWeapons();
             playerStuff.roundsLeft --;
-            music.playing.play();
+            if(tutorial) {
+                music.tutorial.play();
+            }
+            else {
+                music.playing.play();
+            }
             break;
         case "upgrade":
             playerStuff.totalRentCycles ++;
@@ -92,8 +97,11 @@ var switchState = function(target) {
             break;
     }
     //spaghet alert
-    if(target !== "playing" && !music.playing.audio.paused) {
+    if(target !== "playing" && music.playing.audio.playing) {
         music.playing.pause();
+    }
+    else if((target !== "playing" || !tutorial) && music.tutorial.playing) {
+        music.tutorial.pause();
     }
     else if(target !== "gamble" && target !== "upgrade" && target !== "lose" && !music.gambling.audio.paused) {
         music.gambling.pause();
