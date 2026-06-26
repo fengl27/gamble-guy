@@ -88,7 +88,7 @@ var possibleUpgrades = [
         ]//infinity annd beeeoyingd
     },
     {
-        name: 'Get bow!',
+        name: 'Get Bow!',
         symbol: [assets.weapons, 1, 0],
         description: "For people who want to not die",
         effect: function() {
@@ -199,7 +199,7 @@ var possibleUpgrades = [
                 ]//infinity annd beeeoyingd
             },
             {
-                name: 'Mouse aiming',
+                name: 'Mouse Aiming',
                 symbol: [assets.weapons, 1, 0],
                 description: "We're nerfing the charge rate, though (by 30%) (this upgrade was way too good)",
                 effect: function() {
@@ -248,7 +248,7 @@ var possibleUpgrades = [
     {
         name: 'Get Mace!',
         symbol: [assets.weapons, 4, 0],
-        description: "mobility players and midranger's dream",
+        description: "Mobility players and midranger's dream",
         effect: function() {
             playerStuff.weapons.push(weapons.throwMace);
         },
@@ -258,7 +258,7 @@ var possibleUpgrades = [
             {
                 name: 'Larger Mace',
                 symbol: [assets.weapons, 4, 0],
-                description: "run into enemies less (I guess easier aiming too)",
+                description: "Run into enemies less (I guess easier aiming too)",
                 effect: function() {
                     weapons.throwMace.stats.size+=0.5;
                 },
@@ -266,9 +266,9 @@ var possibleUpgrades = [
                 criteria: () => true, //normally omit when no criteria
                 branchThing: [
                     {
-                        name: 'Mace max charge',
+                        name: 'Higher Mace max charge speed',
                         symbol: [assets.weapons, 4, 0],
-                        description: "big zoom",
+                        description: "Throw the Mace farther if you charge for a long time",
                         effect: function() {
                             weapons.throwMace.stats.maxCharge+=1;
                         },
@@ -283,9 +283,9 @@ var possibleUpgrades = [
                 ]//infinity annd beeeoyingd
             },
             {
-                name: 'More mace weight',
+                name: 'More Mace weight',
                 symbol: [assets.weapons, 4, 0],
-                description: "pros: go farther, cons: go farther",
+                description: "Pros: go farther \n Cons: go farther",
                 effect: function() {
                     weapons.throwMace.stats.weightPercentage-=0.05;
                 },
@@ -293,9 +293,9 @@ var possibleUpgrades = [
                 criteria: () => true, //normally omit when no criteria
                 branchThing: [
                     {
-                        name: 'The power of thor',
+                        name: 'The power of Thor',
                         symbol: [assets.weapons, 8, 0],
-                        description: "pros: it's heavy, cons: your not worthy",
+                        description: "Pros: it's heavy \n Cons: you're not worthy",
                         effect: function() {
                             weapons.throwMace.stats.weightPercentage-=0.2;
                             weapons.throwMace.stats.damage+=1;
@@ -312,9 +312,9 @@ var possibleUpgrades = [
             },
             
             {
-                name: 'Less mace weight',
+                name: 'Lighter Mace',
                 symbol: [assets.weapons, 4, 0],
-                description: "Carbon fiber + aluminum! You'll be able to charge the mace faster but won't go as far.",
+                description: "Carbon fiber + aluminum! You'll be able to charge the mace faster but it won't pull you as much.",
                 effect: function() {
                     weapons.throwMace.stats.weightPercentage-=0.05;
                     weapons.throwMace.stats.chargeSpeed *= 1.5;
@@ -323,7 +323,7 @@ var possibleUpgrades = [
                 criteria: () => true, //normally omit when no criteria
                 branchThing: [
                     {
-                        name: 'Less mace weight',
+                        name: 'Lightest Mace',
                         symbol: [assets.weapons, 9, 0],
                         description: "Are you sure you want to use a pillow?",
                         effect: function() {
@@ -342,11 +342,11 @@ var possibleUpgrades = [
                 ]//infinity annd beeeoyingd
             },
             {
-                name: 'Chain pulling',
+                name: 'Chain Pulling',
                 symbol: [assets.weapons, 4, 0],
-                description: "you suddenly realize you can pull on the chain",
+                description: "You suddenly realize you can pull on the chain. \n Bring the Mace closer to you while it's out by holding down the Mace button (Right click).",
                 effect: function() {
-                    weapons.throwMace.stats.pullStrength+=0.02
+                    weapons.throwMace.stats.pullStrength+=0.025;
                 },
                 amount: 1,
                 criteria: () => true, //normally omit when no criteria
@@ -354,9 +354,9 @@ var possibleUpgrades = [
                     {
                         name: 'Better pulling',
                         symbol: [assets.weapons, 4, 0],
-                        description: "you suddenly realize you can pull harder on the chain",
+                        description: "You suddenly realize you can pull harder on the chain",
                         effect: function() {
-                            weapons.throwMace.stats.pullStrength+=0.08
+                            weapons.throwMace.stats.pullStrength+=0.08;
                         },
                         amount: 1,
                         criteria: () => true, //normally omit when no criteria
@@ -432,9 +432,9 @@ var possibleUpgrades = [
         criteria: () => true,
         branchThing: [
             {
-                name: 'Shield length',
+                name: 'Shield Length',
                 symbol: [assets.shield, 0, 0],
-                description: "parry this ye filthy casual",
+                description: "Parry this ye filthy casual",
                 effect: function() {
                     playerStuff.stats.shieldLength += 15;
                 },
@@ -442,9 +442,9 @@ var possibleUpgrades = [
                 criteria: () => true,
                 branchThing: [
                     {
-                        name: 'Rise of the slop hero',
+                        name: 'Rise of the Slop Hero',
                         symbol: [assets.shield, 0, 0],
-                        description: "I'm going to be honest and admit that I had gemni summerize the plot of this anime",
+                        description: "Longer invincibility period after shielding. \n I'm going to be honest and admit that I had Gemini summarize the plot of this anime (the greek symbol not the LLM)",
                         effect: function() {
                             playerStuff.stats.shieldIframes += 10;
                         },
@@ -455,13 +455,13 @@ var possibleUpgrades = [
                         ]//infinity annd beeeoyingd
                     },
                     {
-                        name: 'Parry assist',
+                        name: 'Parry Assist',
                         symbol: [assets.shield, 0, 0],
-                        description: "your actually going to have to try to be able to get rid of the shield now",
+                        description: "You're actually going to have to try to get rid of the shield now",
                         effect: function() {
                             playerStuff.stats.shieldLength -= 20;
                             playerStuff.stats.parryLength += 10;
-                            playerStuff.stats.parryDamageRadius += 1; 
+                            playerStuff.stats.parryDamageRadius += 1;
                         },
                         amount: 1,
                         criteria: () => true,
@@ -472,9 +472,9 @@ var possibleUpgrades = [
                 ]//infinity annd beeeoyingd
             },
             {
-                name: 'Second shield',
+                name: 'Second Shield',
                 symbol: [assets.shield, 0, 0],
-                description: "I have no shield but I must block",
+                description: "I have no shield but I must block \n Backup shield for when your first one breaks",
                 effect: function() {
                     playerStuff.stats.shields += 1;
                 },
@@ -482,9 +482,9 @@ var possibleUpgrades = [
                 criteria: () => true,
                 branchThing: [
                     {
-                        name: 'Five shield',
+                        name: 'Five Shields',
                         symbol: [assets.shield, 0, 0],
-                        description: "I'm revoking your parry privilages",
+                        description: "You get 5 shields but lose the ability to parry.",
                         effect: function() {
                             playerStuff.stats.shields += 3;
                             playerStuff.stats.parryLength -= 60;
