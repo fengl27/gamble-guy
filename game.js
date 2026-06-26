@@ -341,7 +341,7 @@ var upgradeScreen = function(lost) {
     ctx.fillText(playerStuff.coins, h100 * 8, h100 * 2);
 
     if(playerStuff.roundsLeft === 0) {
-        upgradeScreen.payTaxes = 120;
+        upgradeScreen.payTaxes = 90;
         if(mouse.justReleased) {
             playerStuff.coins -= playerStuff.requiredRent + playerStuff.debt;
             if(!lost) {
@@ -363,7 +363,7 @@ var upgradeScreen = function(lost) {
     }
     if(upgradeScreen.payTaxes) {
 
-        upgradeScreen.taxButton.p.y += (120 - upgradeScreen.payTaxes + upgradeScreen.loseTimer) * h100/10;
+        upgradeScreen.taxButton.p.y += (90 - upgradeScreen.payTaxes + upgradeScreen.loseTimer) * h100/10;
         upgradeScreen.taxButton.go();
         upgradeScreen.payTaxes --;
 
@@ -426,8 +426,8 @@ var drawLossScreen = function(stateSwitchTimer){
     ctx.save();
     ctx.translate(canvas.width / 2, y);
     ctx.rotate(r);
-    ctx.strokeText("Haha you lose", 0,0);
-    ctx.fillText(  "Haha you lose", 0,0);
+    ctx.strokeText("You have failed to pay rent", 0,0);
+    ctx.fillText(  "You have failed to pay rent", 0,0);
     ctx.restore();
 
     //other text just like appears idk
@@ -442,7 +442,7 @@ var drawLossScreen = function(stateSwitchTimer){
     */
     ctx.fillStyle = "white";
     ctx.font = 5 * h100 + "px pixelFontSmall";
-    ctx.fillText("You lived through " + playerStuff.totalRentCycles + " rent cycle(s).", canvas.width / 2, canvas.height / 2);
+    ctx.fillText("You lived through " + playerStuff.totalRentCycles + ` rent cycle${playerStuff.totalRentCycles===1?"":"s"}.`, canvas.width / 2, canvas.height / 2);
     
     loseButtons.menuButton.go();
     
@@ -568,7 +568,14 @@ var gamble = function() {
     ctx.font = 15 * h100 + "px pixelFont";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText("SPIN TO WIN!", w100 * 60 - h100 * 1.5, h100 * 70);
+    ctx.fillText("SPIN TO WIN!", w100 * 55 - h100 * 7.5, h100 * 70);
+
+    ctx.lineWidth = h100;
+    ctx.fillStyle = "rgb(228, 228, 34)";
+    rect(ctx, w100 * 55 + h100 * 30, h100 * 65, h100 * 31, h100 * 9, true, true);
+    ctx.fillStyle = "black";
+    ctx.font = 11 * h100 + "px pixelFont";
+    ctx.fillText(gamble.numRolls + " roll" + (gamble.numRolls !== 1? "s": ""), w100 * 55 + h100 * 46, h100 * 70);
     for(var x = 0; x < 3; x ++) {
         gamble.offsets[x] += gamble.offsetVels[x];
         var threshold = (x + 1) * 60;
@@ -604,7 +611,7 @@ var gamble = function() {
             ctx.textAlign = "left";
             ctx.textBaseline = "hanging";
             ctx.font = 6*h100 + "px pixelFont";
-            ctx.fillText(dudeMoney, w100 * 30 + h100 * 5 + x * w100 * 20, h100 * 58);
+            ctx.fillText(dudeMoney, w100 * 30 + h100 * 6 + x * w100 * 20, h100 * 58.5);
         }
     }
     let roundCash = 0;
@@ -688,6 +695,7 @@ var gamble = function() {
             soundEffects.gambleSpin.play();
             soundEffects.gambleSpin.play(1);
             soundEffects.gambleSpin.play(2);
+            gamble.numRolls ++;
         }
     }
 
@@ -739,6 +747,7 @@ var gamble = function() {
         }
     }
 };
+gamble.numRolls = 0;
 gamble.transitionTimer = 0;
 gamble.gambleTimer = 0;
 gamble.spacing = h100 * 70;
@@ -860,7 +869,7 @@ var tutorialText = [
     {txt: "Just make sure to get enough money to pay your rent!"},
     {txt: "By the way, press P to pause. There's an enemy dictionary and options menu from there!"},
     {txt: "Now, go out and gamble your life away! (literally)", thing: () => {
-        if(Math.random() < 0.9) {
+        if(Math.random() < 0.01) {
             currTutorialMessage += 2;
             tutorialText[currTutorialMessage].time = stateSwitchTimer;
         }
@@ -980,7 +989,24 @@ var drawTutorial = function() {
             ctx.fillStyle = "black";
             var currLine = "";
             var lineIdx = 0;
-            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? playerStuff.coins < 0? "You don't have your rent? Shame. Get out!": "So we meet again. \n Pay your rent and you can have another one of my things!": upgradeScreen.payTaxes? "Thanks bye~": "I'LL BE BACK.").split(" ");
+            let winMessages = [
+                "Hello, I like money.",//this one actually appears last
+                "So we meet again. \n Pay your rent and you can have another one of my things!",
+                "Rent. Now.",
+                "Where's my money, lowly peon?",
+                "Gimmie money  $$$$$$",
+                "It appears you owe me an amount of funds.",
+                "Gimmie my " + (playerStuff.requiredRent+playerStuff.debt) + " dollars! NOW!",
+                "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+                "I'm letting you off the hook this time... just kidding. PAY RENT",
+                "MONEY OR DIE!!!!",
+                "It would be greatly appreciated for thou to hand over a value of gold.",
+                "I'm T-posing to assert dominance, you just can't see it right now.",
+                "Money time",
+                "How have you survived so long? Oh well, increasing your rent again.",
+            ];
+            let winMessage = winMessages[playerStuff.totalRentCycles % winMessages.length];
+            var words = (tutorial? tutorialText[currTutorialMessage].txt: playerStuff.roundsLeft === 0? playerStuff.coins < 0? "You don't have your rent? Shame. Get out!": winMessage: upgradeScreen.payTaxes? "Thanks bye~": "I'LL BE BACK.").split(" ");
 
             words.push("\n");//to make sure it draws the last line
             ctx.font = 5 * h100 + "px pixelFontSmall";

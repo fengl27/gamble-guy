@@ -78,7 +78,7 @@ const weapons = {
         nodePos: new Vect(),
         stats: {
             chargeSpeed: 1,
-            size:3,
+            size:3.5,
             playerSlow:0.3,
             damage:2,
             maxCharge:6,
@@ -191,12 +191,13 @@ const weapons = {
                         }
                         if(this.charge === 0){
                             var toPlayer = Vect.normalize(Vect.sub(this.pos, player.pos));
-                            if(Vect.dot(toPlayer, Vect.normalize(enemies[i].vel)) > -0.5) {
+                            if(Vect.dot(toPlayer, Vect.normalize(enemies[i].vel)) < 0.5) {
                                 var dst = dist(cPos.x, cPos.y, enemies[i].pos.x, enemies[i].pos.y);
                                 let wantedMag = (this.stats.size+enemies[i].size) - dst;
 
                                 enemies[i].vel.sub(Vect.mult(Vect.sub(this.pos,enemies[i].pos),wantedMag / dst));
                                 enemies[i].vel.add(Vect.mult(this.vel, 6));
+                                enemies[i].vel.mult(0.7);//slow down a little
                             }
                         }
                     }

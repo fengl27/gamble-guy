@@ -92,12 +92,13 @@ var switchState = function(target) {
                 music.gambling.play();
             }
 
+            gamble.numRolls = 0;
             gamble.gambleTimer = 0;
             gamble.offsetVels = [h100, -h100, h100];
             break;
     }
     //spaghet alert
-    if(target !== "playing" && music.playing.audio.playing) {
+    if(target !== "playing" && music.playing.playing) {
         music.playing.pause();
     }
     else if((target !== "playing" || !tutorial) && music.tutorial.playing) {

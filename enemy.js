@@ -1528,7 +1528,7 @@ class Enemy {
             }
         },
         init: function() {
-            this.size = 1.5;
+            this.size = 1.7;
             this.walkAnimSpeed = 7;
 
             this.dashCharge = 0;
