@@ -31,11 +31,6 @@ function handleMousePress(e) {
     mouse.pressed = true;
     mouse.justPressed = true;
     mouse.button = e.button;
-
-    if(audioCtx.state === 'suspended') {
-        console.log("resume audioctx");
-        audioCtx.resume();
-    }
 }
 function handleMouseMove(e) {
     mouse.x = (e.clientX - canvas.offsetLeft) * canvas.width/canvas.offsetWidth;
@@ -48,6 +43,12 @@ function handleMouseRelease(e) {
 canvas.addEventListener("mousedown", handleMousePress   );
 canvas.addEventListener("mousemove", handleMouseMove    );
 canvas.addEventListener("mouseup",   handleMouseRelease );
+document.body.addEventListener("mousedown", () => {//ploy
+    if(audioCtx.state === 'suspended') {
+        console.log("resume audioctx");
+        audioCtx.resume();
+    }
+});
 
 //hash function for literally just the floorboards
 //hash function for setseed for um testing

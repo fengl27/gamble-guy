@@ -643,7 +643,8 @@ var otherSounds = {
 var music = {
     playing: "song.mp3",
     gambling: "gambleSong.mp3",
-    gaster: "gaster-blaster.mp3"
+    gaster: "gaster-blaster.mp3",
+    mainMenu: "main-menu.mp3"
 };
 
 var toCringeAudio = function(sfx) {

@@ -46,6 +46,7 @@ var switchState = function(target) {
             //you've deaded so we reset ya stuff
             playerStuff = JSON.parse(JSON.stringify(defaultPlayerStuff));
             resetUpgrades();
+            music.mainMenu.play();
             break;
         case "playing":
             if(tutorial) {
@@ -90,11 +91,15 @@ var switchState = function(target) {
             gamble.offsetVels = [h100, -h100, h100];
             break;
     }
+    //spaghet alert
     if(target !== "playing" && !music.playing.audio.paused) {
         music.playing.pause();
     }
     else if(target !== "gamble" && target !== "upgrade" && target !== "lose" && !music.gambling.audio.paused) {
         music.gambling.pause();
+    }
+    else if(target !== "mainMenu") {
+        music.mainMenu.pause();
     }
 };
 var mainMenu = {
@@ -269,6 +274,7 @@ var frame = function() {
 
 function startGame() {
     canvas.style.visibility = "visible";
+    music.mainMenu.play();
     frame();
 }
 /*
