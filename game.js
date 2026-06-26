@@ -487,7 +487,12 @@ var pauseScreen = function() {
     ctx.fillText("PAUSED!!!!!!!!!!!!!!!", canvas.width/2, canvas.height / 4);
 
     optionsMenu.runOptionsButton();
+    pauseScreen.enemyDictButton.go();
+    if(pauseScreen.enemyDictButton.pressed) {
+        enemyDict = true;
+    }
 };
+pauseScreen.enemyDictButton = new Button(canvas.width / 2 - h100 * 35, h100 * 50, h100 * 70, h100 * 10, "Enemy dictionary");
 
 var drawGamble = function(things, offset, thingSpacing, pos, size) {
     ctx.fillStyle = "white";
@@ -1073,3 +1078,99 @@ var optionsMenu = {
         }
     }
 };
+
+
+var drawEnemyDict = function() {
+    ctx.fillStyle = drawEnemyDict.funnyGradient;
+    if(drawEnemyDict.pageAnim) {
+        var page1 = assets["enemyDict-"+drawEnemyDict.currPage];
+        var page2 = assets["enemyDict-"+(drawEnemyDict.currPage + 1)];
+
+        //draw page 1 left half
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, canvas.width / 2, canvas.height);
+        ctx.clip();
+        ctx.drawImage(page1, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        //draw page 2 right half
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(canvas.width / 2, 0, canvas.width / 2, canvas.height);
+        ctx.clip();
+        ctx.drawImage(page2, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        
+        //shadow
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        //draw moving page
+        var moveAmt = easings.easeInOutQuad(drawEnemyDict.pageAnim / 15);
+        if(drawEnemyDict.flipDir === -1) moveAmt = 1-moveAmt;
+        if(moveAmt < 0.5) {
+            //draw right side of page 1 on right side but scaled horizontally
+            ctx.save();
+            ctx.translate(canvas.width / 2, 0);
+            ctx.scale((0.5-moveAmt) * 2, 1);
+            ctx.beginPath();
+            ctx.rect(0, 0, canvas.width / 2, canvas.height);
+            ctx.clip();
+            ctx.drawImage(page1, -canvas.width / 2, 0, canvas.width, canvas.height);
+            ctx.translate(-canvas.width/2, 0);
+            ctx.fillRect(canvas.width/2, 0, canvas.width/2, canvas.height);
+            ctx.restore();
+        }
+        else {
+            //draw left side of page 2 on left side but scaled horizontally
+            ctx.save();
+            ctx.translate(canvas.width / 2, 0);
+            ctx.scale((moveAmt-0.5) * 2, 1);
+            ctx.beginPath();
+            ctx.rect(-canvas.width/2, 0, canvas.width / 2, canvas.height);
+            ctx.clip();
+            ctx.drawImage(page2, -canvas.width / 2, 0, canvas.width, canvas.height);
+            
+            ctx.translate(-canvas.width/2, 0);
+            ctx.fillRect(0, 0, canvas.width/2, canvas.height);
+            ctx.restore();
+        }
+
+        //add to timer
+        drawEnemyDict.pageAnim ++;
+        if(drawEnemyDict.pageAnim >= 15) {
+            drawEnemyDict.pageAnim = 0;//finish anim
+            if(drawEnemyDict.flipDir === 1) {//if ya goin' right
+                drawEnemyDict.currPage ++;
+            }
+        }
+    }
+    else {
+        ctx.drawImage(assets["enemyDict-"+drawEnemyDict.currPage], 0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        //detect flipping
+        if(getInput(playerStuff.controls.Right) && drawEnemyDict.currPage < enemyDictLength - 1) {
+            drawEnemyDict.pageAnim = 1;
+            drawEnemyDict.flipDir = 1;
+        }
+        else if(getInput(playerStuff.controls.Left) && drawEnemyDict.currPage > 0) {
+            drawEnemyDict.pageAnim = 1;
+            drawEnemyDict.currPage --;
+            drawEnemyDict.flipDir = -1;
+        }
+    }
+
+    ctx.drawImage(assets.enemyDictBook, 0, 0, canvas.width, canvas.height);
+};
+drawEnemyDict.currPage = 0;
+drawEnemyDict.pageAnim = 0;
+drawEnemyDict.flipDir = 0;
+drawEnemyDict.funnyGradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+drawEnemyDict.funnyGradient.addColorStop(0,  "rgba(0,0,0, 0)");
+drawEnemyDict.funnyGradient.addColorStop(0.45,  "rgba(0,0,0, 0)");
+drawEnemyDict.funnyGradient.addColorStop(0.49,  "rgba(0,0,0, 0.3)");
+drawEnemyDict.funnyGradient.addColorStop(0.5,     "rgba(0,0,0, 0.8)");
+drawEnemyDict.funnyGradient.addColorStop(0.51,  "rgba(0,0,0, 0.3)");
+drawEnemyDict.funnyGradient.addColorStop(0.71,  "rgba(0,0,0, 0)");
+drawEnemyDict.funnyGradient.addColorStop(1,     "rgba(0,0,0, 0)");

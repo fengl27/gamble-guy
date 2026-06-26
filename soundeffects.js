@@ -727,9 +727,9 @@ for(let i in music) {
 
     music[i].audio.volume = settings.musicVolMult;
     music[i].audio.loop = true;
-    music[i].muffled.volume = settings.musicVolMult * 0.3;
+    music[i].muffled.volume = settings.musicVolMult * 0.2;
     music[i].muffled.loop = true;
-    music[i].muffled.playbackRate = 0.5;
+    music[i].muffled.playbackRate = 0.7;
     
     const aTrack = audioCtx.createMediaElementSource(music[i].audio);
 

@@ -41,6 +41,7 @@ const l2 = Vect.div(settings.levelSize, 2);
 var gameState = "mainMenu";
 var paused = false;
 var tutorial = false;//aee
+var enemyDict = false;
 var firstTime = true;
 
 const pauseSettingsEl = document.getElementById("pauseSettings");
@@ -110,8 +111,16 @@ var assets = {
     tutorialNpc: "tutorial-npc.png",
 
     potion: "potion.png",
-    potionDrain: "potion-drain.png"
+    potionDrain: "potion-drain.png",
+    
+    enemyDictBook: "enemy-dict/book-thing.png"
 };
+
+const enemyDictLength = 2;
+for(var i = 0; i < enemyDictLength; i ++) {
+    assets["enemyDict-" + i] = "enemy-dict/pg" + i + ".png";
+}
+
 for(var i in assets) {
     let bob = new Image();
     bob.src = "assets/"+assets[i];

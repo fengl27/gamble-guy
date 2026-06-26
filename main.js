@@ -196,8 +196,12 @@ var frame = function() {
             optionsMenu.run();
         }
     }
+    //spaghetti alert (pause screens are wierd and i'm lazy)
     if(optionsMenu.isInOptions) {
         optionsMenu.run();
+    }
+    else if(enemyDict) {
+        drawEnemyDict();
     }
     else if(paused) {
         pauseScreen();

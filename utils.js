@@ -236,10 +236,11 @@ keys.handleKeyDown = function(e) {
     if(!keys[k]) {
         keys[k] = true;
         justPressed[k] = true;
-
-        if(k === "alt") {
+        /*
+        if(k === "control") {
             switchState("upgrade");
         }
+        */
     }
 };
 keys.handleKeyUp = function(e) {
